@@ -12,9 +12,12 @@ import mqq.app.MobileQQ
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
-var isConfigOk = false
-
 class PullConfig: IAction {
+    companion object {
+        @JvmStatic
+        var isConfigOk = false
+    }
+
     override fun invoke(ctx: Context) {
         if (MobileQQ.getMobileQQ().qqProcessName != "com.tencent.mobileqq") return
 
@@ -33,7 +36,15 @@ class PullConfig: IAction {
 
             val preferences = ctx.getSharedPreferences("shamrock_config", 0)
             preferences.edit {
-                putBoolean("tablet", it.getBooleanExtra("tablet", false))
+                putBoolean(  "tablet",    it.getBooleanExtra("tablet", false)) // 强制平板模式
+                putInt(      "port",      it.getIntExtra("port", 5700)) // 主动HTTP端口
+                putBoolean(  "ws",        it.getBooleanExtra("ws", false)) // 主动WS开关
+                putInt(      "ws_port",   it.getIntExtra("port", 5700)) // 主动WS端口
+                putBoolean(  "http",      it.getBooleanExtra("http", false)) // HTTP回调开关
+                putString(   "http_addr", it.getStringExtra("http_addr")) // WebHook回调地址
+                putBoolean(  "ws_client", it.getBooleanExtra("ws_client", false)) // 被动WS开关
+                putString(   "ws_addr",   it.getStringExtra("ws_addr")) // 被动WS地址
+                putBoolean(  "pro_api",   it.getBooleanExtra("pro_api", false)) // 开发调试API开关
             }
 
             ActionLoader.runService(ctx)

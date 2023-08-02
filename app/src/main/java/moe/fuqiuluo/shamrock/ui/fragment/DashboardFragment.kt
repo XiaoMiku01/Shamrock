@@ -264,7 +264,7 @@ private fun FunctionCard(
                 title = "HTTP回调",
                 desc = "OneBot标准的HTTPAPI回调，Shamrock作为Client。",
                 descColor = TabSelectedColor,
-                isSwitch = !preferences.getString("webhook", "").isNullOrBlank()
+                isSwitch = preferences.getBoolean("webhook", false)
             ) {
                 preferences.edit { putBoolean("webhook", it) }
                 scope.toast(ctx, "重启QQ生效")

@@ -17,12 +17,18 @@ class MultifunctionalProvider: ContentProvider() {
             "init" -> {
                 AppRuntime.log("推送QQ进程初始化设置数据包成功...")
                 val preferences = context!!.getSharedPreferences("config", 0)
-
                 broadcast {
                     putExtra("tablet", preferences.getBoolean("tablet", false)) // 强制平板模式
+                    putExtra("port", preferences.getInt("port", 5700)) // 主动HTTP端口
+                    putExtra("ws", preferences.getBoolean("ws", false)) // 主动WS开关
+                    putExtra("ws_port", preferences.getInt("ws_port", 5800)) // 主动WS端口
+                    putExtra("http", preferences.getBoolean("webhook", false)) // HTTP回调开关
+                    putExtra("http_addr", preferences.getString("http_addr", "")) // WebHook回调地址
+                    putExtra("ws_client", preferences.getBoolean("ws_client", false)) // 被动WS开关
+                    putExtra("ws_addr", preferences.getString("ws_addr", "")) // 被动WS地址
+                    putExtra("pro_api", preferences.getBoolean("pro_api", false)) // 开发调试API开关
                     putExtra("hash", hash)
                 }
-
             }
         }
 
