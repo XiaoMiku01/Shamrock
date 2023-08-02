@@ -2,6 +2,7 @@ package moe.fuqiuluo.xposed.loader
 
 import android.content.Context
 import moe.fuqiuluo.xposed.actions.IAction
+import moe.fuqiuluo.xposed.actions.impl.CreateHTTP
 import moe.fuqiuluo.xposed.actions.impl.PullConfig
 import moe.fuqiuluo.xposed.actions.impl.DataReceiver
 import moe.fuqiuluo.xposed.actions.impl.FetchService
@@ -18,7 +19,7 @@ object ActionLoader {
     private val ACTION_LIST = arrayOf<KClass<*>>(
         ForceTablet::class, // 强制平板模式
         FetchService::class, // 获取服务实例
-
+        CreateHTTP::class, // 创建HTTP API
     )
 
     // 先从APP拉取配置文件，再执行其他操作

@@ -1,6 +1,6 @@
 package moe.fuqiuluo.http
 
-object HttpServer {
+object HTTPServer {
     fun startHttpServer(port: Int) {
 
     }

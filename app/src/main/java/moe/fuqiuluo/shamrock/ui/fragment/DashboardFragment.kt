@@ -126,8 +126,8 @@ private fun APIInfoCard(
                     confirm = {
                         val newPort = port.value.toInt()
                         preferences.edit { putInt("port", newPort) }
-                        scope.toast(ctx, "重启QQ生效")
-                        AppRuntime.log("设置主动HTTP监听端口为$newPort，重启QQ生效。")
+                        scope.toast(ctx, "也许需要重启QQ生效")
+                        AppRuntime.log("设置主动HTTP监听端口为$newPort，也许需要重启QQ生效哦。")
                     },
                     cancel = {
                         scope.toast(ctx, "取消修改")
