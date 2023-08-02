@@ -27,6 +27,7 @@ import moe.fuqiuluo.shamrock.R
 import moe.fuqiuluo.shamrock.ui.theme.LocalString
 import moe.fuqiuluo.shamrock.ui.theme.TabUnSelectedColor
 import moe.fuqiuluo.shamrock.ui.tools.NoticeTextDialog
+import moe.fuqiuluo.shamrock.ui.tools.toast
 
 @Composable
 fun LabFragment() {
@@ -72,7 +73,7 @@ fun LabFragment() {
                         isSwitch = preferences.getBoolean("2B", false)
                     ) {
                         preferences.edit { putBoolean("2B", it) }
-                        scope.launch { Toast.makeText(ctx, "重启生效哦~", Toast.LENGTH_SHORT).show() }
+                        scope.toast(ctx, "重启生效哦！")
                     }
                 }
             }
@@ -96,7 +97,7 @@ fun LabFragment() {
                         isSwitch = preferences.getBoolean("auto_clear", false)
                     ) {
                         preferences.edit { putBoolean("auto_clear", it) }
-                        scope.launch { Toast.makeText(ctx, "重启QQ生效", Toast.LENGTH_SHORT).show() }
+                        scope.toast(ctx, "重启QQ生效")
                     }
                 }
 

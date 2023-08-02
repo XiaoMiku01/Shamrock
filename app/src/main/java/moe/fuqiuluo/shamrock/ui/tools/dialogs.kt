@@ -31,10 +31,18 @@ import moe.fuqiuluo.shamrock.ui.theme.TabUnSelectedColor
 data class InputDialogState(
     val isOpen: MutableState<Boolean>,
     val isError: MutableState<Boolean>,
+    var confirm: (() -> Unit)? = null,
+    var cancel: (() -> Unit)? = null,
 ) {
-    fun show() {
+    fun show(
+        confirm: (() -> Unit)? = null,
+        cancel: (() -> Unit)? = null,
+    ) {
+        this.confirm = confirm
+        this.cancel = cancel
         isOpen.value = true
     }
+
 }
 
 @SuppressLint("ComposableNaming")
@@ -51,17 +59,18 @@ fun InputDialog(
         mutableStateOf(false)
     },
     keyboardType: KeyboardType = KeyboardType.Text,
-    confirm: (() -> Unit)? = null,
-    cancel: (() -> Unit)? = null,
     checker: ((String) -> Boolean)? = null,
 ): InputDialogState {
-    if (!openDialog.value) return InputDialogState(openDialog, isError)
+    val state = remember { InputDialogState(openDialog, isError) }
+    if (!openDialog.value) return state
 
     AlertDialog(
         shape = RoundedCornerShape(12.dp),
         onDismissRequest = {
-            openDialog.value = false
-            cancel?.invoke()
+            if(openDialog.value) {
+                openDialog.value = false
+                state.cancel?.invoke()
+            }
         },
         title = {
             Text(
@@ -104,7 +113,7 @@ fun InputDialog(
                 modifier = Modifier,
                 onClick = {
                     openDialog.value = false
-                    confirm?.invoke()
+                    state.confirm?.invoke()
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent,
@@ -130,7 +139,7 @@ fun InputDialog(
         }
     )
 
-    return InputDialogState(openDialog, isError)
+    return state
 }
 
 @Composable

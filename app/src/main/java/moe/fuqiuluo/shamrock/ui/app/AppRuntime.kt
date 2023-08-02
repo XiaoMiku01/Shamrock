@@ -16,6 +16,8 @@ object AppRuntime {
 
     lateinit var logger: Logger
 
+    lateinit var requestCount: MutableIntState
+
     object AccountInfo {
         lateinit var uin: MutableState<String>
 
@@ -44,7 +46,7 @@ class RuntimeState(
     val coreCode: MutableIntState,
     val coreName: MutableState<String>
 ) {
-    val attrMap = mutableMapOf<String, String>()
+
 }
 
 enum class Level(

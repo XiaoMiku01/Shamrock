@@ -138,6 +138,8 @@ private fun AppMainView() {
         }
     }
 
+    AppRuntime.requestCount = remember { mutableIntStateOf(0) }
+
     @Suppress("LocalVariableName") val LocalString = LocalString
     LaunchedEffect(isFined.value) {
         if (isFined.value) {
