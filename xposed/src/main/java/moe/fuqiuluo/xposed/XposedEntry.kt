@@ -104,7 +104,7 @@ class XposedEntry: IXposedHookLoadPackage {
         // MSG LISTENER 进程运行在主进程
         // API 也应该开放在主进程
 
-        ActionLoader.runAll(ctx)
+        ActionLoader.runFirst(ctx)
     }
 
     private fun injectClassloader(classLoader: ClassLoader?) {
