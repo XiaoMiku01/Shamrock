@@ -1,0 +1,69 @@
+package moe.fuqiuluo.shamrock.ui.app
+
+import android.annotation.SuppressLint
+import android.icu.text.SimpleDateFormat
+import android.util.Log
+import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.MutableState
+import androidx.compose.ui.graphics.Color
+import java.util.Date
+
+object AppRuntime {
+    @SuppressLint("SimpleDateFormat")
+    private val format = SimpleDateFormat("[HH:mm:ss] ")
+
+    lateinit var state: RuntimeState
+
+    lateinit var logger: Logger
+
+    object AccountInfo {
+        lateinit var uin: MutableState<String>
+
+        lateinit var nick: MutableState<String>
+    }
+
+    fun log(msg: String, level: Level = Level.INFO) {
+        if (::logger.isInitialized) {
+            val format = "%s%s %s".format(format.format(Date()), level.name, msg)
+
+            val builder = logger.logCache.value
+            val start = builder.length
+            val end = start + format.length
+
+            builder.append(format)
+            logger.logRanges.add(Logger.LogRange(start, end, level))
+        } else {
+            Log.e("AppRuntime", "logger is not initialized")
+        }
+    }
+}
+
+class RuntimeState(
+    val isFined: MutableState<Boolean>,
+    val coreVersion: MutableState<String>,
+    val coreCode: MutableIntState,
+    val coreName: MutableState<String>
+) {
+    val attrMap = mutableMapOf<String, String>()
+}
+
+enum class Level(
+    val color: Color
+) {
+    DEBUG(Color(0xFF4CAF50)),
+    INFO(Color(0xff6c6c6c)),
+    WARN(Color(0xFFFF9800)),
+    ERROR(Color(0xFFE91E63)),
+}
+
+class Logger(
+    val logCache: MutableState<StringBuilder>,
+    val logRanges: MutableList<LogRange>,
+) {
+    data class LogRange(
+        val start: Int,
+        val end: Int,
+        val level: Level
+    )
+}
+
