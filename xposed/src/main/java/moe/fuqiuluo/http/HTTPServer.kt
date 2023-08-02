@@ -1,5 +1,7 @@
 package moe.fuqiuluo.http
 
+import android.widget.Toast
+import androidx.core.content.edit
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
@@ -22,7 +24,13 @@ import moe.fuqiuluo.http.api.getAccountInfo
 import moe.fuqiuluo.http.api.getMsfInfo
 import moe.fuqiuluo.http.api.getStartTime
 import moe.fuqiuluo.http.api.uploadGroupImage
+import moe.fuqiuluo.xposed.actions.impl.GlobalUi
+import moe.fuqiuluo.xposed.actions.impl.PullConfig
+import moe.fuqiuluo.xposed.helper.DataRequester
+import moe.fuqiuluo.xposed.loader.ActionLoader
 import mqq.app.MobileQQ
+import kotlin.concurrent.thread
+import kotlin.system.exitProcess
 
 object HTTPServer {
     var isQueryServiceStarted = false
@@ -42,6 +50,7 @@ object HTTPServer {
     suspend fun start(port: Int) {
         if (isQueryServiceStarted) return
         mutex.withLock {
+            val ctx = MobileQQ.getContext()
             server = embeddedServer(Netty, port = port) {
                 install(ContentNegotiation) {
                     json(Json {
@@ -59,7 +68,7 @@ object HTTPServer {
                 }
                 routing {
                     kotlin.runCatching {
-                        val shamrockConfig = MobileQQ.getContext().getSharedPreferences("shamrock_config", 0)
+                        val shamrockConfig = ctx.getSharedPreferences("shamrock_config", 0)
                         val proApi = shamrockConfig.getBoolean("pro_api", false)
                         API_LIST.forEach {
                             if (!it.second || proApi) {
@@ -74,6 +83,10 @@ object HTTPServer {
             isQueryServiceStarted = true
             this.PORT = port
             log("Start HTTP Server: http://0.0.0.0:$PORT/")
+
+            DataRequester.request(ctx, "success", bodyBuilder = {
+                put("port", PORT)
+            }, onFailure = {}) {}
         }
     }
 

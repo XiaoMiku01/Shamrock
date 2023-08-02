@@ -30,6 +30,10 @@ class MultifunctionalProvider: ContentProvider() {
                     putExtra("hash", hash)
                 }
             }
+            "success" -> {
+                DashboardInitializer(content.getAsInteger("port"))
+                broadcast { putExtra("hash", hash) }
+            }
         }
 
 
