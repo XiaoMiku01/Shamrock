@@ -45,7 +45,7 @@ object HTTPServer {
     )
     private val mutex = Mutex()
     private lateinit var server: ApplicationEngine
-    private var PORT: Int = 0
+    internal var PORT: Int = 0
 
     suspend fun start(port: Int) {
         if (isQueryServiceStarted) return

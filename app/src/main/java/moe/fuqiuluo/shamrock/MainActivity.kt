@@ -72,6 +72,7 @@ import moe.fuqiuluo.shamrock.ui.fragment.DashboardFragment
 import moe.fuqiuluo.shamrock.ui.fragment.HomeFragment
 import moe.fuqiuluo.shamrock.ui.fragment.LabFragment
 import moe.fuqiuluo.shamrock.ui.fragment.LogFragment
+import moe.fuqiuluo.shamrock.ui.service.broadcast
 import moe.fuqiuluo.shamrock.ui.theme.LocalString
 import moe.fuqiuluo.shamrock.ui.theme.ShamrockTheme
 import moe.fuqiuluo.shamrock.ui.theme.TabDividerColor
@@ -82,7 +83,7 @@ import moe.fuqiuluo.shamrock.ui.tools.NoIndication
 import moe.fuqiuluo.shamrock.ui.tools.ShamrockTab
 import java.lang.StringBuilder
 
-class MainActivity : ComponentActivity() {
+class MainActivity: ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -95,8 +96,8 @@ class MainActivity : ComponentActivity() {
                 isAppearanceLightStatusBars = true
             }
             WindowCompat.setDecorFitsSystemWindows(window, true)
+            broadcast { putExtra("cmd", "fetchPort") }
         }
-
     }
 }
 

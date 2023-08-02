@@ -2,6 +2,7 @@ package moe.fuqiuluo.shamrock.ui.service
 
 import android.content.ContentProvider
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
@@ -41,10 +42,7 @@ class MultifunctionalProvider: ContentProvider() {
     }
 
     private fun broadcast(intentBuilder: Intent.() -> Unit) {
-        val intent = Intent()
-        intent.action = "moe.fuqiuluo.xqbot.dynamic"
-        intent.intentBuilder()
-        context!!.sendBroadcast(intent)
+        context!!.broadcast(intentBuilder)
     }
 
     override fun onCreate(): Boolean {
@@ -72,4 +70,11 @@ class MultifunctionalProvider: ContentProvider() {
     override fun update(p0: Uri, p1: ContentValues?, p2: String?, p3: Array<out String>?): Int {
         return 0
     }
+}
+
+inline fun Context.broadcast(intentBuilder: Intent.() -> Unit) {
+    val intent = Intent()
+    intent.action = "moe.fuqiuluo.xqbot.dynamic"
+    intent.intentBuilder()
+    sendBroadcast(intent)
 }

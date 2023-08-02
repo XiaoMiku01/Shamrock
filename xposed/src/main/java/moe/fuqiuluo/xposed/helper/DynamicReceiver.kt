@@ -1,5 +1,4 @@
 @file:OptIn(DelicateCoroutinesApi::class)
-
 package moe.fuqiuluo.xposed.helper
 
 import android.content.BroadcastReceiver
@@ -12,28 +11,37 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 object DynamicReceiver: BroadcastReceiver() {
-    private val mutableSet = mutableSetOf<Request>()
+    private val hashHandler = mutableSetOf<Request>()
+    private val cmdHandler = mutableMapOf<String, Request>()
     private val mutex = Mutex() // 滥用的锁，所以说尽量减少使用
 
     override fun onReceive(ctx: Context, intent: Intent) {
-        GlobalScope.launch { mutex.withLock {
-            mutableSet.forEach {
-                val hash = intent.getIntExtra("hash", -1)
+        val hash = intent.getIntExtra("hash", -1)
+        val cmd = intent.getStringExtra("cmd") ?: ""
+        if (cmd.isNotBlank()) {
+            cmdHandler[cmd]?.callback?.handle(intent)
+        } else GlobalScope.launch { mutex.withLock {
+            hashHandler.forEach {
                 if (hash == -1) return@forEach
 
                 if (hash == it.hashCode()) {
                     it.callback.handle(intent)
-                    mutableSet.remove(it)
+                    if (it.seq != -1)
+                        hashHandler.remove(it)
                     return@forEach
                 }
             }
         } }
     }
 
+    fun register(cmd: String, request: Request) {
+        cmdHandler[cmd] = request
+    }
+
     fun register(request: Request) {
         GlobalScope.launch {
             mutex.withLock {
-                mutableSet.add(request)
+                hashHandler.add(request)
             }
         }
     }
@@ -41,7 +49,7 @@ object DynamicReceiver: BroadcastReceiver() {
     fun unregister(seq: Int) {
         GlobalScope.launch {
             mutex.withLock {
-                mutableSet.removeIf {
+                hashHandler.removeIf {
                     it.seq == seq
                 }
             }
