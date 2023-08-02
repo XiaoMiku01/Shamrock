@@ -1,6 +1,11 @@
+@file:OptIn(DelicateCoroutinesApi::class)
 package moe.fuqiuluo.xposed.actions.impl
 
 import android.content.Context
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import moe.fuqiuluo.http.HTTPServer
 import moe.fuqiuluo.xposed.actions.IAction
 import mqq.app.MobileQQ
 
@@ -11,5 +16,9 @@ class CreateHTTP: IAction {
         val shamrockConfig = ctx.getSharedPreferences("shamrock_config", 0)
         val port = shamrockConfig.getInt("port", 5700)
 
+        GlobalScope.launch {
+            HTTPServer.start(port)
+
+        }
     }
 }
