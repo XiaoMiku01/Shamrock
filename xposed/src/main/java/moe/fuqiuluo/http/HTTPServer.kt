@@ -22,17 +22,18 @@ import moe.fuqiuluo.http.api.getAccountInfo
 import moe.fuqiuluo.http.api.getMsfInfo
 import moe.fuqiuluo.http.api.getStartTime
 import moe.fuqiuluo.http.api.uploadGroupImage
+import mqq.app.MobileQQ
 
 object HTTPServer {
     var isQueryServiceStarted = false
     internal var startTime = 0L
 
     private val API_LIST = arrayOf(
-        Routing::index,
-        Routing::getAccountInfo,
-        Routing::getMsfInfo,
-        Routing::getStartTime,
-        Routing::uploadGroupImage
+        Routing::index to false,
+        Routing::getAccountInfo to false,
+        Routing::getMsfInfo to true,
+        Routing::getStartTime to false,
+        Routing::uploadGroupImage to true
     )
     private val mutex = Mutex()
     private lateinit var server: ApplicationEngine
@@ -58,7 +59,13 @@ object HTTPServer {
                 }
                 routing {
                     kotlin.runCatching {
-                        API_LIST.forEach { it.invoke(this) }
+                        val shamrockConfig = MobileQQ.getContext().getSharedPreferences("shamrock_config", 0)
+                        val proApi = shamrockConfig.getBoolean("pro_api", false)
+                        API_LIST.forEach {
+                            if (!it.second || proApi) {
+                                it.first.invoke(this)
+                            }
+                        }
                     }.onFailure { log(it) }
                 }
             }

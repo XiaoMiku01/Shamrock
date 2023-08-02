@@ -1,4 +1,4 @@
-package moe.fuqiuluo.xqbot.server.api
+package moe.fuqiuluo.http.api
 
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
