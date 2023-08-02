@@ -85,6 +85,12 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    // useless
+    //implementation ("com.maxkeppeler.sheets-compose-dialogs:core:1.2.0")
+    //implementation ("com.maxkeppeler.sheets-compose-dialogs:info:1.2.0")
+    //implementation ("com.maxkeppeler.sheets-compose-dialogs:input:1.2.0")
+    //implementation ("com.maxkeppeler.sheets-compose-dialogs:list:1.2.0")
+    //implementation ("com.maxkeppeler.sheets-compose-dialogs:state:1.2.0")
 
     implementation(project(":xposed"))
 

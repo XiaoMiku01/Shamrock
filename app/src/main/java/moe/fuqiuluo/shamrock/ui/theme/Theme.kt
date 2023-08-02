@@ -23,8 +23,8 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Color.White,
-    secondary = Color.White,
+    primary = TabSelectedColor,
+    secondary = Color(0xFFCCC2DC),
     tertiary = Color(0xFF7D5260),
     surface = Color(0xFFFFFBFE),
 

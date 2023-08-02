@@ -2,7 +2,6 @@ package moe.fuqiuluo.shamrock.ui.fragment
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,7 +11,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,13 +47,11 @@ fun LabFragment() {
             NoticeBox(text = LocalString.labWarning) {
                 showNoticeDialog.value = true
             }
-            if (showNoticeDialog.value) {
-                NoticeTextDialog(
-                    openDialog = showNoticeDialog,
-                    title = "温馨提示",
-                    text = "实验室功能会导致一些奇怪的问题，请谨慎使用！"
-                )
-            }
+            NoticeTextDialog(
+                openDialog = showNoticeDialog,
+                title = "温馨提示",
+                text = "实验室功能会导致一些奇怪的问题，请谨慎使用！"
+            )
 
             ActionBox(
                 modifier = Modifier.padding(top = 12.dp),

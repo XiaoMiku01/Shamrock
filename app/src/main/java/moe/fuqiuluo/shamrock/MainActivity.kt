@@ -131,10 +131,10 @@ private fun AppMainView() {
 
     AppRuntime.AccountInfo.also {
         it.uin = remember {
-            mutableStateOf("unknown")
+            mutableStateOf("2854200454")
         }
         it.nick = remember {
-            mutableStateOf("unknown")
+            mutableStateOf("测试昵称")
         }
     }
 

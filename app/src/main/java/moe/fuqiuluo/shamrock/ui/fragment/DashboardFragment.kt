@@ -1,10 +1,17 @@
+@file:OptIn(ExperimentalFoundationApi::class)
 package moe.fuqiuluo.shamrock.ui.fragment
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,15 +29,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalMapOf
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,6 +56,8 @@ import moe.fuqiuluo.shamrock.ui.app.AppRuntime
 import moe.fuqiuluo.shamrock.ui.app.Level
 import moe.fuqiuluo.shamrock.ui.theme.TabSelectedColor
 import moe.fuqiuluo.shamrock.ui.theme.TabUnSelectedColor
+import moe.fuqiuluo.shamrock.ui.tools.InputDialog
+
 
 @Composable
 fun DashboardFragment(
@@ -66,8 +78,74 @@ fun DashboardFragment(
                 .padding(16.dp)
         ) {
             AccountCard(nick, uin)
-            InformationCard()
+            InformationCard(ctx)
+            APIInfoCard(scope, ctx, preferences)
             FunctionCard(scope, ctx, preferences, "功能设置")
+        }
+    }
+}
+
+@Composable
+private fun APIInfoCard(
+    scope: CoroutineScope,
+    ctx: Context,
+    preferences: SharedPreferences
+) {
+    ActionBox(
+        modifier = Modifier.padding(top = 12.dp),
+        painter = painterResource(id = R.drawable.round_info_24),
+        title = "接口信息(双击修改)"
+    ) {
+        Column {
+            Divider(
+                modifier = Modifier,
+                color = TabUnSelectedColor,
+                thickness = 0.2.dp
+            )
+
+            val port = remember { mutableStateOf(preferences.getInt("port", 5700).toString()) }
+
+            val dialogPortInputState = InputDialog(
+                openDialog = remember { mutableStateOf(false) },
+                title = "主动HTTP端口",
+                desc = "端口范围在0~65565，并确保可用。",
+                isError = remember { mutableStateOf(false) },
+                text = port,
+                hint = "请输入端口号",
+                keyboardType = KeyboardType.Number,
+                errorText = "端口范围应在0~65565",
+                confirm = {
+
+                }
+            ) {
+                it.isNotBlank() && it.toInt() in 0 .. 65565
+            }
+            InfoItem(
+                title = "主动HTTP监听端口",
+                content = port.value
+            ) {
+                dialogPortInputState.show()
+            }
+
+            InfoItem(
+                title = "主动WebSocket端口",
+                content = "5800"
+            )
+
+            InfoItem(
+                title = "被动HTTP回调地址",
+                content = "127.0.0.1:8080"
+            )
+            
+            InfoItem(
+                title = "被动WebSocket地址",
+                content = "127.0.0.1:8080"
+            )
+
+            InfoItem(
+                title = "累计调用次数",
+                content = "114514"
+            )
         }
     }
 }
@@ -179,7 +257,7 @@ private fun Function(
 }
 
 @Composable
-private fun InformationCard() {
+private fun InformationCard(ctx: Context) {
     ActionBox(
         modifier = Modifier.padding(top = 12.dp),
         painter = painterResource(id = R.drawable.round_info_24),
@@ -197,14 +275,13 @@ private fun InformationCard() {
                 content =  "${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})"
             )
 
-            InfoItem(title = "设备", content = "${Build.BRAND} ${Build.MODEL}")
+            InfoItem(title = "设备", content = "${Build.BRAND} ${Build.MODEL}") {
+                val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val mClipData = ClipData.newPlainText("Label", it)
+                cm.setPrimaryClip(mClipData)
+            }
 
             InfoItem(title = "系统架构", content = Build.SUPPORTED_ABIS.joinToString())
-
-            InfoItem(
-                title = "累计调用次数",
-                content = "114514"
-            )
         }
     }
 }
@@ -215,12 +292,19 @@ private fun InfoItem(
     titleColor: Color = Color(0xFF5A5A5A),
     contentColor: Color = Color(0xFF5A5A5A),
     title: String,
-    content: String
+    content: String,
+    doubleClick: ((String) -> Unit)? = null
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .absolutePadding(left = 8.dp, right = 8.dp, top = 12.dp, bottom = 0.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .combinedClickable(onDoubleClick = {
+                doubleClick?.invoke(content)
+            }) {
+               // nothing
+            }
+        ,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
