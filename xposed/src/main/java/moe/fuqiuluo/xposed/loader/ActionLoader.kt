@@ -4,6 +4,8 @@ import android.content.Context
 import moe.fuqiuluo.xposed.actions.IAction
 import moe.fuqiuluo.xposed.actions.impl.PullConfig
 import moe.fuqiuluo.xposed.actions.impl.DataReceiver
+import moe.fuqiuluo.xposed.actions.impl.FetchService
+import moe.fuqiuluo.xposed.actions.impl.ForceTablet
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -14,6 +16,8 @@ object ActionLoader {
     )
 
     private val ACTION_LIST = arrayOf<KClass<*>>(
+        ForceTablet::class, // 强制平板模式
+        FetchService::class, // 获取服务实例
 
     )
 

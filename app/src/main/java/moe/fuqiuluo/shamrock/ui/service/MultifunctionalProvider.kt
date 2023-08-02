@@ -15,16 +15,26 @@ class MultifunctionalProvider: ContentProvider() {
         val hash = content.getAsInteger("hash")
         when(content.getAsString("cmd")) {
             "init" -> {
-                AppRuntime.log("收到QQ进程的通讯消息 = init")
-                val intent = Intent()
-                intent.action = "moe.fuqiuluo.xqbot.dynamic"
-                intent.putExtra("hash", hash)
-                context!!.sendBroadcast(intent)
+                AppRuntime.log("推送QQ进程初始化设置数据包成功...")
+                val preferences = context!!.getSharedPreferences("config", 0)
+
+                broadcast {
+                    putExtra("tablet", preferences.getBoolean("tablet", false)) // 强制平板模式
+                    putExtra("hash", hash)
+                }
+
             }
         }
 
 
         return uri
+    }
+
+    private fun broadcast(intentBuilder: Intent.() -> Unit) {
+        val intent = Intent()
+        intent.action = "moe.fuqiuluo.xqbot.dynamic"
+        intent.intentBuilder()
+        context!!.sendBroadcast(intent)
     }
 
     override fun onCreate(): Boolean {
