@@ -45,8 +45,6 @@ import java.util.HashMap
 
 object AIOMSGListener: IKernelMsgListener {
     override fun onRecvMsg(msgList: ArrayList<MsgRecord>) {
-        if (MobileQQ.getMobileQQ().qqProcessName != "com.tencent.mobileqq") return // 忽略非主进程
-
         val msg = msgList.first() // 暂时忽略多消息非一包的信息
         if (msg.chatType == MsgConstant.KCHATTYPEGROUP) {
             if (msg.senderUin == 0L) return // 自己发的消息，不看
