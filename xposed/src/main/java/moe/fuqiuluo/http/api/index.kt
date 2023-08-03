@@ -7,10 +7,11 @@ import io.ktor.server.routing.get
 import moe.fuqiuluo.http.HTTPServer
 import moe.fuqiuluo.http.entries.CommonResult
 import moe.fuqiuluo.http.entries.IndexData
+import moe.fuqiuluo.xposed.tools.getOrPost
 import mqq.app.MobileQQ
 
 fun Routing.index() {
-    get("/") {
+    getOrPost("/") {
         this.call.respond(CommonResult("ok", 0, IndexData(
             MobileQQ.getMobileQQ().qqProcessName, HTTPServer.startTime
         )))

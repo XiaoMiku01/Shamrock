@@ -6,6 +6,7 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import moe.fuqiuluo.http.entries.CommonResult
 import moe.fuqiuluo.http.entries.Protocol
+import moe.fuqiuluo.xposed.tools.getOrPost
 import mqq.app.MobileQQ
 import oicq.wlogin_sdk.tlv_type.tlv_t100
 import oicq.wlogin_sdk.tlv_type.tlv_t106
@@ -14,7 +15,7 @@ import oicq.wlogin_sdk.tools.util
 import moe.fuqiuluo.xposed.tools.util.buf_to_string
 
 fun Routing.getMsfInfo() {
-    get("/get_msf_info") {
+    getOrPost("/get_msf_info") {
         val mqq = MobileQQ.getMobileQQ()
         val ctx = MobileQQ.getContext()
 

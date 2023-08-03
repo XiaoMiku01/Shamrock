@@ -7,10 +7,11 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import moe.fuqiuluo.http.entries.CommonResult
 import moe.fuqiuluo.http.entries.CurrentAccount
+import moe.fuqiuluo.xposed.tools.getOrPost
 import mqq.app.MobileQQ
 
 fun Routing.getAccountInfo() {
-    get("/get_account_info") {
+    getOrPost("/get_account_info") {
         val accounts = MobileQQ.getMobileQQ().allAccounts
         val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
         val curUin = runtime.currentAccountUin
@@ -24,7 +25,7 @@ fun Routing.getAccountInfo() {
         }
     }
 
-    get("/get_history_account_info") {
+    getOrPost("/get_history_account_info") {
         val accounts = MobileQQ.getMobileQQ().allAccounts
         val accountList = accounts.map {
             CurrentAccount(it.uin.toLong(), it.isLogined)

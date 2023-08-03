@@ -33,7 +33,10 @@ import com.tencent.qqnt.kernel.nativeinterface.TabStatusInfo
 import com.tencent.qqnt.kernel.nativeinterface.TempChatInfo
 import com.tencent.qqnt.kernel.nativeinterface.UnreadCntInfo
 import de.robv.android.xposed.XposedBridge
+import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.url
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -75,6 +78,12 @@ object AIOMSGListener: IKernelMsgListener {
 
             // GlobalClient.get("") 直接写会报红
             GlobalScope.launch {
+                GlobalClient.post {
+                    url("xxxxxxx")
+                    formData {
+                        append("a", "aaa")
+                    }
+                }
                 // 百度一下如何使用ktor client发送请求什么的吧
                 //val respond = GlobalClient.get("http://baidu.com") // 发送应该get请求喏
             }

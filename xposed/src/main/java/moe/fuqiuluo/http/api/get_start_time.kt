@@ -6,9 +6,10 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import moe.fuqiuluo.http.HTTPServer
 import moe.fuqiuluo.http.entries.CommonResult
+import moe.fuqiuluo.xposed.tools.getOrPost
 
 fun Routing.getStartTime() {
-    get("/get_start_time") {
+    getOrPost("/get_start_time") {
         call.respond(CommonResult("ok", 0, HTTPServer.startTime))
     }
 }
