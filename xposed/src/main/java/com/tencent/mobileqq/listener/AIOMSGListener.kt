@@ -45,6 +45,8 @@ import java.util.HashMap
 
 object AIOMSGListener: IKernelMsgListener {
     override fun onRecvMsg(msgList: ArrayList<MsgRecord>) {
+        if (MobileQQ.getMobileQQ().qqProcessName != "com.tencent.mobileqq") return // 忽略非主进程
+
         val msg = msgList.first() // 暂时忽略多消息非一包的信息
         if (msg.chatType == MsgConstant.KCHATTYPEGROUP) {
             if (msg.senderUin == 0L) return // 自己发的消息，不看
@@ -52,9 +54,9 @@ object AIOMSGListener: IKernelMsgListener {
 
             val ctx = MobileQQ.getContext() // 获取腾讯的系统上下文
 
-            GlobalUi.post {
+            //GlobalUi.post {
                 // 这里可以执行ui操作
-            }
+            //}
 
             val sharedPreferences = ctx.getSharedPreferences("shamrock_config", 0)
 
@@ -76,8 +78,7 @@ object AIOMSGListener: IKernelMsgListener {
             // GlobalClient.get("") 直接写会报红
             GlobalScope.launch {
                 // 百度一下如何使用ktor client发送请求什么的吧
-                val respond = GlobalClient.get("http://baidu.com") // 发送应该get请求喏
-
+                //val respond = GlobalClient.get("http://baidu.com") // 发送应该get请求喏
             }
         }
     }

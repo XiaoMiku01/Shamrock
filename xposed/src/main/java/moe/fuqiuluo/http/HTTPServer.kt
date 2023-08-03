@@ -24,13 +24,8 @@ import moe.fuqiuluo.http.api.getAccountInfo
 import moe.fuqiuluo.http.api.getMsfInfo
 import moe.fuqiuluo.http.api.getStartTime
 import moe.fuqiuluo.http.api.uploadGroupImage
-import moe.fuqiuluo.xposed.actions.impl.GlobalUi
-import moe.fuqiuluo.xposed.actions.impl.PullConfig
 import moe.fuqiuluo.xposed.helper.DataRequester
-import moe.fuqiuluo.xposed.loader.ActionLoader
 import mqq.app.MobileQQ
-import kotlin.concurrent.thread
-import kotlin.system.exitProcess
 
 object HTTPServer {
     var isQueryServiceStarted = false
