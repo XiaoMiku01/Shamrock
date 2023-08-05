@@ -1,11 +1,8 @@
 package moe.fuqiuluo.http.action
 
-import io.ktor.server.application.ApplicationCall
-import io.ktor.util.pipeline.PipelineContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import moe.fuqiuluo.http.action.handlers.TestHandler
-import moe.fuqiuluo.http.entries.CommonResult
 import moe.fuqiuluo.xposed.tools.asInt
 import moe.fuqiuluo.xposed.tools.asJsonArray
 import moe.fuqiuluo.xposed.tools.asJsonObject
@@ -16,13 +13,13 @@ internal object ActionManager {
         "test" to TestHandler
     )
 
-    operator fun get(action: String): ActionHandler<*>? {
+    operator fun get(action: String): ActionHandler? {
         return actionMap[action]
     }
 }
 
-internal interface ActionHandler<T: Any> {
-    fun handle(session: ActionSession): CommonResult<T?>
+internal interface ActionHandler {
+    fun handle(session: ActionSession): String
 }
 
 internal class ActionSession(

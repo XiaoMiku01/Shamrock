@@ -3,13 +3,22 @@ package moe.fuqiuluo.http.action.handlers
 import kotlinx.serialization.Serializable
 import moe.fuqiuluo.http.action.ActionHandler
 import moe.fuqiuluo.http.action.ActionSession
-import moe.fuqiuluo.http.entries.CommonResult
 import moe.fuqiuluo.http.entries.Status
-import moe.fuqiuluo.http.entries.result
+import moe.fuqiuluo.http.entries.resultToString
+import de.robv.android.xposed.XposedBridge.log
 
-internal object TestHandler: ActionHandler<TestHandler.Test> {
-    override fun handle(session: ActionSession): CommonResult<Test?> {
-        return result(true, Status.Ok, Test(System.currentTimeMillis()))
+internal object TestHandler: ActionHandler {
+    override fun handle(session: ActionSession): String {
+        kotlin.runCatching {
+            return resultToString(
+                isOk = true,
+                code = Status.Ok,
+                data = Test(System.currentTimeMillis())
+            )
+        }.onFailure {
+            log(it)
+        }
+        return "error"
     }
 
     @Serializable

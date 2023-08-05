@@ -2,6 +2,8 @@ package moe.fuqiuluo.http.entries
 
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 enum class Status(
     val code: Int
@@ -36,20 +38,35 @@ data class CommonResult<T>(
     var echo: String = ""
 )
 
-internal fun <T> result(
+@Serializable
+object EmptyObject
+
+internal inline fun <reified T: Any> resultToString(
     isOk: Boolean,
     code: Status,
-    data: T? = null,
+    data: T,
+    msg: String = "",
+    echo: String = ""
+): String {
+    return Json.encodeToString(
+        CommonResult(if (isOk) "ok" else "failed", code.code, data, msg, echo)
+    )
+}
+
+internal inline fun <reified T> result(
+    isOk: Boolean,
+    code: Status,
+    data: T,
     msg: String = "",
     echo: String = ""
 ): CommonResult<T?> {
     return result(isOk, code.code, data, msg, echo)
 }
 
-internal fun <T> result(
+internal inline fun <reified T> result(
     isOk: Boolean,
     code: Int,
-    data: T? = null,
+    data: T,
     msg: String = "",
     echo: String = ""
 ): CommonResult<T?> {

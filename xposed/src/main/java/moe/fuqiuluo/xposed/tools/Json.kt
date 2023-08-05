@@ -15,7 +15,7 @@ val JsonElement?.asInt: Int
     get() = this!!.jsonPrimitive.int
 
 val JsonElement?.asJsonObject: JsonObject
-    get() = this!!.jsonPrimitive.jsonObject
+    get() = this!!.jsonObject
 
 val JsonElement?.asJsonArray: JsonArray
-    get() = this!!.jsonPrimitive.jsonArray
+    get() = this!!.jsonArray

@@ -11,6 +11,7 @@ import kotlinx.serialization.json.jsonObject
 import moe.fuqiuluo.http.HTTPServer
 import moe.fuqiuluo.http.action.ActionManager
 import moe.fuqiuluo.http.action.ActionSession
+import moe.fuqiuluo.http.entries.EmptyObject
 import moe.fuqiuluo.http.entries.IndexData
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.xposed.tools.asJsonObject
@@ -37,9 +38,11 @@ fun Routing.index() {
 
         val handler = ActionManager[action]
         if (handler == null) {
-            respond(false, Status.UnsupportedAction, null, "不支持的Action")
+            respond(false, Status.UnsupportedAction, EmptyObject, "不支持的Action")
         } else {
-            call.respond(handler.handle(ActionSession(params)))
+            call.respond(handler.handle(
+                ActionSession(params)
+            ))
         }
     }
 }

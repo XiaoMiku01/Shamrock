@@ -48,7 +48,7 @@ fun Routing.getOrPost(path: String, body: suspend PipelineContext<Unit, Applicat
 suspend inline fun <reified T : Any> PipelineContext<Unit, ApplicationCall>.respond(
     isOk: Boolean,
     code: Status,
-    data: T? = null,
+    data: T,
     msg: String = "",
     echo: String = ""
 ) {
@@ -64,7 +64,7 @@ suspend inline fun <reified T : Any> PipelineContext<Unit, ApplicationCall>.resp
 suspend inline fun <reified T : Any> PipelineContext<Unit, ApplicationCall>.respond(
     isOk: Boolean,
     code: Int,
-    data: T? = null,
+    data: T,
     msg: String = "",
     echo: String = ""
 ) {
