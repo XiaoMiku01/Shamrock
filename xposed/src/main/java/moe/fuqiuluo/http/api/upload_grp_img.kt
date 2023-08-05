@@ -10,7 +10,9 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.post
 import moe.fuqiuluo.http.entries.CommonResult
+import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.xposed.tools.fetchPost
+import moe.fuqiuluo.xposed.tools.respond
 import mqq.app.MobileQQ
 import oicq.wlogin_sdk.tools.MD5
 import kotlin.random.Random
@@ -49,6 +51,9 @@ fun Routing.uploadGroupImage() {
         (runtime.getRuntimeService(ITransFileController::class.java, "") as ITransFileController)
             .transferAsync(transferRequest)
 
-        call.respond(CommonResult("ok", 0, "$md5Str.jpg"))
+        respond(
+            isOk = true,
+            Status.Ok, "$md5Str.jpg"
+        )
     }
 }

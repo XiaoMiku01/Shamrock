@@ -104,6 +104,8 @@ class XposedEntry: IXposedHookLoadPackage {
         // MSG LISTENER 进程运行在主进程
         // API 也应该开放在主进程
 
+        sec_static_stage_inited = true
+
         ActionLoader.runFirst(ctx)
     }
 

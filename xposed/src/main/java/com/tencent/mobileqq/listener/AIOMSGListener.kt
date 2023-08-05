@@ -51,42 +51,6 @@ object AIOMSGListener: IKernelMsgListener {
         val msg = msgList.first() // 暂时忽略多消息非一包的信息
         if (msg.chatType == MsgConstant.KCHATTYPEGROUP) {
             if (msg.senderUin == 0L) return // 自己发的消息，不看
-
-
-            val ctx = MobileQQ.getContext() // 获取腾讯的系统上下文
-
-            //GlobalUi.post {
-                // 这里可以执行ui操作
-            //}
-
-            val sharedPreferences = ctx.getSharedPreferences("shamrock_config", 0)
-
-            // val 是否开启HTTP回调 = sharedPreferences.getBoolean("http", false)
-            // val HTTP回调地址 = sharedPreferences.getString("http_addr", "")
-
-            /* 按照名字你可以获取到对应数据
-            putBoolean(  "tablet",    it.getBooleanExtra("tablet", false)) // 强制平板模式
-                putInt(      "port",      it.getIntExtra("port", 5700)) // 主动HTTP端口
-                putBoolean(  "ws",        it.getBooleanExtra("ws", false)) // 主动WS开关
-                putInt(      "ws_port",   it.getIntExtra("port", 5700)) // 主动WS端口
-                putBoolean(  "http",      it.getBooleanExtra("http", false)) // HTTP回调开关
-                putString(   "http_addr", it.getStringExtra("http_addr")) // WebHook回调地址
-                putBoolean(  "ws_client", it.getBooleanExtra("ws_client", false)) // 被动WS开关
-                putString(   "ws_addr",   it.getStringExtra("ws_addr")) // 被动WS地址
-                putBoolean(  "pro_api",   it.getBooleanExtra("pro_api", false)) // 开发调试API开关
-             */
-
-            // GlobalClient.get("") 直接写会报红
-            GlobalScope.launch {
-                GlobalClient.post {
-                    url("xxxxxxx")
-                    formData {
-                        append("a", "aaa")
-                    }
-                }
-                // 百度一下如何使用ktor client发送请求什么的吧
-                //val respond = GlobalClient.get("http://baidu.com") // 发送应该get请求喏
-            }
         }
     }
 

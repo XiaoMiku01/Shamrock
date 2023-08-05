@@ -17,10 +17,10 @@ fun Routing.getAccountInfo() {
         val curUin = runtime.currentAccountUin
         val account = accounts.firstOrNull { it.uin == curUin }
         if (account == null || !account.isLogined) {
-            this.call.respond(CommonResult("当前不处于已登录状态", 1, null))
+            this.call.respond(CommonResult("failed", 1, null, "当前不处于已登录状态"))
         } else {
             this.call.respond(CommonResult("ok", 0, CurrentAccount(
-                curUin.toLong(), runtime.isLogin, if (runtime is QQAppInterface) runtime.currentNickname else "Unknown"
+                curUin.toLong(), runtime.isLogin, if (runtime is QQAppInterface) runtime.currentNickname else "unknown"
             )))
         }
     }

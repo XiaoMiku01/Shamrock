@@ -20,7 +20,6 @@ class CreateHTTP: IAction {
         GlobalScope.launch {
             kotlin.runCatching {
                 HTTPServer.start(port)
-
             }.onFailure {
                 XposedBridge.log(it)
             }

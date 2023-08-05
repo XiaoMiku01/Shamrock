@@ -4,18 +4,23 @@ import com.tencent.mobileqq.listener.AIOMSGListener
 import com.tencent.qqnt.kernel.api.IKernelService
 import de.robv.android.xposed.XposedBridge
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import mqq.app.api.IRuntimeService
 
 object ServiceFetcher {
     private lateinit var iKernelService: IKernelService
     private var isRegisteredMSG = atomic(false)
+    private val lock = Mutex()
 
-    fun onFetch(service: IRuntimeService) {
-        if (service is IKernelService && !this::iKernelService.isInitialized) {
-            this.iKernelService = service
-            XposedBridge.log("Fetch kernel service successfully: $iKernelService")
+    suspend fun onFetch(service: IRuntimeService) {
+        lock.withLock {
+            if (service is IKernelService && !this::iKernelService.isInitialized) {
+                this.iKernelService = service
+                XposedBridge.log("Fetch kernel service successfully: $iKernelService")
+            }
+            if (this::iKernelService.isInitialized && !isRegisteredMSG.value) registerMSG()
         }
-        if (this::iKernelService.isInitialized && !isRegisteredMSG.value) registerMSG()
     }
 
     private fun registerMSG() {

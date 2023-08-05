@@ -24,10 +24,12 @@ import moe.fuqiuluo.http.api.getAccountInfo
 import moe.fuqiuluo.http.api.getMsfInfo
 import moe.fuqiuluo.http.api.getStartTime
 import moe.fuqiuluo.http.api.uploadGroupImage
+import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.xposed.helper.DataRequester
 import mqq.app.MobileQQ
 
 object HTTPServer {
+    @JvmStatic
     var isQueryServiceStarted = false
     internal var startTime = 0L
 
@@ -56,7 +58,7 @@ object HTTPServer {
                 }
                 install(StatusPages) {
                     exception<Throwable> { call, cause ->
-                        call.respond(CommonResult("ok", -1, ErrorCatch(
+                        call.respond(CommonResult("failed", Status.IAmTired.code, ErrorCatch(
                             call.request.uri, cause.stackTraceToString())
                         ))
                     }

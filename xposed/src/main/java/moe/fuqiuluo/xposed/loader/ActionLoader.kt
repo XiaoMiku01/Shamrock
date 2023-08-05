@@ -14,10 +14,10 @@ object ActionLoader {
     private val ACTION_FIRST_LIST = arrayOf(
         DataReceiver::class, // 注册一个接收数据的动态广播
         PullConfig::class, // 从APP进程拉扯配置文件
+        ForceTablet::class, // 强制平板模式
     )
 
     private val ACTION_LIST = arrayOf<KClass<*>>(
-        ForceTablet::class, // 强制平板模式
         FetchService::class, // 获取服务实例
         CreateHTTP::class, // 创建HTTP API
     )

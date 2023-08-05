@@ -14,7 +14,7 @@ import mqq.app.MobileQQ
 class ForceTablet: IAction {
     override fun invoke(ctx: Context) {
         val preferences = ctx.getSharedPreferences("shamrock_config", 0)
-        if (preferences.getBoolean("tablet", false)) {
+        if (preferences.getBoolean("tablet", true)) {
             if (MobileQQ.getMobileQQ().qqProcessName == XposedEntry.PACKAGE_NAME_QQ) {
                 GlobalUi.post {
                     Toast.makeText(MobileQQ.getContext(), "强制协议类型 (PAD)", Toast.LENGTH_SHORT).show()

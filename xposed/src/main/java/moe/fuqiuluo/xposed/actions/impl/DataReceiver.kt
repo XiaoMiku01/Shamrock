@@ -18,6 +18,7 @@ lateinit var GlobalUi: Handler
 class DataReceiver: IAction {
     override fun invoke(ctx: Context) {
         if (MobileQQ.getMobileQQ().qqProcessName != "com.tencent.mobileqq") return
+
         GlobalUi = Handler(ctx.mainLooper)
         GlobalScope.launch {
             val intentFilter = IntentFilter()
