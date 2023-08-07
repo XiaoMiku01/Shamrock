@@ -2,24 +2,32 @@ package moe.fuqiuluo.http.action
 
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
-import moe.fuqiuluo.http.action.handlers.TestHandler
+import moe.fuqiuluo.http.action.handlers.*
 import moe.fuqiuluo.xposed.tools.asInt
 import moe.fuqiuluo.xposed.tools.asJsonArray
 import moe.fuqiuluo.xposed.tools.asJsonObject
 import moe.fuqiuluo.xposed.tools.asString
 
 internal object ActionManager {
-    private val actionMap = mutableMapOf(
-        "test" to TestHandler
+    val actionMap = mutableMapOf(
+        "test" to TestHandler,
+        "get_latest_events" to GetLatestEvents,
+        "get_supported_actions" to GetSupportedActions,
+        "get_status" to GetStatus,
+        "get_version" to GetVersion,
+        "get_self_info" to GetSelfInfo,
+
     )
 
-    operator fun get(action: String): ActionHandler? {
+    operator fun get(action: String): IActionHandler? {
         return actionMap[action]
     }
 }
 
-internal interface ActionHandler {
+internal interface IActionHandler {
     fun handle(session: ActionSession): String
+
+    fun path(): String
 }
 
 internal class ActionSession(

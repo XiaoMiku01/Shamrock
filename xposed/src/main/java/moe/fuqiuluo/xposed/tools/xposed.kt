@@ -1,14 +1,45 @@
 package moe.fuqiuluo.xposed.tools
 
 import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XC_MethodHook.MethodHookParam
+import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.callbacks.XCallback
 import moe.fuqiuluo.xposed.loader.LuoClassloader
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
+internal typealias MethodHooker = (MethodHookParam) -> Unit
+
+internal class XCHook {
+    var before = nullableOf<MethodHooker>()
+    var after = nullableOf<MethodHooker>()
+
+    fun after(after: MethodHooker) {
+        this.after.set(after)
+    }
+
+    fun before(before: MethodHooker) {
+        this.before.set(before)
+    }
+}
+
+internal fun Class<*>.hookMethod(name: String): XCHook {
+    return XCHook().also {
+        XposedBridge.hookAllMethods(this, name, object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                it.before.getOrNull()?.invoke(param)
+            }
+
+            override fun afterHookedMethod(param: MethodHookParam) {
+                it.after.getOrNull()?.invoke(param)
+            }
+        })
+    }
+}
+
 fun beforeHook(ver: Int = XCallback.PRIORITY_DEFAULT, block: (param: XC_MethodHook.MethodHookParam) -> Unit): XC_MethodHook {
-    return object :XC_MethodHook() {
+    return object :XC_MethodHook(ver) {
         override fun afterHookedMethod(param: MethodHookParam) {
             block(param)
         }

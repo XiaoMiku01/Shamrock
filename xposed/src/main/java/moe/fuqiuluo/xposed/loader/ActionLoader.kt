@@ -7,6 +7,7 @@ import moe.fuqiuluo.xposed.actions.impl.PullConfig
 import moe.fuqiuluo.xposed.actions.impl.DataReceiver
 import moe.fuqiuluo.xposed.actions.impl.FetchService
 import moe.fuqiuluo.xposed.actions.impl.ForceTablet
+import moe.fuqiuluo.xposed.actions.impl.RegisterServiceHandler
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -15,6 +16,7 @@ object ActionLoader {
         DataReceiver::class, // 注册一个接收数据的动态广播
         PullConfig::class, // 从APP进程拉扯配置文件
         ForceTablet::class, // 强制平板模式
+        RegisterServiceHandler::class, // 注册服务处理器
     )
 
     private val ACTION_LIST = arrayOf<KClass<*>>(

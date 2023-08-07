@@ -1,5 +1,7 @@
 package mqq.app;
 
+import com.tencent.qphone.base.remote.ToServiceMsg;
+
 import mqq.app.api.IRuntimeService;
 
 public abstract class AppRuntime {
@@ -78,5 +80,12 @@ public abstract class AppRuntime {
 
     public boolean isLogin() {
         return false;
+    }
+
+    public void sendToService(ToServiceMsg toServiceMsg) {
+    }
+
+    public ServletContainer getServletContainer() {
+        return null;
     }
 }

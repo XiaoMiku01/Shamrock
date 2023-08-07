@@ -1,8 +1,10 @@
 package moe.fuqiuluo.http.api
 
+import io.ktor.http.ContentType
 import io.ktor.server.application.call
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -40,9 +42,9 @@ fun Routing.index() {
         if (handler == null) {
             respond(false, Status.UnsupportedAction, EmptyObject, "不支持的Action")
         } else {
-            call.respond(handler.handle(
-                ActionSession(params)
-            ))
+            call.respondText(
+                handler.handle(ActionSession(params)), ContentType.Application.Json
+            )
         }
     }
 }

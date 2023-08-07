@@ -6,6 +6,7 @@ import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import de.robv.android.xposed.XposedBridge.log
 import moe.fuqiuluo.xposed.loader.ActionLoader
+import moe.fuqiuluo.xposed.loader.FixedLoader
 import moe.fuqiuluo.xposed.loader.LuoClassloader
 import moe.fuqiuluo.xposed.tools.FuzzySearchClass
 import moe.fuqiuluo.xposed.tools.afterHook
@@ -117,6 +118,12 @@ class XposedEntry: IXposedHookLoadPackage {
             field.isAccessible = true
             field.set(LuoClassloader, parent)
             field.set(classLoader, LuoClassloader)
+
+            val qloader = LuoClassloader.hostClassLoader
+            val qparent = qloader.parent
+            field.set(FixedLoader, qparent)
+            field.set(qloader, FixedLoader)
+
             log("Classloader inject successfully.")
         }
     }

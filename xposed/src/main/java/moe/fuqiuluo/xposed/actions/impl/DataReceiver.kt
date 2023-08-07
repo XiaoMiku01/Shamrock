@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Handler
+import android.widget.Toast
 import de.robv.android.xposed.XposedBridge
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -13,9 +14,19 @@ import moe.fuqiuluo.xposed.actions.IAction
 import moe.fuqiuluo.xposed.helper.DynamicReceiver
 import mqq.app.MobileQQ
 
-lateinit var GlobalUi: Handler
+internal lateinit var GlobalUi: Handler
 
-class DataReceiver: IAction {
+internal fun Context.toast(msg: String, flag: Int = Toast.LENGTH_SHORT) {
+    XposedBridge.log(msg)
+    if (!::GlobalUi.isInitialized) {
+        return
+    }
+    GlobalUi.post {
+        Toast.makeText(this, msg, flag).show()
+    }
+}
+
+internal class DataReceiver: IAction {
     override fun invoke(ctx: Context) {
         if (MobileQQ.getMobileQQ().qqProcessName != "com.tencent.mobileqq") return
 
