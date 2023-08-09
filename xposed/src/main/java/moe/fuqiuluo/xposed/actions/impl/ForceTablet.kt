@@ -16,9 +16,7 @@ class ForceTablet: IAction {
         val preferences = ctx.getSharedPreferences("shamrock_config", 0)
         if (preferences.getBoolean("tablet", true)) {
             if (MobileQQ.getMobileQQ().qqProcessName == XposedEntry.PACKAGE_NAME_QQ) {
-                GlobalUi.post {
-                    Toast.makeText(MobileQQ.getContext(), "强制协议类型 (PAD)", Toast.LENGTH_SHORT).show()
-                }
+                MobileQQ.getContext().toast("强制协议类型 (PAD)")
             }
             FuzzySearchClass.findAllClassByMethod(
                 LuoClassloader.hostClassLoader, "com.tencent.common.config.pad"

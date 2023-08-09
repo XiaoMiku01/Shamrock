@@ -9,6 +9,7 @@ import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
+
 internal typealias MethodHooker = (MethodHookParam) -> Unit
 
 internal class XCHook {
@@ -38,7 +39,7 @@ internal fun Class<*>.hookMethod(name: String): XCHook {
     }
 }
 
-fun beforeHook(ver: Int = XCallback.PRIORITY_DEFAULT, block: (param: XC_MethodHook.MethodHookParam) -> Unit): XC_MethodHook {
+internal fun beforeHook(ver: Int = XCallback.PRIORITY_DEFAULT, block: (param: XC_MethodHook.MethodHookParam) -> Unit): XC_MethodHook {
     return object :XC_MethodHook(ver) {
         override fun afterHookedMethod(param: MethodHookParam) {
             block(param)
@@ -46,7 +47,7 @@ fun beforeHook(ver: Int = XCallback.PRIORITY_DEFAULT, block: (param: XC_MethodHo
     }
 }
 
-fun afterHook(ver: Int = XCallback.PRIORITY_DEFAULT, block: (param: XC_MethodHook.MethodHookParam) -> Unit): XC_MethodHook {
+internal fun afterHook(ver: Int = XCallback.PRIORITY_DEFAULT, block: (param: XC_MethodHook.MethodHookParam) -> Unit): XC_MethodHook {
     return object :XC_MethodHook(ver) {
         override fun afterHookedMethod(param: MethodHookParam) {
             block(param)
@@ -145,4 +146,48 @@ object FuzzySearchClass {
         }
         return false
     }
+}
+
+internal fun Any.toInnerValuesString(): String {
+    val builder = StringBuilder()
+    val clz = javaClass
+    builder.append(clz.canonicalName)
+    builder.append("========>\n")
+    clz.declaredFields.forEach {
+        if (!Modifier.isStatic(it.modifiers)) {
+            if (!it.isAccessible) {
+                it.isAccessible = true
+            }
+            builder.append(it.name)
+            builder.append(" = ")
+            when (val v = it.get(this)) {
+                null -> builder.append("null")
+                is ByteArray -> builder.append(v.toHexString())
+                is Map<*, *> -> {
+                    builder.append("{\n\t")
+                    v.forEach { key, value ->
+                        builder.append("\t")
+                        builder.append(key)
+                        builder.append(" = ")
+                        builder.append(value)
+                        builder.append("\n")
+                    }
+                    builder.append("}")
+                }
+                is List<*> -> {
+                    builder.append("[\n\t")
+                    v.forEach { value ->
+                        builder.append("\t")
+                        builder.append(value)
+                        builder.append("\n")
+                    }
+                    builder.append("]")
+                }
+                else -> builder.append(v)
+            }
+            builder.append("\n")
+        }
+    }
+    builder.append("=======================>\n")
+    return builder.toString()
 }

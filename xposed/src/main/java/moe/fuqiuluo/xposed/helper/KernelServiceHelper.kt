@@ -4,7 +4,7 @@ import com.tencent.qqnt.kernel.api.IKernelService
 import com.tencent.qqnt.kernel.api.impl.MsgService
 import java.lang.reflect.Method
 
-object KernelServiceHelper {
+internal object KernelServiceHelper {
     private lateinit var M_GET_MSG_SERVICE: Method
 
     fun getMsgService(service: IKernelService): MsgService? {

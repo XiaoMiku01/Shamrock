@@ -3,6 +3,11 @@ package moe.fuqiuluo.http.action
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import moe.fuqiuluo.http.action.handlers.*
+import moe.fuqiuluo.http.entries.EmptyObject
+import moe.fuqiuluo.http.entries.Status
+import moe.fuqiuluo.http.entries.resultToString
+import moe.fuqiuluo.xposed.tools.asBoolean
+import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asInt
 import moe.fuqiuluo.xposed.tools.asJsonArray
 import moe.fuqiuluo.xposed.tools.asJsonObject
@@ -16,6 +21,7 @@ internal object ActionManager {
         "get_status" to GetStatus,
         "get_version" to GetVersion,
         "get_self_info" to GetSelfInfo,
+        "get_user_info" to GetProfileCard,
 
     )
 
@@ -24,10 +30,22 @@ internal object ActionManager {
     }
 }
 
-internal interface IActionHandler {
-    fun handle(session: ActionSession): String
+internal abstract class IActionHandler {
+    abstract fun handle(session: ActionSession): String
 
-    fun path(): String
+    abstract fun path(): String
+
+    fun badParam(paramName: String): String {
+        return failed(Status.BadParam, "lack of [$paramName]")
+    }
+
+    fun logic(why: String): String {
+        return failed(Status.LogicError, why)
+    }
+
+    fun failed(status: Status, msg: String): String {
+        return resultToString(false, status, EmptyObject, msg)
+    }
 }
 
 internal class ActionSession(
@@ -39,6 +57,14 @@ internal class ActionSession(
 
     fun getString(key: String): String {
         return params[key].asString
+    }
+
+    fun getBoolean(key: String): Boolean {
+        return params[key].asBoolean
+    }
+
+    fun <T: Boolean?> getBooleanOrDefault(key: String, default: T? = null): T {
+        return (params[key].asBooleanOrNull as? T) ?: default as T
     }
 
     fun getObject(key: String): JsonObject {

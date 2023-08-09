@@ -1,5 +1,10 @@
 package mqq.app;
 
+import android.os.Bundle;
+import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
+
 import com.tencent.qphone.base.remote.ToServiceMsg;
 
 import mqq.app.api.IRuntimeService;
@@ -60,10 +65,13 @@ public abstract class AppRuntime {
         }
     }
 
-    public <T extends IRuntimeService> T getRuntimeService(Class<T> cls, String str) {
+    public <T extends IRuntimeService> T getRuntimeService(Class<T> cls, String namespace) {
         throw new UnsupportedOperationException();
     }
 
+    public <T extends IRuntimeService> T getRuntimeServiceIPCSync(@NonNull Class<T> cls, String str) {
+        throw new UnsupportedOperationException();
+    }
     public String getAccount() {
         return "";
     }
@@ -87,5 +95,9 @@ public abstract class AppRuntime {
 
     public ServletContainer getServletContainer() {
         return null;
+    }
+
+    public void onCreate(Bundle bundle) {
+
     }
 }

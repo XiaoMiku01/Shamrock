@@ -48,7 +48,7 @@ fun Routing.uploadGroupImage() {
         picUpExtraInfo.mIsRaw = true
         transferRequest.mPicSendSource = 8
         transferRequest.mExtraObj = picUpExtraInfo
-        (runtime.getRuntimeService(ITransFileController::class.java, "") as ITransFileController)
+        (runtime.getRuntimeService(ITransFileController::class.java, "all") as ITransFileController)
             .transferAsync(transferRequest)
 
         respond(

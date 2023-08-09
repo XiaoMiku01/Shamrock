@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-object DynamicReceiver: BroadcastReceiver() {
+internal object DynamicReceiver: BroadcastReceiver() {
     private val hashHandler = mutableSetOf<Request>()
     private val cmdHandler = mutableMapOf<String, Request>()
     private val mutex = Mutex() // 滥用的锁，所以说尽量减少使用
@@ -25,7 +25,7 @@ object DynamicReceiver: BroadcastReceiver() {
                 if (hash == -1) return@forEach
 
                 if (hash == it.hashCode()) {
-                    it.callback.handle(intent)
+                    it.callback?.handle(intent)
                     if (it.seq != -1)
                         hashHandler.remove(it)
                     return@forEach

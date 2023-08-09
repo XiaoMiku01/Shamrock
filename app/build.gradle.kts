@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    kotlin("plugin.serialization")
+    kotlin("plugin.serialization") version "1.8.10"
 }
 
 android {
@@ -86,7 +86,6 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("org.jetbrains.kotlinx:kotlinx-io-jvm:0.1.16")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.5.1")
     implementation("io.ktor:ktor-server-core:2.3.3")
     implementation("io.ktor:ktor-server-host-common:2.3.3")
     implementation("io.ktor:ktor-server-status-pages:2.3.3")

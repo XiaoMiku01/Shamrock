@@ -8,7 +8,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import mqq.app.api.IRuntimeService
 
-object ServiceFetcher {
+internal object ServiceFetcher {
     private lateinit var iKernelService: IKernelService
     private var isRegisteredMSG = atomic(false)
     private val lock = Mutex()

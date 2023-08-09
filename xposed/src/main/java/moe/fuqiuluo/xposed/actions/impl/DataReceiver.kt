@@ -21,9 +21,7 @@ internal fun Context.toast(msg: String, flag: Int = Toast.LENGTH_SHORT) {
     if (!::GlobalUi.isInitialized) {
         return
     }
-    GlobalUi.post {
-        Toast.makeText(this, msg, flag).show()
-    }
+    GlobalUi.post { Toast.makeText(this, msg, flag).show() }
 }
 
 internal class DataReceiver: IAction {

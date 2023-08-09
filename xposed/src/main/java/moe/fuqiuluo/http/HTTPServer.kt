@@ -83,7 +83,7 @@ object HTTPServer {
 
             DataRequester.request(ctx, "success", bodyBuilder = {
                 put("port", PORT)
-            }, onFailure = {}) {}
+            })
         }
     }
 

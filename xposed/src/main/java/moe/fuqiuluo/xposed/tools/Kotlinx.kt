@@ -1,5 +1,7 @@
 package moe.fuqiuluo.xposed.tools
 
+import java.util.Locale
+
 class Nullable<T: Any>(
     private var value: T?
 ) {
@@ -35,4 +37,10 @@ fun ByteArray.slice(off: Int, length: Int = size - off): ByteArray {
         return b1
     }
     return this
+}
+
+@JvmOverloads fun ByteArray.toHexString(uppercase: Boolean = false): String = this.joinToString("") {
+    (it.toInt() and 0xFF).toString(16)
+        .padStart(2, '0')
+        .let { s -> if (uppercase) s.lowercase(Locale.getDefault()) else s }
 }

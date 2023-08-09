@@ -9,7 +9,7 @@ import moe.fuqiuluo.http.entries.resultToString
 import mqq.app.MobileQQ
 
 
-internal object GetStatus: IActionHandler {
+internal object GetStatus: IActionHandler() {
     override fun handle(session: ActionSession): String {
         val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
         val curUin = runtime.currentAccountUin

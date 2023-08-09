@@ -7,7 +7,7 @@ import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.http.entries.resultToString
 
-internal object GetVersion: IActionHandler {
+internal object GetVersion: IActionHandler() {
     override fun handle(session: ActionSession): String {
         return resultToString(true, Status.Ok, VersionInfo(
             "shamrock", "1.0.1", "12"

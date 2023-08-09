@@ -23,12 +23,12 @@ object DataRequester {
     fun request(
         ctx: Context,
         cmd: String,
-        bodyBuilder: ContentValues.() -> Unit,
-        onFailure: (Throwable) -> Unit,
-        callback: ICallback
+        bodyBuilder: (ContentValues.() -> Unit)? = null,
+        onFailure: ((Throwable) -> Unit)? = null,
+        callback: ICallback? = null
     ): Int {
         val values = ContentValues()
-        values.bodyBuilder()
+        bodyBuilder?.invoke(values)
         val currentSeq = seq
         values.put("hash", (cmd + currentSeq).hashCode())
         values.put("cmd", cmd)
@@ -37,7 +37,7 @@ object DataRequester {
             ctx.contentResolver
                 .insert(URI, values)
         }.onFailure {
-            onFailure.invoke(it)
+            onFailure?.invoke(it)
         }
 
         val job = timer(initialDelay = 6000L, period = 5000L) {
@@ -48,12 +48,21 @@ object DataRequester {
             kotlin.runCatching {
                 job.cancel()
             }
-            callback.handle(it)
+            callback?.handle(it)
         }
         DynamicReceiver.register(request)
 
         return currentSeq
     }
+
+    /*fun requestService(
+        cmd: String,
+        bodyBuilder: (ContentValues.() -> Unit)? = null,
+        onFailure: ((Throwable) -> Unit)? = null,
+        callback: ((ContentValues) -> Unit)? = null
+    ) {
+
+    }*/
 }
 
 fun interface ICallback {
@@ -64,8 +73,10 @@ data class Request(
     val cmd: String,
     val seq: Int,
     val values: ContentValues,
-    val callback: ICallback
+    var callback: ICallback? = null,
 ) {
+    var callbackV2: ((ContentValues) -> Unit)? = null
+
     override fun hashCode(): Int {
         return (cmd + seq).hashCode()
     }

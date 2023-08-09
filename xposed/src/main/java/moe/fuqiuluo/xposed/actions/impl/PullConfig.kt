@@ -28,13 +28,11 @@ class PullConfig: IAction {
         DynamicReceiver.register("fetchPort", Request("", 0, ContentValues()) {
             DataRequester.request(ctx, "success", bodyBuilder = {
                 put("port", HTTPServer.PORT)
-            }, onFailure = {}) {}
+            })
         })
 
-        DataRequester.request(ctx, "init", bodyBuilder = {}, onFailure = {
-            GlobalUi.post {
-                Toast.makeText(ctx, "请启动Shamrock主进程以初始化服务，进程将退出。", Toast.LENGTH_LONG).show()
-            }
+        DataRequester.request(ctx, "init", onFailure = {
+            ctx.toast("请启动Shamrock主进程以初始化服务，进程将退出。")
             thread {
                 Thread.sleep(3000)
                 exitProcess(1)

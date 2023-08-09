@@ -7,7 +7,7 @@ import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.http.entries.resultToString
 import de.robv.android.xposed.XposedBridge.log
 
-internal object TestHandler: IActionHandler {
+internal object TestHandler: IActionHandler() {
     override fun handle(session: ActionSession): String {
         kotlin.runCatching {
             return resultToString(
