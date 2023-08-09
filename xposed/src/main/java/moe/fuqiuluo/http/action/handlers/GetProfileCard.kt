@@ -40,7 +40,7 @@ internal object GetProfileCard: IActionHandler() {
         return resultToString(true, Status.Ok, MyCard(
             uin = card.uin,
             name = card.strNick,
-            mail = card.strShowName,
+            mail = card.strShowName ?: card.strEmail ?: "",
             remark = card.strReMark.let { if (it.isNullOrBlank()) card.strAutoRemark else it },
             findMethod = card.addSrcName,
             displayName = card.strContactName,
@@ -105,17 +105,17 @@ internal object GetProfileCard: IActionHandler() {
     data class MyCard(
         @SerialName("user_id") val uin: String,
         @SerialName("user_name") val name: String,
-        @SerialName("user_displayname") val displayName: String,
-        @SerialName("user_remark") val remark: String,
-        val mail: String,
-        @SerialName("find_method") val findMethod: String,
+        @SerialName("user_displayname") val displayName: String?,
+        @SerialName("user_remark") val remark: String?,
+        val mail: String?,
+        @SerialName("find_method") val findMethod: String?,
 
         @SerialName("max_vote_cnt") val maxVoteCnt: Short,
         @SerialName("have_vote_cnt") val haveVoteCnt: Short,
 
         @SerialName("vip_list") val vipList: List<VipInfo>,
 
-        @SerialName("hobby_entry") val hobbyEntry: String,
+        @SerialName("hobby_entry") val hobbyEntry: String?,
 
         val level: Int,
         val birthday: Long,
@@ -131,12 +131,12 @@ internal object GetProfileCard: IActionHandler() {
 
     @Serializable
     data class Location(
-        val city: String,
-        val company: String,
-        val country: String,
-        val province: String,
-        val hometown: String,
-        val school: String,
+        val city: String?,
+        val company: String?,
+        val country: String?,
+        val province: String?,
+        val hometown: String?,
+        val school: String?,
 
     )
 
