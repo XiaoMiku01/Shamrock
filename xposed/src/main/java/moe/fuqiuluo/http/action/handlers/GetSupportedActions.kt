@@ -7,7 +7,7 @@ import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.http.entries.resultToString
 
 internal object GetSupportedActions: IActionHandler() {
-    override fun handle(session: ActionSession): String {
+    override suspend fun handle(session: ActionSession): String {
         return resultToString(true, Status.Ok, ActionManager.actionMap.keys.toList())
     }
 

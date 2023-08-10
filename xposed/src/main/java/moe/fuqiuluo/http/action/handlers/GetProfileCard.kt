@@ -5,18 +5,23 @@ import com.tencent.mobileqq.data.Card
 import com.tencent.mobileqq.profilecard.api.IProfileDataService
 import com.tencent.mobileqq.profilecard.api.IProfileProtocolService
 import com.tencent.mobileqq.profilecard.observer.ProfileCardObserver
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
+import moe.fuqiuluo.http.action.data.Location
+import moe.fuqiuluo.http.action.data.ProfileCard
+import moe.fuqiuluo.http.action.data.VipInfo
+import moe.fuqiuluo.http.action.data.VipType
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.http.entries.resultToString
-import moe.fuqiuluo.xposed.tools.toInnerValuesString
 import mqq.app.MobileQQ
 import java.util.concurrent.ArrayBlockingQueue
 
 internal object GetProfileCard: IActionHandler() {
-    override fun handle(session: ActionSession): String {
+    private val refreshLock = Mutex() // 防止重复注册监视器导致错误
+
+    override suspend fun handle(session: ActionSession): String {
         if (!session.has("user_id")) {
             return badParam("user_id")
         }
@@ -37,7 +42,7 @@ internal object GetProfileCard: IActionHandler() {
         }
         requireNotNull(card)
 
-        return resultToString(true, Status.Ok, MyCard(
+        return resultToString(true, Status.Ok, ProfileCard(
             uin = card.uin,
             name = card.strNick,
             mail = card.strShowName ?: card.strEmail ?: "",
@@ -79,83 +84,28 @@ internal object GetProfileCard: IActionHandler() {
         ))
     }
 
-    private fun refreshProfileCard(uin: String, app: AppInterface, dataService: IProfileDataService): Card? {
-        val queue = ArrayBlockingQueue<Card?>(1)
-        app.addObserver(object: ProfileCardObserver() {
-            override fun onGetProfileCard(success: Boolean, obj: Any) {
-                if (!success || obj !is Card) {
-                    queue.put(null)
-                } else {
-                    queue.put(obj)
-                    dataService.saveProfileCard(obj)
+    private suspend fun refreshProfileCard(uin: String, app: AppInterface, dataService: IProfileDataService): Card? {
+        refreshLock.withLock {
+            val queue = ArrayBlockingQueue<Card?>(1)
+            app.addObserver(object: ProfileCardObserver() {
+                override fun onGetProfileCard(success: Boolean, obj: Any) {
+                    if (!success || obj !is Card) {
+                        queue.put(null)
+                    } else {
+                        queue.put(obj)
+                        dataService.saveProfileCard(obj)
+                    }
+                    app.removeObserver(this)
                 }
-                app.removeObserver(this)
-            }
-        })
-        app.getRuntimeService(IProfileProtocolService::class.java, "all")
-            .requestProfileCard(app.currentUin, uin, 12, 0L, 0.toByte(), 0L, 0L, null, "", 0L, 10004, null, 0.toByte())
-        return queue.take()
+            })
+            app.getRuntimeService(IProfileProtocolService::class.java, "all")
+                .requestProfileCard(app.currentUin, uin, 12, 0L, 0.toByte(), 0L, 0L, null, "", 0L, 10004, null, 0.toByte())
+            return queue.take()
+        }
     }
 
     private fun Card?.ok(): Boolean {
         return this != null && !strNick.isNullOrBlank()
-    }
-
-    @Serializable
-    data class MyCard(
-        @SerialName("user_id") val uin: String,
-        @SerialName("user_name") val name: String,
-        @SerialName("user_displayname") val displayName: String?,
-        @SerialName("user_remark") val remark: String?,
-        val mail: String?,
-        @SerialName("find_method") val findMethod: String?,
-
-        @SerialName("max_vote_cnt") val maxVoteCnt: Short,
-        @SerialName("have_vote_cnt") val haveVoteCnt: Short,
-
-        @SerialName("vip_list") val vipList: List<VipInfo>,
-
-        @SerialName("hobby_entry") val hobbyEntry: String?,
-
-        val level: Int,
-        val birthday: Long,
-        @SerialName("login_day") val loginDay: Long,
-
-        @SerialName("vote_cnt") val voteCnt: Long,
-
-        val qid: String,
-        @SerialName("is_school_verified") val schoolVerified: Boolean,
-
-        val location: Location,
-    )
-
-    @Serializable
-    data class Location(
-        val city: String?,
-        val company: String?,
-        val country: String?,
-        val province: String?,
-        val hometown: String?,
-        val school: String?,
-
-    )
-
-    @Serializable
-    data class VipInfo(
-        val type: VipType,
-        val level: Int,
-        @SerialName("vip_type") val vipType: Int,
-        @SerialName("template_id") val templateId: Long
-    )
-
-    enum class VipType {
-        QQ_VIP,
-        SUPER_QQ,
-        SUPER_VIP,
-        QQ_VIDEO,
-        QQ_READING,
-        BIG_VIP,
-        YELLOW_VIP
     }
 
     override fun path(): String = "get_user_info"

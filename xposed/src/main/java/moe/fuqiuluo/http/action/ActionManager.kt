@@ -22,6 +22,7 @@ internal object ActionManager {
         "get_version" to GetVersion,
         "get_self_info" to GetSelfInfo,
         "get_user_info" to GetProfileCard,
+        "get_friend_list" to GetFriendList,
 
     )
 
@@ -31,9 +32,13 @@ internal object ActionManager {
 }
 
 internal abstract class IActionHandler {
-    abstract fun handle(session: ActionSession): String
+    abstract suspend fun handle(session: ActionSession): String
 
     abstract fun path(): String
+
+    inline fun <reified T> ok(data: T): String {
+        return resultToString(true, Status.Ok, data!!)
+    }
 
     fun badParam(paramName: String): String {
         return failed(Status.BadParam, "lack of [$paramName]")

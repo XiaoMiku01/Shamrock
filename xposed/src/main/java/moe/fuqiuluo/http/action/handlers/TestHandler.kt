@@ -8,7 +8,7 @@ import moe.fuqiuluo.http.entries.resultToString
 import de.robv.android.xposed.XposedBridge.log
 
 internal object TestHandler: IActionHandler() {
-    override fun handle(session: ActionSession): String {
+    override suspend fun handle(session: ActionSession): String {
         kotlin.runCatching {
             return resultToString(
                 isOk = true,
