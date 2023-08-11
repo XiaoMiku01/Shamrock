@@ -25,7 +25,7 @@ internal object ActionManager {
         "get_friend_list" to GetFriendList,
         "get_group_info" to GetTroopInfo,
         "get_group_list" to GetTroopList,
-
+        "get_group_member_info" to GetTroopMemberInfo
     )
 
     operator fun get(action: String): IActionHandler? {

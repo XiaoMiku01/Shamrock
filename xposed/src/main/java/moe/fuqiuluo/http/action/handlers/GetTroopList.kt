@@ -11,6 +11,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
 import moe.fuqiuluo.http.action.data.SimpleTroopInfo
+import moe.fuqiuluo.http.action.helper.TroopRequestHelper
 import mqq.app.MobileQQ
 import kotlin.coroutines.resume
 
@@ -54,11 +55,12 @@ internal object GetTroopList: IActionHandler() {
     }
 
     private suspend fun requestGroupList(service: ITroopInfoService): Boolean {
+        TroopRequestHelper.refreshTroopList()
         return suspendCancellableCoroutine { continuation ->
             val waiter = GlobalScope.launch {
-                while (!service.isTroopCacheInited) {
-                    delay(200)
-                }
+                do {
+                    delay(1000)
+                } while (!service.isTroopCacheInited)
                 continuation.resume(true)
             }
             continuation.invokeOnCancellation {

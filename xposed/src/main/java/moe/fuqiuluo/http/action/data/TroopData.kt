@@ -16,3 +16,15 @@ internal data class SimpleTroopInfo(
     @SerialName("max_member") val maxMember: Int,
     @SerialName("member_num") val memNum: Int,
 )
+
+@Serializable
+internal data class SimpleTroopMemberInfo(
+    @SerialName("user_id") val uin: String,
+    @SerialName("user_name") val name: String,
+    @SerialName("user_displayname") val showName: String?,
+    @SerialName("distance") val distance: Int,
+    @SerialName("honor") val honor: List<Int>,
+    @SerialName("join_time") val joinTime: Long,
+    @SerialName("last_active_time") val lastActiveTime: Long,
+    @SerialName("unique_name") val uniqueName: String?,
+)

@@ -44,3 +44,7 @@ fun ByteArray.slice(off: Int, length: Int = size - off): ByteArray {
         .padStart(2, '0')
         .let { s -> if (uppercase) s.lowercase(Locale.getDefault()) else s }
 }
+
+fun String?.ifNullOrEmpty(defaultValue: String?): String? {
+    return if (this.isNullOrEmpty()) defaultValue else this
+}
