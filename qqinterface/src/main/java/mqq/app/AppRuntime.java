@@ -90,9 +90,6 @@ public abstract class AppRuntime {
         return false;
     }
 
-    public void sendToService(ToServiceMsg toServiceMsg) {
-    }
-
     public ServletContainer getServletContainer() {
         return null;
     }

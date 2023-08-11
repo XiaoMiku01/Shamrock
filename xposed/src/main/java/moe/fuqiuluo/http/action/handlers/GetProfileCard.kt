@@ -23,7 +23,7 @@ internal object GetProfileCard: IActionHandler() {
 
     override suspend fun handle(session: ActionSession): String {
         if (!session.has("user_id")) {
-            return badParam("user_id")
+            return noParam("user_id")
         }
         val uin = session.getString("user_id")
         val refresh = session.getBooleanOrDefault("refresh", false)

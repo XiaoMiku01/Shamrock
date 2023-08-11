@@ -2,6 +2,7 @@ package com.tencent.common.app;
 
 import com.tencent.mobileqq.app.BusinessHandler;
 import com.tencent.mobileqq.app.BusinessObserver;
+import com.tencent.qphone.base.remote.ToServiceMsg;
 
 import mqq.app.AppRuntime;
 
@@ -18,5 +19,8 @@ public abstract class AppInterface extends AppRuntime {
     }
 
     public void removeObserver(BusinessObserver businessObserver) {
+    }
+
+    public void sendToService(ToServiceMsg toServiceMsg) {
     }
 }

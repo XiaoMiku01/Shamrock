@@ -23,6 +23,7 @@ internal object ActionManager {
         "get_self_info" to GetSelfInfo,
         "get_user_info" to GetProfileCard,
         "get_friend_list" to GetFriendList,
+        "get_group_info" to GetTroopInfo,
 
     )
 
@@ -40,8 +41,12 @@ internal abstract class IActionHandler {
         return resultToString(true, Status.Ok, data!!)
     }
 
-    fun badParam(paramName: String): String {
+    fun noParam(paramName: String): String {
         return failed(Status.BadParam, "lack of [$paramName]")
+    }
+
+    fun badParam(why: String): String {
+        return failed(Status.BadParam, why)
     }
 
     fun logic(why: String): String {
