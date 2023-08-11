@@ -24,6 +24,7 @@ internal object ActionManager {
         "get_user_info" to GetProfileCard,
         "get_friend_list" to GetFriendList,
         "get_group_info" to GetTroopInfo,
+        "get_group_list" to GetTroopList,
 
     )
 

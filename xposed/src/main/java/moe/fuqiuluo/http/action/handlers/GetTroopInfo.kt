@@ -1,4 +1,3 @@
-@file:OptIn(DelicateCoroutinesApi::class)
 package moe.fuqiuluo.http.action.handlers
 
 import com.tencent.common.app.AppInterface
