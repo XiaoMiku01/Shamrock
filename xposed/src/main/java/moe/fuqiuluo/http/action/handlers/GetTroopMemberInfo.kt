@@ -42,7 +42,7 @@ internal object GetTroopMemberInfo: IActionHandler() {
             return logic("cannot get troop member info")
         }
         return ok(SimpleTroopMemberInfo(
-            uin = info.troopuin,
+            uin = info.memberuin,
             name = info.friendnick.ifNullOrEmpty(info.autoremark) ?: "",
             showName = info.troopnick.ifNullOrEmpty(info.troopColorNick),
             distance = info.distance,
