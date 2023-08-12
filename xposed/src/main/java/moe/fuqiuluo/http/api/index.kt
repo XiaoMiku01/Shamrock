@@ -3,11 +3,12 @@ package moe.fuqiuluo.http.api
 import io.ktor.http.ContentType
 import io.ktor.server.application.call
 import io.ktor.server.request.receiveText
-import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import moe.fuqiuluo.http.HTTPServer
@@ -20,6 +21,14 @@ import moe.fuqiuluo.xposed.tools.asJsonObject
 import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.respond
 import mqq.app.MobileQQ
+
+@Serializable
+data class OldApiResult<T>(
+    val code: Int,
+    val msg: String = "",
+    @Contextual
+    val data: T? = null
+)
 
 fun Routing.index() {
     get("/") {

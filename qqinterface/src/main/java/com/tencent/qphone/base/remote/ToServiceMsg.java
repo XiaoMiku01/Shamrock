@@ -42,37 +42,13 @@ public class ToServiceMsg implements Parcelable {
     private int ssoSeq;
     private long timeout;
     private byte toVersion;
-    private final HashMap<String, byte[]> transInfo;
+    private HashMap<String, byte[]> transInfo;
     private String uin;
     private byte uinType;
     private byte[] wupBuffer;
 
-    public ToServiceMsg(String str, String str2, String str3) {
-        this.mSsoVersion = 0;
-        this.sendTimeout = -1L;
-        this.timeout = -1L;
-        this.appSeq = -1;
-        this.wupBuffer = new byte[0];
-        this.needResp = true;
-        this.mIsSupportRetry = false;
-        this.ssoSeq = -1;
-        this.attributes = new HashMap<>(32);
-        this.extraData = new Bundle();
-        this.toVersion = (byte) 1;
-        this.msfCommand = MsfCommand.unknown;
-        this.uinType = (byte) 0;
-        this.quickSendEnable = false;
-        this.quickSendStrategy = -1;
-        this.mSkipBinderWhenMarshall = false;
-        this.transInfo = new HashMap<>();
-        this.serviceName = str;
-        this.uin = str2;
-        this.serviceCmd = str3;
-        try {
-            this.extraData.putByte("version", this.toVersion);
-        } catch (Exception e2) {
-            e2.printStackTrace();
-        }
+    public ToServiceMsg(String service, String uin, String cmd) {
+
     }
 
     public synchronized Object addAttribute(String str, Object obj) {
