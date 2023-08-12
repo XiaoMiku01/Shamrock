@@ -35,73 +35,70 @@ fun LabFragment() {
     val ctx = LocalContext.current
     val preferences = ctx.getSharedPreferences("config", 0)
 
-    Surface(
+    Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+        val showNoticeDialog = remember { mutableStateOf(false) }
+
+        NoticeBox(text = LocalString.labWarning) {
+            showNoticeDialog.value = true
+        }
+        NoticeTextDialog(
+            openDialog = showNoticeDialog,
+            title = "温馨提示",
+            text = "实验室功能会导致一些奇怪的问题，请谨慎使用！"
+        )
+
+        ActionBox(
+            modifier = Modifier.padding(top = 12.dp),
+            painter = painterResource(id = R.drawable.baseline_preview_24),
+            title = "显示设置"
         ) {
-            val showNoticeDialog = remember { mutableStateOf(false) }
-            NoticeBox(text = LocalString.labWarning) {
-                showNoticeDialog.value = true
+            Column {
+                Divider(
+                    modifier = Modifier,
+                    color = TabUnSelectedColor,
+                    thickness = 0.2.dp
+                )
+
+                Function(
+                    title = "中二病模式",
+                    desc = "也许会导致奇怪的问题，大抵就是你看不懂罢了。",
+                    descColor = it,
+                    isSwitch = preferences.getBoolean("2B", false)
+                ) {
+                    preferences.edit { putBoolean("2B", it) }
+                    scope.toast(ctx, "重启生效哦！")
+                }
             }
-            NoticeTextDialog(
-                openDialog = showNoticeDialog,
-                title = "温馨提示",
-                text = "实验室功能会导致一些奇怪的问题，请谨慎使用！"
-            )
+        }
 
-            ActionBox(
-                modifier = Modifier.padding(top = 12.dp),
-                painter = painterResource(id = R.drawable.baseline_preview_24),
-                title = "显示设置"
-            ) {
-                Column {
-                    Divider(
-                        modifier = Modifier,
-                        color = TabUnSelectedColor,
-                        thickness = 0.2.dp
-                    )
+        ActionBox(
+            modifier = Modifier.padding(top = 12.dp),
+            painter = painterResource(id = R.drawable.round_logo_dev_24),
+            title = "实验功能"
+        ) {
+            Column {
+                Divider(
+                    modifier = Modifier,
+                    color = TabUnSelectedColor,
+                    thickness = 0.2.dp
+                )
 
-                    Function(
-                        title = "中二病模式",
-                        desc = "也许会导致奇怪的问题，大抵就是你看不懂罢了。",
-                        descColor = it,
-                        isSwitch = preferences.getBoolean("2B", false)
-                    ) {
-                        preferences.edit { putBoolean("2B", it) }
-                        scope.toast(ctx, "重启生效哦！")
-                    }
+                Function(
+                    title = "自动清理QQ垃圾",
+                    desc = "也许会导致奇怪的问题。",
+                    descColor = it,
+                    isSwitch = preferences.getBoolean("auto_clear", false)
+                ) {
+                    preferences.edit { putBoolean("auto_clear", it) }
+                    scope.toast(ctx, "重启QQ生效")
                 }
             }
 
-            ActionBox(
-                modifier = Modifier.padding(top = 12.dp),
-                painter = painterResource(id = R.drawable.round_logo_dev_24),
-                title = "实验功能"
-            ) {
-                Column {
-                    Divider(
-                        modifier = Modifier,
-                        color = TabUnSelectedColor,
-                        thickness = 0.2.dp
-                    )
-
-                    Function(
-                        title = "自动清理QQ垃圾",
-                        desc = "也许会导致奇怪的问题。",
-                        descColor = it,
-                        isSwitch = preferences.getBoolean("auto_clear", false)
-                    ) {
-                        preferences.edit { putBoolean("auto_clear", it) }
-                        scope.toast(ctx, "重启QQ生效")
-                    }
-                }
-
-            }
         }
     }
 }

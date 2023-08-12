@@ -40,37 +40,34 @@ import moe.fuqiuluo.shamrock.ui.theme.LocalString
 fun HomeFragment(
     runtime: RuntimeState
 ) {
-    val scope = rememberCoroutineScope()
+    //val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
 
-    Surface(
+    Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
     ) {
-        Column(
+        StatusCardBoard(runtime.isFined, runtime.coreVersion, runtime.coreCode, runtime.coreName)
+
+        NoticeBox(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(top = 12.dp),
+            text = LocalString.legalWarning,
         ) {
-            StatusCardBoard(runtime.isFined, runtime.coreVersion, runtime.coreCode, runtime.coreName)
+            Toast.makeText(ctx, arrayOf(
+                "请严格遵守哦！", "点我又不能下崽...", "家人们谁懂啊!", "别点啦，记得遵守规则啊！", "CRC：06f77ca1"
+            ).random(), Toast.LENGTH_SHORT).show()
+        }
 
-            NoticeBox(
-                modifier = Modifier
-                    .padding(top = 12.dp),
-                text = LocalString.legalWarning,
-            ) {
-                Toast.makeText(ctx, arrayOf(
-                    "请严格遵守哦！", "点我又不能下崽...", "家人们谁懂啊!", "别点啦，记得遵守规则啊！", "CRC：06f77ca1"
-                ).random(), Toast.LENGTH_SHORT).show()
-            }
-
-            ActionBox(
-                modifier = Modifier
-                    .padding(top = 12.dp),
-                painter = painterResource(id = R.drawable.ic_help_512),
-                title = "使用教程 & 注意事项"
-            ) { textColor ->
-                Text(text = """
+        ActionBox(
+            modifier = Modifier
+                .padding(top = 12.dp),
+            painter = painterResource(id = R.drawable.ic_help_512),
+            title = "使用教程 & 注意事项"
+        ) { textColor ->
+            Text(text = """
                     Q：如何使用呢？
                     A：在Xposed/Lsposed中激活模块，选中目标应用重新后强行停止目标应用并重新启动即可。
                     Q：冻结封号是怎么回事？
@@ -87,12 +84,10 @@ fun HomeFragment(
                        2，支持OneBot12标准，但不会更新支持之后的OneBot标准(特殊性)。
                        3，原始支持来自Native/Jvm的插件。
                 """.trimIndent(),
-                    color = textColor,
-                    fontSize = 12.sp
-                )
-            }
+                color = textColor,
+                fontSize = 12.sp
+            )
         }
-
     }
 }
 

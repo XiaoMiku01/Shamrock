@@ -69,20 +69,16 @@ fun DashboardFragment(
     val ctx = LocalContext.current
     val preferences = ctx.getSharedPreferences("config", 0)
 
-    Surface(
+    Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
-        ) {
-            AccountCard(nick, uin)
-            InformationCard(ctx)
-            APIInfoCard(scope, ctx, preferences)
-            FunctionCard(scope, ctx, preferences, "功能设置")
-        }
+        AccountCard(nick, uin)
+        InformationCard(ctx)
+        APIInfoCard(scope, ctx, preferences)
+        FunctionCard(scope, ctx, preferences, "功能设置")
     }
 }
 

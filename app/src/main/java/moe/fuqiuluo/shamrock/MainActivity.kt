@@ -49,6 +49,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -104,7 +105,6 @@ class MainActivity: ComponentActivity() {
 @Composable
 private fun AppMainView() {
     val scope = rememberCoroutineScope()
-    val ctx = LocalContext.current
 
     val systemUiController = rememberSystemUiController()
     val statusBarDarkIcons by remember { mutableStateOf(true) }
@@ -122,25 +122,30 @@ private fun AppMainView() {
     val coreName = remember { mutableStateOf("Xposed") }
     val coreCode = remember { mutableIntStateOf(1000) }
 
-    AppRuntime.state = remember {
-        RuntimeState(isFined, coreVersion, coreCode, coreName)
-    }
-
-    AppRuntime.logger = remember {
-        Logger(mutableStateOf(StringBuilder()), mutableListOf())
-    }
-
-    AppRuntime.AccountInfo.also {
-        it.uin = remember {
-            mutableStateOf("2854200454")
+    if (!AppRuntime.isInit) {
+        AppRuntime.state = remember {
+            RuntimeState(isFined, coreVersion, coreCode, coreName)
         }
-        it.nick = remember {
-            mutableStateOf("测试昵称")
+
+        AppRuntime.logger = remember {
+            Logger(mutableStateOf(StringBuilder()), mutableListOf())
         }
+
+        AppRuntime.AccountInfo.also {
+            it.uin = remember {
+                mutableStateOf("2854200454")
+            }
+            it.nick = remember {
+                mutableStateOf("测试昵称")
+            }
+        }
+
+        AppRuntime.requestCount = remember { mutableIntStateOf(0) }
+
+        AppRuntime.isInit = false
     }
 
-    AppRuntime.requestCount = remember { mutableIntStateOf(0) }
-
+    val ctx = LocalContext.current
     @Suppress("LocalVariableName") val LocalString = LocalString
     LaunchedEffect(isFined.value) {
         if (isFined.value) {
@@ -151,15 +156,6 @@ private fun AppMainView() {
             Toast.makeText(ctx, LocalString.frameworkNo, Toast.LENGTH_SHORT).show()
         }
     }
-    //模拟激活事件测试
-    //LaunchedEffect(systemUiController) {
-    //    delay(5000)
-    //    isFined.value = true
-    //    AppRuntime.AccountInfo.also {
-    //        it.uin.value = "1372362033"
-    //        it.nick.value = "伏秋洛啊~"
-    //    }
-    //}
 
     ShamrockTheme {
         Surface(

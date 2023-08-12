@@ -9,6 +9,8 @@ import androidx.compose.ui.graphics.Color
 import java.util.Date
 
 object AppRuntime {
+    var isInit: Boolean = false
+
     @SuppressLint("SimpleDateFormat")
     private val format = SimpleDateFormat("[HH:mm:ss] ")
 

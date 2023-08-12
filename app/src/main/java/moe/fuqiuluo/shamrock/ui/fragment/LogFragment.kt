@@ -39,78 +39,74 @@ import java.util.Collections.EMPTY_LIST
 fun LogFragment(
     logger: Logger
 ) {
-    val scope = rememberCoroutineScope()
-    Surface(
+    //val scope = rememberCoroutineScope()
+    Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
-        Column(
+        NoticeBox(text = "日志仅保留最新的${Short.MAX_VALUE}条，超出部分会自动删除，如有需要请做好保留。")
+
+        Box(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(top = 12.dp)
+                .fillMaxSize()
+                .indication(remember { MutableInteractionSource() }, null)
+                .background(
+                    color = Color(0xFFf4f4f4),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .verticalScroll(rememberScrollState())
         ) {
-            NoticeBox(text = "日志仅保留最新的${Short.MAX_VALUE}条，超出部分会自动删除，如有需要请做好保留。")
-
-            Box(
+            Row(
                 modifier = Modifier
-                    .padding(top = 12.dp)
-                    .fillMaxSize()
-                    .indication(remember { MutableInteractionSource() }, null)
-                    .background(
-                        color = Color(0xFFf4f4f4),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .verticalScroll(rememberScrollState())
+                    .padding(
+                        start = 10.dp,
+                        end = 10.dp,
+                        top = 10.dp,
+                        bottom = 10.dp
+                    ),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .padding(
-                            start = 10.dp,
-                            end = 10.dp,
-                            top = 10.dp,
-                            bottom = 10.dp
-                        ),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    @Suppress("UNCHECKED_CAST") val text = remember {
-                        mutableStateOf(
-                            AnnotatedString(
-                                text = "",
-                                spanStyles = EMPTY_LIST as List<AnnotatedString.Range<SpanStyle>>,
-                                paragraphStyles = EMPTY_LIST as List<AnnotatedString.Range<ParagraphStyle>>
-                            )
+                @Suppress("UNCHECKED_CAST") val text = remember {
+                    mutableStateOf(
+                        AnnotatedString(
+                            text = "",
+                            spanStyles = EMPTY_LIST as List<AnnotatedString.Range<SpanStyle>>,
+                            paragraphStyles = EMPTY_LIST as List<AnnotatedString.Range<ParagraphStyle>>
                         )
-                    }
-                    LaunchedEffect(logger.logCache.value.length) {
-                        val spanStyles = mutableListOf<AnnotatedString.Range<SpanStyle>>()
-                        val paragraphStyles = mutableListOf<AnnotatedString.Range<ParagraphStyle>>()
-                        logger.logRanges.forEach {
-                            spanStyles.add(AnnotatedString.Range(
-                                SpanStyle(
-                                    color = it.level.color
-                                ), it.start, it.end
-                            ))
-                            paragraphStyles.add(AnnotatedString.Range(
-                                ParagraphStyle(
-                                    textAlign = TextAlign.Start
-                                ), it.start, it.end
-                            ))
-                        }
-                        text.value = AnnotatedString(
-                            text = logger.logCache.value.toString(),
-                            spanStyles = spanStyles,
-                            paragraphStyles = paragraphStyles
-                        )
-                    }
-
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = text.value,
-                        fontSize = 12.sp,
-                        color = Color(0xff6c6c6c),
                     )
-
                 }
+                LaunchedEffect(logger.logRanges.size) {
+                    val spanStyles = mutableListOf<AnnotatedString.Range<SpanStyle>>()
+                    val paragraphStyles = mutableListOf<AnnotatedString.Range<ParagraphStyle>>()
+                    logger.logRanges.forEach {
+                        spanStyles.add(AnnotatedString.Range(
+                            SpanStyle(
+                                color = it.level.color
+                            ), it.start, it.end
+                        ))
+                        paragraphStyles.add(AnnotatedString.Range(
+                            ParagraphStyle(
+                                textAlign = TextAlign.Start
+                            ), it.start, it.end
+                        ))
+                    }
+                    text.value = AnnotatedString(
+                        text = logger.logCache.value.toString(),
+                        spanStyles = spanStyles,
+                        paragraphStyles = paragraphStyles
+                    )
+                }
+
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = text.value,
+                    fontSize = 12.sp,
+                    color = Color(0xff6c6c6c),
+                )
+
             }
         }
     }
