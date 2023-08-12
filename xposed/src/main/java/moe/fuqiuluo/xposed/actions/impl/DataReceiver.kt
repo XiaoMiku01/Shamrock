@@ -1,18 +1,22 @@
 @file:OptIn(DelicateCoroutinesApi::class)
 package moe.fuqiuluo.xposed.actions.impl
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Handler
 import android.widget.Toast
+import com.tencent.mobileqq.sign.QQSecuritySign
 import de.robv.android.xposed.XposedBridge
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.xposed.actions.IAction
 import moe.fuqiuluo.xposed.helper.DynamicReceiver
+import moe.fuqiuluo.xposed.helper.Request
 import mqq.app.MobileQQ
+import kotlin.coroutines.resume
 
 internal lateinit var GlobalUi: Handler
 
@@ -25,13 +29,26 @@ internal fun Context.toast(msg: String, flag: Int = Toast.LENGTH_SHORT) {
 }
 
 internal class DataReceiver: IAction {
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun invoke(ctx: Context) {
-        if (MobileQQ.getMobileQQ().qqProcessName != "com.tencent.mobileqq") return
-
-        GlobalUi = Handler(ctx.mainLooper)
-        GlobalScope.launch {
+        if (MobileQQ.getMobileQQ().qqProcessName == "com.tencent.mobileqq") {
+            GlobalUi = Handler(ctx.mainLooper)
+            GlobalScope.launch {
+                val intentFilter = IntentFilter()
+                intentFilter.addAction("moe.fuqiuluo.xqbot.dynamic")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    MobileQQ.getMobileQQ().registerReceiver(
+                        DynamicReceiver, intentFilter,
+                        Context.RECEIVER_EXPORTED
+                    )
+                } else {
+                    MobileQQ.getMobileQQ().registerReceiver(DynamicReceiver, intentFilter)
+                }
+                XposedBridge.log("Register Main::Broadcast successfully.")
+            }
+        } else if (MobileQQ.getMobileQQ().qqProcessName.contains("msf", ignoreCase = true)) {
             val intentFilter = IntentFilter()
-            intentFilter.addAction("moe.fuqiuluo.xqbot.dynamic")
+            intentFilter.addAction("moe.fuqiuluo.msf.dynamic")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 MobileQQ.getMobileQQ().registerReceiver(
                     DynamicReceiver, intentFilter,
@@ -40,7 +57,6 @@ internal class DataReceiver: IAction {
             } else {
                 MobileQQ.getMobileQQ().registerReceiver(DynamicReceiver, intentFilter)
             }
-            XposedBridge.log("Register broadcast successfully.")
         }
     }
 }

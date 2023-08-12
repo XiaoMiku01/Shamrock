@@ -1,6 +1,8 @@
+@file:OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
 package moe.fuqiuluo.http.api
 
 import com.tencent.mobileqq.fe.FEKit
+import com.tencent.mobileqq.sign.QQSecuritySign.SignResult
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receiveParameters
@@ -9,11 +11,27 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.Serializable
+import moe.fuqiuluo.xposed.actions.impl.DataReceiver
+import moe.fuqiuluo.xposed.helper.DataRequester
+import moe.fuqiuluo.xposed.helper.DynamicReceiver
+import moe.fuqiuluo.xposed.helper.Request
+import moe.fuqiuluo.xposed.tools.broadcast
 import moe.fuqiuluo.xposed.tools.fetchGet
 import moe.fuqiuluo.xposed.tools.fetchPost
 import moe.fuqiuluo.xposed.tools.hex2ByteArray
 import moe.fuqiuluo.xposed.tools.toHexString
+import mqq.app.MobileQQ
+import kotlin.coroutines.resume
 
 fun Routing.sign() {
     get("/sign") {
@@ -46,13 +64,39 @@ private data class Sign(
     val requestCallback: List<Int>
 )
 
+private val reqLock = Mutex() // 懒得做高并发支持，写个锁，能用就行
+
 private suspend fun PipelineContext<Unit, ApplicationCall>.requestSign(
     cmd: String,
     uin: String,
     seq: Int,
     buffer: ByteArray,
 ) {
-    val sign = FEKit.getInstance().getSign(cmd, buffer, seq, uin)
+    val sign = reqLock.withLock {
+        withTimeoutOrNull(5000) {
+            suspendCancellableCoroutine { con ->
+                DynamicReceiver.register("sign_callback", Request("sign", -1) {
+                    con.resume(SignResult().apply {
+                        this.sign = it.getByteArrayExtra("sign") ?: error("无法获取SIGN")
+                        this.token = it.getByteArrayExtra("token")
+                        this.extra = it.getByteArrayExtra("extra")
+                    })
+                })
+                MobileQQ.getContext().broadcast("msf") {
+                    putExtra("cmd", "sign")
+                    putExtra("wupCmd", cmd)
+                    putExtra("uin", uin)
+                    putExtra("seq", seq)
+                    putExtra("buffer", buffer)
+                }
+                con.invokeOnCancellation {
+                    DynamicReceiver.unregister("sign")
+                    con.resume(SignResult())
+                }
+            }
+        }
+    } ?: SignResult()
+
     call.respond(
         OldApiResult(0, "success",
             Sign(

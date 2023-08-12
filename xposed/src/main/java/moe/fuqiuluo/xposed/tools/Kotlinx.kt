@@ -39,11 +39,11 @@ fun ByteArray.slice(off: Int, length: Int = size - off): ByteArray {
     return this
 }
 
-@JvmOverloads fun ByteArray.toHexString(uppercase: Boolean = false): String = this.joinToString("") {
+@JvmOverloads fun ByteArray?.toHexString(uppercase: Boolean = false): String = this?.joinToString("") {
     (it.toInt() and 0xFF).toString(16)
         .padStart(2, '0')
         .let { s -> if (uppercase) s.lowercase(Locale.getDefault()) else s }
-}
+} ?: "null"
 
 fun String?.ifNullOrEmpty(defaultValue: String?): String? {
     return if (this.isNullOrEmpty()) defaultValue else this

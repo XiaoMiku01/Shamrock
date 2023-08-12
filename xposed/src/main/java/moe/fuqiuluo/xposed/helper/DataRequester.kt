@@ -72,7 +72,7 @@ fun interface ICallback {
 data class Request(
     val cmd: String,
     val seq: Int,
-    val values: ContentValues,
+    val values: ContentValues? = null,
     var callback: ICallback? = null,
 ) {
     var callbackV2: ((ContentValues) -> Unit)? = null

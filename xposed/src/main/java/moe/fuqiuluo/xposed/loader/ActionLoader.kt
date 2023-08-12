@@ -8,6 +8,7 @@ import moe.fuqiuluo.xposed.actions.impl.DataReceiver
 import moe.fuqiuluo.xposed.actions.impl.FetchService
 import moe.fuqiuluo.xposed.actions.impl.ForceTablet
 import moe.fuqiuluo.xposed.actions.impl.HookForDebug
+import moe.fuqiuluo.xposed.actions.impl.MsfSignService
 import moe.fuqiuluo.xposed.actions.impl.OnRuntimeCreate
 import moe.fuqiuluo.xposed.actions.impl.RegisterServiceHandler
 import kotlin.reflect.KClass
@@ -21,6 +22,7 @@ object ActionLoader {
         RegisterServiceHandler::class, // 注册服务处理器
         HookForDebug::class,
         OnRuntimeCreate::class,
+        MsfSignService::class
     )
 
     private val ACTION_LIST = arrayOf<KClass<*>>(

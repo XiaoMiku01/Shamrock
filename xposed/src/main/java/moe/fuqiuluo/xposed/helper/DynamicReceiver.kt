@@ -38,6 +38,10 @@ internal object DynamicReceiver: BroadcastReceiver() {
         cmdHandler[cmd] = request
     }
 
+    fun unregister(cmd: String) {
+        cmdHandler.remove(cmd)
+    }
+
     fun register(request: Request) {
         GlobalScope.launch {
             mutex.withLock {

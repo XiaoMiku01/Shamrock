@@ -7,24 +7,14 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.selects.whileSelect
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
 import moe.fuqiuluo.http.action.data.FriendEntry
-import moe.fuqiuluo.http.action.data.Location
 import moe.fuqiuluo.http.action.data.PlatformType
-import moe.fuqiuluo.http.action.data.VipInfo
-import moe.fuqiuluo.http.action.data.VipType
-import moe.fuqiuluo.http.entries.Status
-import moe.fuqiuluo.http.entries.resultToString
-import moe.fuqiuluo.xposed.tools.toInnerValuesString
 import mqq.app.AppRuntime
 import mqq.app.MobileQQ
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 internal object GetFriendList: IActionHandler() {
     override suspend fun handle(session: ActionSession): String {
