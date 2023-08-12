@@ -2,6 +2,7 @@
 package moe.fuqiuluo.http.action.handlers
 
 import com.tencent.common.app.AppInterface
+import com.tencent.mobileqq.data.troop.TroopInfo
 import com.tencent.mobileqq.troop.api.ITroopInfoService
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -21,12 +22,14 @@ internal object GetTroopList: IActionHandler() {
         if (runtime !is AppInterface)
             return logic("AppRuntime cannot cast to AppInterface")
 
+        val refresh = session.getBooleanOrDefault("refresh", false)
+
         val service = runtime
             .getRuntimeService(ITroopInfoService::class.java, "all")
 
         var troopList = service.allTroopList
-        if(!service.isTroopCacheInited || troopList == null) {
-            if(!requestGroupList(service)) {
+        if(refresh || !service.isTroopCacheInited || troopList == null) {
+            if(!requestGroupList(service, troopList)) {
                 return logic("Unable to obtain group list")
             } else {
                 troopList = service.allTroopList
@@ -43,7 +46,9 @@ internal object GetTroopList: IActionHandler() {
                     adminList = groupInfo.Administrator
                         .split("|", ",")
                         .map { it }
-                        .apply { (this as ArrayList<String>).add(0, groupInfo.troopowneruin ?: "0") },
+                        .apply { (this as ArrayList<String>).add(0, groupInfo.troopowneruin ?: "0") }
+                        .filter { it.isNotBlank() && it != "0" }
+                    ,
                     classText = groupInfo.mGroupClassExtText,
                     isFrozen = groupInfo.mIsFreezed != 0,
                     //troopLevel = groupInfo.newTroopLevelMap,
@@ -54,13 +59,24 @@ internal object GetTroopList: IActionHandler() {
         })
     }
 
-    private suspend fun requestGroupList(service: ITroopInfoService): Boolean {
+    private suspend fun requestGroupList(
+        service: ITroopInfoService,
+        troopList: List<TroopInfo>?
+    ): Boolean {
+        //if (!troopList.isNullOrEmpty()) {
+        //    // 删除缓存 重新获取
+        //    service.deleteTroopList(troopList.map { it.troopuin })
+        //}
         TroopRequestHelper.refreshTroopList()
+
         return suspendCancellableCoroutine { continuation ->
             val waiter = GlobalScope.launch {
                 do {
                     delay(1000)
-                } while (!service.isTroopCacheInited)
+                } while (
+                    !service.isTroopCacheInited
+                    // || (!troopList.isNullOrEmpty() && service.hasNoTroop()) 判断不合理
+                )
                 continuation.resume(true)
             }
             continuation.invokeOnCancellation {

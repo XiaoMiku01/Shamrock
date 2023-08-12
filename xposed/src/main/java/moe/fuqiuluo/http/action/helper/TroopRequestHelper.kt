@@ -10,6 +10,28 @@ internal object TroopRequestHelper {
     private lateinit var METHOD_REQ_MEMBER_INFO: Method
     private lateinit var METHOD_REQ_MEMBER_INFO_V2: Method
     private lateinit var METHOD_REQ_TROOP_LIST: Method
+    private lateinit var METHOD_REQ_TROOP_MEM_LIST: Method
+
+    fun refreshTroopMemberList(groupId: Long) {
+        val app = MobileQQ.getMobileQQ().waitAppRuntime()
+        if (app !is AppInterface)
+            throw RuntimeException("AppRuntime cannot cast to AppInterface")
+        val businessHandler = app.getBusinessHandler(BusinessHandlerFactory.TROOP_MEMBER_LIST_HANDLER)
+
+        // void C(boolean foreRefresh, String groupId, String troopcode, int reqType); // RequestedTroopList/refreshMemberListFromServer
+        if (!::METHOD_REQ_TROOP_MEM_LIST.isInitialized) {
+            METHOD_REQ_TROOP_MEM_LIST = businessHandler.javaClass.declaredMethods.first {
+                it.parameterCount == 4
+                        && it.parameterTypes[0] == Boolean::class.java
+                        && it.parameterTypes[1] == String::class.java
+                        && it.parameterTypes[2] == String::class.java
+                        && it.parameterTypes[3] == Int::class.java
+                        && !Modifier.isPrivate(it.modifiers)
+            }
+        }
+
+        METHOD_REQ_TROOP_MEM_LIST.invoke(businessHandler, true, groupId.toString(), groupUin2GroupCode(groupId).toString(), 5)
+    }
 
     fun refreshTroopList() {
         val app = MobileQQ.getMobileQQ().waitAppRuntime()
@@ -19,7 +41,7 @@ internal object TroopRequestHelper {
 
         if (!::METHOD_REQ_TROOP_LIST.isInitialized) {
             METHOD_REQ_TROOP_LIST = businessHandler.javaClass.declaredMethods.first {
-                it.parameterCount == 0 && !Modifier.isPrivate(it.modifiers)
+                it.parameterCount == 0 && !Modifier.isPrivate(it.modifiers) && it.returnType == Void.TYPE
             }
         }
 
