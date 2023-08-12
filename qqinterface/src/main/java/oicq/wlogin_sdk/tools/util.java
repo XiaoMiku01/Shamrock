@@ -22,4 +22,8 @@ public class util {
     public static byte[] get_qimei(Context context) {
         return "".getBytes();
     }
+
+    public static byte[] get_android_dev_info(Context context) {
+        return null;
+    }
 }
