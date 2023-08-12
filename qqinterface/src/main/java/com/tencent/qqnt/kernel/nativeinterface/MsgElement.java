@@ -22,7 +22,6 @@ public final class MsgElement implements IKernelModel, Serializable {
     PicElement picElement;
     PttElement pttElement;
     ReplyElement replyElement;
-    long serialVersionUID = 1;
     ShareLocationElement shareLocationElement;
     StructLongMsgElement structLongMsgElement;
     StructMsgElement structMsgElement;

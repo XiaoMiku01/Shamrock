@@ -20,5 +20,7 @@ public class QQAppInterface extends BaseQQAppInterface {
     public void syncOnlineFriend() {
     }
 
-
+    public MessageHandler getMsgHandler() {
+        return null;
+    }
 }

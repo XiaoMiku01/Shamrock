@@ -28,4 +28,6 @@ data class Protocol(
 
     var SSOVer: Int,
     var tgtgtVer: Int,
+
+    var androidDevInfo: String
 )

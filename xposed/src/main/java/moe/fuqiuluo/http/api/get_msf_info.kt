@@ -5,6 +5,7 @@ import moe.fuqiuluo.http.entries.Protocol
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.xposed.tools.getOrPost
 import moe.fuqiuluo.xposed.tools.respond
+import moe.fuqiuluo.xposed.tools.toHexString
 import mqq.app.MobileQQ
 import oicq.wlogin_sdk.tlv_type.tlv_t100
 import oicq.wlogin_sdk.tlv_type.tlv_t106
@@ -35,7 +36,9 @@ fun Routing.getMsfInfo() {
                 util.get_network_type(ctx),
                 t18._ping_version.toByte(), t18._sso_version,
                 t100._sso_ver, t100._db_buf_ver,
-                t106._SSoVer, t106._TGTGTVer
+                t106._SSoVer, t106._TGTGTVer,
+
+                util.get_android_dev_info(ctx).toHexString()
             )
         )
     }

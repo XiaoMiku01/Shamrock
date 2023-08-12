@@ -7,6 +7,7 @@ import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import moe.fuqiuluo.shamrock.ui.app.AppRuntime
+import moe.fuqiuluo.shamrock.ui.app.Logger
 
 class MultifunctionalProvider: ContentProvider() {
     override fun insert(uri: Uri, content: ContentValues?): Uri {
@@ -34,6 +35,9 @@ class MultifunctionalProvider: ContentProvider() {
             "success" -> {
                 DashboardInitializer(content.getAsInteger("port"))
                 broadcast { putExtra("hash", hash) }
+            }
+            "send_message" -> {
+                AppRuntime.log(content.getAsString("string"))
             }
         }
 
