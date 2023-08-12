@@ -28,6 +28,7 @@ internal object ActionManager {
         "get_group_member_info" to GetTroopMemberInfo,
         "get_group_member_list" to GetTroopMemberList,
         "set_group_name" to ModifyTroopName,
+        "leave_group" to LeaveTroop,
 
     )
 
@@ -41,8 +42,8 @@ internal abstract class IActionHandler {
 
     abstract fun path(): String
 
-    inline fun <reified T> ok(data: T): String {
-        return resultToString(true, Status.Ok, data!!)
+    inline fun <reified T> ok(data: T, msg: String = ""): String {
+        return resultToString(true, Status.Ok, data!!, msg)
     }
 
     fun noParam(paramName: String): String {
