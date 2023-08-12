@@ -48,6 +48,7 @@ internal object GetTroopMemberInfo: IActionHandler() {
             distance = info.distance,
             honor = (info.honorList ?: "")
                 .split("|")
+                .filter { it.isNotBlank() }
                 .map { it.toInt() },
             joinTime = info.join_time,
             lastActiveTime = info.last_active_time,

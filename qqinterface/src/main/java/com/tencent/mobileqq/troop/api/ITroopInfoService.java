@@ -12,7 +12,7 @@ public interface ITroopInfoService extends IRuntimeService {
     // 从数据库里面获取群聊信息
     // void asyncGetTroopInfo(String str, com.tencent.mobileqq.data.troop.a aVar);
 
-    void deleteTroopList(List<String> list);
+    void deleteTroopList(List<String> groupList);
 
     void deleteTroopWithoutDB(String str, TroopInfo troopInfo);
 
