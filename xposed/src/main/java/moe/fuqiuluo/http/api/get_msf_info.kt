@@ -22,6 +22,10 @@ fun Routing.getMsfInfo() {
         val t100 = tlv_t100()
         val t106 = tlv_t106()
 
+        val qimei = kotlin.runCatching {
+            buf_to_string(util.get_qimei(ctx))
+        }.getOrNull()
+
         respond(
             isOk = true,
             code = Status.Ok,
@@ -29,7 +33,7 @@ fun Routing.getMsfInfo() {
                 mqq.qqProcessName,
                 mqq.appId.toLong(), mqq.qua, mqq.ntCoreVersion,
                 mqq.msfConnectedNetType,
-                buf_to_string( util.get_qimei(ctx) ),
+                qimei ?: "",
                 util.getSvnVersion(),
                 buf_to_string( util.getGuidFromFile(ctx) ),
                 buf_to_string( util.get_ksid(ctx) ),
