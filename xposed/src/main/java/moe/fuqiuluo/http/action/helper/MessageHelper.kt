@@ -1,51 +1,54 @@
 package moe.fuqiuluo.http.action.helper
 
-import com.tencent.mobileqq.app.BusinessObserver
-import com.tencent.mobileqq.app.MessageHandler
-import com.tencent.mobileqq.app.QQAppInterface
-import com.tencent.mobileqq.data.MessageRecord
-import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedBridge
-import moe.fuqiuluo.xposed.helper.DataRequester
-import mqq.app.MobileQQ
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
+import com.tencent.mobileqq.qroute.QRoute
+import com.tencent.qqnt.kernel.nativeinterface.Contact
+import com.tencent.qqnt.kernel.nativeinterface.IOperateCallback
+import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
+import com.tencent.qqnt.kernel.nativeinterface.MsgElement
+import com.tencent.qqnt.msg.api.IMsgService
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.jsonObject
+import moe.fuqiuluo.http.action.helper.msg.MessageMaker
+import moe.fuqiuluo.xposed.tools.asJsonObject
+import moe.fuqiuluo.xposed.tools.asString
+import kotlin.math.abs
+import kotlin.random.Random
 
 internal object MessageHelper {
-    private lateinit var METHOD_SEND_MSG: Method
+    fun sendTroopMessage(groupId: String, msgElements: ArrayList<MsgElement>, callback: IOperateCallback): Pair<Long, Long> {
+        val service = QRoute.api(IMsgService::class.java)
+        val time = System.currentTimeMillis()
+        val uniseq = createMessageUniseq(time)
+        service.sendMsg(
+            Contact(MsgConstant.KCHATTYPEGROUP, groupId, ""), uniseq, msgElements, callback
+        )
+        return time to uniseq
+    }
 
-    fun hookSendMessageOldChannel() {
-        val app = MobileQQ.getMobileQQ().waitAppRuntime()
-        if (app !is QQAppInterface)
-            return
-
-        val handler = app.msgHandler
-        // final MessageRecord messageRecord, final BusinessObserver businessObserver, final boolean z
-        if (!::METHOD_SEND_MSG.isInitialized) {
-            METHOD_SEND_MSG = MessageHandler::class.java.declaredMethods.first {
-                //XposedBridge.log("method: ${it.name}, params: ${it.parameterTypes.joinToString(", ")}")
-                !Modifier.isPrivate(it.modifiers)
-                && it.parameterCount == 3
-                && it.parameterTypes[0] == MessageRecord::class.java
-                && it.parameterTypes[1] == BusinessObserver::class.java
-            }
-        }
-
-        if (::METHOD_SEND_MSG.isInitialized) {
-            XposedBridge.hookMethod(METHOD_SEND_MSG, object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    val record = param.args[0] as MessageRecord
-                    DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {
-                        put("string", record.toString())
-                    })
-                }
-            })
-        } else {
-            XposedBridge.log("Cannot find [METHOD_SEND_MSG]")
+    fun obtainMessageTypeByDetailType(detailType: String): Int {
+        return when(detailType) {
+            "troop", "group" -> MsgConstant.KCHATTYPEGROUP
+            "private" -> MsgConstant.KCHATTYPEC2C
+            else -> error("不支持的消息来源类型")
         }
     }
 
-    fun sendMessage(record: MessageRecord) {
+    fun messageArrayToMessageElements(messageList: JsonArray): ArrayList<MsgElement> {
+        val msgList = arrayListOf<MsgElement>()
+        messageList.forEach {
+            val msg = it.jsonObject
+            val maker = MessageMaker[msg["type"].asString]
+            if(maker != null) {
+                val data = msg["data"].asJsonObject
+                msgList.add(maker(data))
+            }
+        }
+        return msgList
+    }
 
+    private fun createMessageUniseq(time: Long): Long {
+        var uniseq = (time / 1000).toInt().toLong()
+        uniseq = uniseq shl 32 or abs(Random.nextInt()).toLong()
+        return uniseq
     }
 }

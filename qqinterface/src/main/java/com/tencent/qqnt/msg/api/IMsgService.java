@@ -224,16 +224,16 @@ public interface IMsgService extends QRouteApi {
 
     void sendInputStatusReq(int i2, int i3, @NotNull String str, @NotNull IOperateCallback iOperateCallback);
 
-    void sendMsg(@NotNull Contact contact, long j2, @NotNull ArrayList<MsgElement> arrayList, @Nullable IOperateCallback iOperateCallback);
+    void sendMsg(@NotNull Contact contact, long msgId, @NotNull ArrayList<MsgElement> arrayList, @Nullable IOperateCallback iOperateCallback);
 
     void sendMsg(@NotNull Contact contact, @NotNull ArrayList<MsgElement> arrayList, @Nullable IOperateCallback iOperateCallback);
 
-    void sendMsg(@NotNull Contact contact, @NotNull ArrayList<MsgElement> arrayList, @NotNull HashMap<Integer, MsgAttributeInfo> hashMap, @Nullable IOperateCallback iOperateCallback);
+    void sendMsg(@NotNull Contact contact, @NotNull ArrayList<MsgElement> arrayList, @NotNull HashMap<Integer, MsgAttributeInfo> msgAttributes, @Nullable IOperateCallback callback);
 
    // @NotNull
    // Flow<g> sendMsgErrorNotificationFlow();
 
-    void sendMsgWithMsgId(@NotNull Contact contact, long j2, @NotNull ArrayList<MsgElement> arrayList, @Nullable IOperateCallback iOperateCallback);
+    void sendMsgWithMsgId(@NotNull Contact contact, long msgId, @NotNull ArrayList<MsgElement> arrayList, @Nullable IOperateCallback iOperateCallback);
 
     void sendSummonMsg(@NotNull Contact contact, @NotNull ArrayList<MsgElement> arrayList, @Nullable IOperateCallback iOperateCallback);
 

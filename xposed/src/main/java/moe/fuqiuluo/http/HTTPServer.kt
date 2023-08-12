@@ -63,7 +63,7 @@ object HTTPServer {
                 }
                 install(StatusPages) {
                     exception<Throwable> { call, cause ->
-                        call.respond(CommonResult("failed", Status.IAmTired.code, ErrorCatch(
+                        call.respond(CommonResult("failed", Status.InternalHandlerError.code, ErrorCatch(
                             call.request.uri, cause.stackTraceToString())
                         ))
                     }

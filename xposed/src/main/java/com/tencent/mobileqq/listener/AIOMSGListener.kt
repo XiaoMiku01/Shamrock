@@ -41,6 +41,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import moe.fuqiuluo.xposed.helper.DataRequester
 import moe.fuqiuluo.xposed.tools.GlobalClient
 import mqq.app.MobileQQ
 import java.util.ArrayList
@@ -64,7 +65,6 @@ internal object AIOMSGListener: IKernelMsgListener {
         if (msg.chatType == MsgConstant.KCHATTYPEGROUP) {
             if (msg.senderUin == 0L) return
             GlobalScope.launch {
-
                 if(sharedPreferences.getBoolean("http", false)) sharedPreferences.getString("http_addr", null)?.let { url ->
                     kotlin.runCatching {
                         GlobalClient.post("http://$url") {
@@ -75,6 +75,10 @@ internal object AIOMSGListener: IKernelMsgListener {
                 }
             }
         }
+    }
+
+    override fun onAddSendMsg(record: MsgRecord) {
+        // DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = { put("string", record.toString()) })
     }
 
     override fun onRecvMsgSvrRspTransInfo(
@@ -98,10 +102,6 @@ internal object AIOMSGListener: IKernelMsgListener {
 
     override fun onRecvSysMsg(arrayList: ArrayList<Byte>?) {
         XposedBridge.log("onRecvSysMsg(${arrayList.toString()})")
-    }
-
-    override fun onAddSendMsg(msgRecord: MsgRecord?) {
-        XposedBridge.log("onAddSendMsg($msgRecord)")
     }
 
     override fun onBroadcastHelperDownloadComplete(broadcastHelperTransNotifyInfo: BroadcastHelperTransNotifyInfo?) {

@@ -40,7 +40,7 @@ object DataRequester {
             onFailure?.invoke(it)
         }
 
-        val job = timer(initialDelay = 6000L, period = 5000L) {
+        val job = timer(initialDelay = 3000L, period = 5000L) {
             DynamicReceiver.unregister(currentSeq)
             this.cancel()
         }

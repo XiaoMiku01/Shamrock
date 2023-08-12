@@ -10,8 +10,11 @@ import moe.fuqiuluo.xposed.tools.asBoolean
 import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asInt
 import moe.fuqiuluo.xposed.tools.asJsonArray
+import moe.fuqiuluo.xposed.tools.asJsonArrayOrNull
 import moe.fuqiuluo.xposed.tools.asJsonObject
+import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
 import moe.fuqiuluo.xposed.tools.asString
+import moe.fuqiuluo.xposed.tools.asStringOrNull
 
 internal object ActionManager {
     val actionMap = mutableMapOf(
@@ -29,7 +32,7 @@ internal object ActionManager {
         "get_group_member_list" to GetTroopMemberList,
         "set_group_name" to ModifyTroopName,
         "leave_group" to LeaveTroop,
-
+        "send_message" to SendMessage
     )
 
     operator fun get(action: String): IActionHandler? {
@@ -54,6 +57,10 @@ internal abstract class IActionHandler {
         return failed(Status.BadParam, why)
     }
 
+    fun error(why: String): String {
+        return failed(Status.InternalHandlerError, why)
+    }
+
     fun logic(why: String): String {
         return failed(Status.LogicError, why)
     }
@@ -74,6 +81,10 @@ internal class ActionSession(
         return params[key].asString
     }
 
+    fun getStringOrNull(key: String): String? {
+        return params[key].asStringOrNull
+    }
+
     fun getBoolean(key: String): Boolean {
         return params[key].asBoolean
     }
@@ -86,8 +97,16 @@ internal class ActionSession(
         return params[key].asJsonObject
     }
 
+    fun getObjectOrNull(key: String): JsonObject? {
+        return params[key].asJsonObjectOrNull
+    }
+
     fun getArray(key: String): JsonArray {
         return params[key].asJsonArray
+    }
+
+    fun getArrayOrNull(key: String): JsonArray? {
+        return params[key].asJsonArrayOrNull
     }
 
     fun has(key: String) = params.containsKey(key)

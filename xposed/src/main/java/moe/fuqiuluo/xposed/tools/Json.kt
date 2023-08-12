@@ -13,6 +13,9 @@ import kotlinx.serialization.json.jsonPrimitive
 val JsonElement?.asString: String
     get() = this!!.jsonPrimitive.content
 
+val JsonElement?.asStringOrNull: String?
+    get() = this?.jsonPrimitive?.content
+
 val JsonElement?.asInt: Int
     get() = this!!.jsonPrimitive.int
 
@@ -25,5 +28,11 @@ val JsonElement?.asBooleanOrNull: Boolean?
 val JsonElement?.asJsonObject: JsonObject
     get() = this!!.jsonObject
 
+val JsonElement?.asJsonObjectOrNull: JsonObject?
+    get() = this?.jsonObject
+
 val JsonElement?.asJsonArray: JsonArray
     get() = this!!.jsonArray
+
+val JsonElement?.asJsonArrayOrNull: JsonArray?
+    get() = this?.jsonArray
