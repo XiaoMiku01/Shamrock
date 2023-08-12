@@ -20,9 +20,11 @@ import moe.fuqiuluo.http.api.index
 import moe.fuqiuluo.http.entries.CommonResult
 import moe.fuqiuluo.http.entries.ErrorCatch
 import de.robv.android.xposed.XposedBridge.log
+import moe.fuqiuluo.http.api.energy
 import moe.fuqiuluo.http.api.getAccountInfo
 import moe.fuqiuluo.http.api.getMsfInfo
 import moe.fuqiuluo.http.api.getStartTime
+import moe.fuqiuluo.http.api.sign
 import moe.fuqiuluo.http.api.uploadGroupImage
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.xposed.helper.DataRequester
@@ -33,12 +35,15 @@ object HTTPServer {
     var isQueryServiceStarted = false
     internal var startTime = 0L
 
+    // 接口名称-------是否需要打开专业级开关
     private val API_LIST = arrayOf(
         Routing::index to false,
         Routing::getAccountInfo to false,
         Routing::getMsfInfo to true,
         Routing::getStartTime to false,
-        Routing::uploadGroupImage to true
+        Routing::uploadGroupImage to true,
+        Routing::energy to true,
+        Routing::sign to true
     )
     private val mutex = Mutex()
     private lateinit var server: ApplicationEngine

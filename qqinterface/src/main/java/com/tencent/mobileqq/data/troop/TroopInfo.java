@@ -205,4 +205,60 @@ public class TroopInfo {
     public long groupAllianceid = 0;
     public TroopInfoExt mTroopInfoExtObj = new TroopInfoExt();
     public long cmduinFlagEx3Grocery = 0;
+
+    public boolean isAdmin() {
+        return (this.dwAdditionalFlag & 1) == 1 || (this.dwCmdUinUinFlag & 1) == 1;
+    }
+
+    public boolean hasTroopAssociation() {
+        return this.groupAllianceid != 0;
+    }
+
+    public boolean isAVGameOpen() {
+        return (this.dwGroupFlagExt3 & 0x10000000) != 0;
+    }
+
+    public boolean isAllowCreateDiscuss() {
+        return (this.troopPrivilegeFlag & 32768) == 0;
+    }
+
+    public boolean isAllowCreateTempConv() {
+        return (this.troopPrivilegeFlag & 65536) == 0;
+    }
+
+    public boolean isAutoApprovalOpen() {
+        return (this.dwGroupFlagExt3 & 1048576) == 1048576;
+    }
+
+    public boolean isDisband() {
+        return this.exitTroopReason == 2;
+    }
+
+    public boolean isExited() {
+        return this.exitTroopReason != 0;
+    }
+
+    public boolean isFansTroop() {
+        return this.dwGroupClassExt == 27;
+    }
+
+    public boolean isGameBind() {
+        return (this.dwGroupFlagExt3 & 2048) != 0;
+    }
+
+    public boolean isGameTroop() {
+        return this.dwGroupClassExt == 25;
+    }
+
+    public boolean isHistoryMsgReadEnableForNewMember() {
+        return this.isAllowHistoryMsgFlag == 1;
+    }
+
+    public boolean isHomeworkTroop() {
+        return this.dwGroupClassExt == 32;
+    }
+
+    public boolean isKicked() {
+        return this.exitTroopReason == 1;
+    }
 }

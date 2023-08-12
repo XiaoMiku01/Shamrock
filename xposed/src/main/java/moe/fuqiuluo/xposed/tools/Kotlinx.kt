@@ -48,3 +48,15 @@ fun ByteArray.slice(off: Int, length: Int = size - off): ByteArray {
 fun String?.ifNullOrEmpty(defaultValue: String?): String? {
     return if (this.isNullOrEmpty()) defaultValue else this
 }
+
+@JvmOverloads fun String.hex2ByteArray(replace: Boolean = false): ByteArray {
+    val s = if (replace) this.replace(" ", "")
+        .replace("\n", "")
+        .replace("\t", "")
+        .replace("\r", "") else this
+    val bs = ByteArray(s.length / 2)
+    for (i in 0 until s.length / 2) {
+        bs[i] = s.substring(i * 2, i * 2 + 2).toInt(16).toByte()
+    }
+    return bs
+}

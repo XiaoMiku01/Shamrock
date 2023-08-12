@@ -2,6 +2,7 @@ package moe.fuqiuluo.http.action.helper
 
 import com.tencent.common.app.AppInterface
 import com.tencent.mobileqq.app.BusinessHandlerFactory
+import com.tencent.qphone.base.remote.ToServiceMsg
 import mqq.app.MobileQQ
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -11,6 +12,39 @@ internal object TroopRequestHelper {
     private lateinit var METHOD_REQ_MEMBER_INFO_V2: Method
     private lateinit var METHOD_REQ_TROOP_LIST: Method
     private lateinit var METHOD_REQ_TROOP_MEM_LIST: Method
+    private lateinit var METHOD_REQ_MODIFY_GROUP_NAME: Method
+
+    fun resignTroop(groupId: Long) {
+        val app = MobileQQ.getMobileQQ().waitAppRuntime()
+        if (app !is AppInterface)
+            throw RuntimeException("AppRuntime cannot cast to AppInterface")
+
+        val toServiceMsg = ToServiceMsg("mobileqq.service", app.currentAccountUin, "ProfileService.GroupMngReq")
+        toServiceMsg.extraData.putInt("groupreqtype", 2)
+        toServiceMsg.extraData.putString("troop_uin", groupId.toString())
+        toServiceMsg.extraData.putString("uin", app.currentAccountUin)
+        app.sendToService(toServiceMsg)
+    }
+
+    fun modifyTroopName(groupId: String, name: String) {
+        val app = MobileQQ.getMobileQQ().waitAppRuntime()
+        if (app !is AppInterface)
+            throw RuntimeException("AppRuntime cannot cast to AppInterface")
+        val businessHandler = app.getBusinessHandler(BusinessHandlerFactory.TROOP_MODIFY_HANDLER)
+
+        // N0(String str, String str2, boolean z)
+        if (!::METHOD_REQ_MODIFY_GROUP_NAME.isInitialized) {
+            METHOD_REQ_MODIFY_GROUP_NAME = businessHandler.javaClass.declaredMethods.first {
+                it.parameterCount == 3
+                        && it.parameterTypes[0] == String::class.java
+                        && it.parameterTypes[1] == String::class.java
+                        && it.parameterTypes[2] == Boolean::class.java
+                        && !Modifier.isPrivate(it.modifiers)
+            }
+        }
+
+        METHOD_REQ_MODIFY_GROUP_NAME.invoke(businessHandler, groupId, name, false)
+    }
 
     fun refreshTroopMemberList(groupId: Long) {
         val app = MobileQQ.getMobileQQ().waitAppRuntime()

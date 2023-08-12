@@ -26,7 +26,9 @@ internal object ActionManager {
         "get_group_info" to GetTroopInfo,
         "get_group_list" to GetTroopList,
         "get_group_member_info" to GetTroopMemberInfo,
-        "get_group_member_list" to GetTroopMemberList
+        "get_group_member_list" to GetTroopMemberList,
+        "set_group_name" to ModifyTroopName,
+
     )
 
     operator fun get(action: String): IActionHandler? {
