@@ -1,6 +1,7 @@
 package com.tencent.mobileqq.transfile.api;
 
 import com.tencent.mobileqq.transfile.TransferRequest;
+import com.tencent.mobileqq.utils.httputils.IHttpCommunicatorListener;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,9 +16,9 @@ public interface ITransFileController extends IRuntimeService {
 
     //boolean containsProcessor(String str, long j2);
 
-    //IHttpCommunicatorListener findProcessor(String str);
+    IHttpCommunicatorListener findProcessor(String str);
 
-    //IHttpCommunicatorListener findProcessor(String str, long j2);
+    IHttpCommunicatorListener findProcessor(String str, long j2);
 
     //TransFileControllerBusHelper getBusHelper();
 

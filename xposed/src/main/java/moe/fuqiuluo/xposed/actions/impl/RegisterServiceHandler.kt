@@ -38,18 +38,20 @@ class RegisterServiceHandler: IAction {
         thizClass.hookMethod("onResponse").before {
             val from = it.args[1] as FromServiceMsg
             GlobalScope.launch {
-                if ("SSO.LoginMerge" == from.serviceCmd) {
-                    val packetList = SSOLoginMerge.BusiBuffData()
-                        .mergeFrom(from.wupBuffer.slice(4))
-                        .BusiBuffVec.get()
-                    packetList.forEach {
-                        PacketReceiver.onReceive(FromServiceMsg().apply {
-                            this.requestSsoSeq = it.SeqNo.get()
-                            this.serviceCmd = it.ServiceCmd.get()
-                            putWupBuffer(it.BusiBuff.get().toByteArray())
-                        })
-                    }
-                } else PacketReceiver.onReceive(from)
+                kotlin.runCatching {
+                    if ("SSO.LoginMerge" == from.serviceCmd) {
+                        val packetList = SSOLoginMerge.BusiBuffData()
+                            .mergeFrom(from.wupBuffer.slice(4))
+                            .BusiBuffVec.get()
+                        packetList.forEach {
+                            PacketReceiver.onReceive(FromServiceMsg().apply {
+                                this.requestSsoSeq = it.SeqNo.get()
+                                this.serviceCmd = it.ServiceCmd.get()
+                                putWupBuffer(it.BusiBuff.get().toByteArray())
+                            })
+                        }
+                    } else PacketReceiver.onReceive(from)
+                }
             }
         }
     }

@@ -78,7 +78,7 @@ internal object AIOMSGListener: IKernelMsgListener {
     }
 
     override fun onAddSendMsg(record: MsgRecord) {
-        // DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = { put("string", record.toString()) })
+        DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = { put("string", record.toString()) })
     }
 
     override fun onRecvMsgSvrRspTransInfo(

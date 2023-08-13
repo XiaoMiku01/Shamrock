@@ -33,14 +33,14 @@ internal object MessageHelper {
         }
     }
 
-    fun messageArrayToMessageElements(messageList: JsonArray): ArrayList<MsgElement> {
+    suspend fun messageArrayToMessageElements(chatType: Int, targetUin: String, messageList: JsonArray): ArrayList<MsgElement> {
         val msgList = arrayListOf<MsgElement>()
         messageList.forEach {
             val msg = it.jsonObject
             val maker = MessageMaker[msg["type"].asString]
             if(maker != null) {
                 val data = msg["data"].asJsonObject
-                msgList.add(maker(data))
+                msgList.add(maker(chatType, targetUin, data))
             }
         }
         return msgList

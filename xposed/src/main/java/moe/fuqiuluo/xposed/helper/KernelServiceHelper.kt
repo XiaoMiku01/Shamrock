@@ -14,3 +14,6 @@ internal object KernelServiceHelper {
         return M_GET_MSG_SERVICE.invoke(service) as? MsgService
     }
 }
+
+internal val IKernelService.msgService: MsgService?
+    get() = KernelServiceHelper.getMsgService(this)

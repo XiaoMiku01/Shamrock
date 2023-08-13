@@ -28,13 +28,11 @@ internal object SendMessage: IActionHandler() {
                 val groupId = session.getStringOrNull("group_id") ?: return noParam("group_id")
                 val message = session.getArrayOrNull("message") ?: return noParam("message")
                 val result = sendToTroop(groupId, message)
-                val date = result.second
                 return ok(MessageResult(
                     msgId = result.second,
                     time = result.first * 0.001
                 ))
             }
-
         }
         return logic("unable to send message: not support detail_type")
     }
@@ -42,9 +40,14 @@ internal object SendMessage: IActionHandler() {
     private suspend fun sendToTroop(groupId: String, message: JsonArray): Pair<Long, Long> {
         return MessageHelper.sendTroopMessage(
             groupId = groupId,
-            msgElements = MessageHelper.messageArrayToMessageElements(message))
-        { code, _ ->
-            DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = { put("string", "消息发送到：$groupId, 返回码：$code") })
+            msgElements = MessageHelper.messageArrayToMessageElements(
+                chatType = MsgConstant.KCHATTYPEGROUP,
+                targetUin = groupId,
+                messageList = message)
+        ) { code, _ ->
+            DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {
+                put("string", "消息发送 troop: $groupId,code: $code")
+            })
         }
     }
 

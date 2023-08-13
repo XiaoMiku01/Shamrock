@@ -37,4 +37,7 @@ internal object ServiceFetcher {
             XposedBridge.log(it)
         }
     }
+
+    val kernelService: IKernelService
+        get() = iKernelService
 }
