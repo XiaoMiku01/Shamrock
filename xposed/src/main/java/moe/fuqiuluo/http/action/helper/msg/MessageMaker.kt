@@ -16,10 +16,18 @@ import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
 import com.tencent.qqnt.kernel.nativeinterface.RichMediaFilePathInfo
 import com.tencent.qqnt.kernel.nativeinterface.TextElement
 import com.tencent.qqnt.kernel.nativeinterface.UploadGroupFileParams
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.client.statement.readBytes
+import io.ktor.http.HttpStatusCode
+import io.ktor.util.cio.writeChannel
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.copyTo
 import kotlinx.serialization.json.JsonObject
 import moe.fuqiuluo.http.action.helper.HighwayHelper
 import moe.fuqiuluo.xposed.helper.ServiceFetcher
 import moe.fuqiuluo.xposed.helper.msgService
+import moe.fuqiuluo.xposed.tools.GlobalClient
 import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asInt
 import moe.fuqiuluo.xposed.tools.asString
@@ -63,9 +71,15 @@ internal object MessageMaker {
                 Base64.decode(url.substring(9), Base64.DEFAULT)
             ))
         } else if (url.startsWith("file:///")) {
-
+            file = File(url.substring(8))
         } else {
-
+            file = kotlin.run {
+                val respond = GlobalClient.get(url)
+                if (respond.status != HttpStatusCode.OK) {
+                    throw Exception("download image failed: ${respond.status}")
+                }
+                saveImageToCache(respond.bodyAsChannel())
+            }
         }
 
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
@@ -152,6 +166,16 @@ internal object MessageMaker {
             255216 -> "jpg"
             else -> "jpg"
         }
+    }
+
+    private suspend fun saveImageToCache(channel: ByteReadChannel): File {
+        val tmpFile = CacheDir.resolve(UUID.randomUUID().toString())
+        channel.copyTo(tmpFile.writeChannel())
+        val md5Hex = QQNTWrapperUtil.CppProxy.genFileMd5Hex(tmpFile.absolutePath)
+        val sourceFile = CacheDir.resolve(md5Hex)
+        tmpFile.renameTo(sourceFile)
+        //input.close() 内存流，无需close
+        return sourceFile
     }
 
     private fun saveImageToCache(input: ByteArrayInputStream): File {
