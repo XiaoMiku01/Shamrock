@@ -6,6 +6,7 @@ import moe.fuqiuluo.xposed.actions.impl.CreateHTTP
 import moe.fuqiuluo.xposed.actions.impl.PullConfig
 import moe.fuqiuluo.xposed.actions.impl.DataReceiver
 import moe.fuqiuluo.xposed.actions.impl.FetchService
+import moe.fuqiuluo.xposed.actions.impl.FixLibraryLoad
 import moe.fuqiuluo.xposed.actions.impl.ForceTablet
 import moe.fuqiuluo.xposed.actions.impl.HookForDebug
 import moe.fuqiuluo.xposed.actions.impl.MsfSignService
@@ -22,7 +23,8 @@ object ActionLoader {
         RegisterServiceHandler::class, // 注册服务处理器
         HookForDebug::class,
         OnRuntimeCreate::class,
-        MsfSignService::class
+        MsfSignService::class,
+        FixLibraryLoad::class
     )
 
     private val ACTION_LIST = arrayOf<KClass<*>>(

@@ -4,27 +4,22 @@ import android.graphics.BitmapFactory
 import android.media.ExifInterface
 import android.util.Base64
 import com.tencent.mobileqq.emoticon.QQSysFaceUtil
-import com.tencent.mobileqq.transfile.TransferRequest
-import com.tencent.mobileqq.transfile.api.ITransFileController
-import com.tencent.qqnt.kernel.nativeinterface.Contact
 import com.tencent.qqnt.kernel.nativeinterface.FaceElement
-import com.tencent.qqnt.kernel.nativeinterface.IKernelRichMediaService
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import com.tencent.qqnt.kernel.nativeinterface.MsgElement
 import com.tencent.qqnt.kernel.nativeinterface.PicElement
+import com.tencent.qqnt.kernel.nativeinterface.PttElement
 import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
 import com.tencent.qqnt.kernel.nativeinterface.RichMediaFilePathInfo
 import com.tencent.qqnt.kernel.nativeinterface.TextElement
-import com.tencent.qqnt.kernel.nativeinterface.UploadGroupFileParams
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsChannel
-import io.ktor.client.statement.readBytes
 import io.ktor.http.HttpStatusCode
-import io.ktor.util.cio.writeChannel
-import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.copyTo
 import kotlinx.serialization.json.JsonObject
+import moe.fuqiuluo.http.action.helper.FileHelper
 import moe.fuqiuluo.http.action.helper.HighwayHelper
+import moe.fuqiuluo.http.action.helper.MediaType
+import moe.fuqiuluo.http.action.helper.codec.AudioUtils
 import moe.fuqiuluo.xposed.helper.ServiceFetcher
 import moe.fuqiuluo.xposed.helper.msgService
 import moe.fuqiuluo.xposed.tools.GlobalClient
@@ -32,13 +27,9 @@ import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asInt
 import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.asStringOrNull
-import mqq.app.MobileQQ
 import java.io.ByteArrayInputStream
 import java.io.File
-import java.util.UUID
-import kotlin.experimental.and
-import kotlin.random.Random
-import kotlin.random.nextLong
+import kotlin.math.roundToInt
 
 internal typealias IMaker = suspend (Int, String, JsonObject) -> MsgElement
 
@@ -48,42 +39,109 @@ internal object MessageMaker {
         "face" to ::createFaceElem,
         "pic" to ::createImageElem,
         "image" to ::createImageElem,
-
-    )
-    private val CacheDir = MobileQQ.getContext().getExternalFilesDir(null)!!
-        .parentFile!!.resolve("Tencent/QQ_Images")
-    private val PicIdMap = hashMapOf(
-        "jpg" to 1000,
-        "bmp" to 1005,
-        "gif" to 2000,
-        "png" to 1001,
-        "webp" to 1002,
-        "sharpp" to 1004,
-        "apng" to 2001,
+        "record" to ::createRecordElem,
     )
 
-    private suspend fun createImageElem(chatType: Int, target: String, data: JsonObject): MsgElement {
-        val isOriginal = data["original"].asBooleanOrNull ?: true
+    private suspend fun createRecordElem(chatType: Int, target: String, data: JsonObject): MsgElement {
         val url = data["file"].asString
-        lateinit var file: File
-        if (url.startsWith("base64://")) {
-            file = saveImageToCache(ByteArrayInputStream(
+        var file = if (url.startsWith("base64://")) {
+            FileHelper.saveFileToCache(ByteArrayInputStream(
                 Base64.decode(url.substring(9), Base64.DEFAULT)
             ))
         } else if (url.startsWith("file:///")) {
-            file = File(url.substring(8))
+            File(url.substring(8))
         } else {
-            file = kotlin.run {
+            kotlin.run {
                 val respond = GlobalClient.get(url)
                 if (respond.status != HttpStatusCode.OK) {
                     throw Exception("download image failed: ${respond.status}")
                 }
-                saveImageToCache(respond.bodyAsChannel())
+                FileHelper.saveFileToCache(respond.bodyAsChannel())
+            }
+        }
+        val isMagic = data["magic"].asBooleanOrNull ?: false
+
+        val ptt = PttElement()
+
+        when (FileHelper.getMediaType(file)) {
+            MediaType.Silk -> {
+                ptt.formatType = MsgConstant.KPTTFORMATTYPESILK
+                // NOTHING TO DO
+            }
+            MediaType.Amr -> {
+                ptt.duration = (FileHelper.getAudioDuration(file.absolutePath) * 0.001f).roundToInt()
+                ptt.formatType = MsgConstant.KPTTFORMATTYPEAMR
+            }
+            else -> {
+                file = AudioUtils.audioToPcm(file)
+                AudioUtils.pcmToSilk(file).let {
+                    file.delete()
+                    file = it.first
+                    ptt.duration = (it.second).roundToInt()
+                }
+                ptt.formatType = MsgConstant.KPTTFORMATTYPESILK
             }
         }
 
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
-            HighwayHelper.transTroopMessage(target, file)
+            HighwayHelper.transTroopVoice(target, file)
+        }
+
+        val elem = MsgElement()
+        elem.elementType = MsgConstant.KELEMTYPEPTT
+        ptt.md5HexStr = QQNTWrapperUtil.CppProxy.genFileMd5Hex(file.absolutePath)
+
+        val msgService = ServiceFetcher.kernelService.msgService!!
+        val originalPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(
+            4, 0, ptt.md5HexStr, file.name, 1, 0, null, "", true
+        ))!!
+        if (!QQNTWrapperUtil.CppProxy.fileIsExist(originalPath) || QQNTWrapperUtil.CppProxy.getFileSize(originalPath) != file.length()) {
+            QQNTWrapperUtil.CppProxy.copyFile(file.absolutePath, originalPath)
+        }
+
+        ptt.fileName = originalPath.substring(originalPath.lastIndexOf("/") + 1)
+        ptt.filePath = originalPath
+        ptt.fileSize = QQNTWrapperUtil.CppProxy.getFileSize(originalPath)
+
+        if (!isMagic) {
+            ptt.voiceType = MsgConstant.KPTTVOICETYPESOUNDRECORD
+            ptt.voiceChangeType = MsgConstant.KPTTVOICECHANGETYPENONE
+        } else {
+            ptt.voiceType = MsgConstant.KPTTVOICETYPEVOICECHANGE
+            ptt.voiceChangeType = MsgConstant.KPTTVOICECHANGETYPEECHO
+        }
+
+        ptt.canConvert2Text = false
+        ptt.fileId = 0
+        ptt.fileUuid = ""
+        ptt.text = ""
+
+        elem.pttElement = ptt
+        return elem
+    }
+
+    private suspend fun createImageElem(chatType: Int, target: String, data: JsonObject): MsgElement {
+        val isOriginal = data["original"].asBooleanOrNull ?: true
+        val isFlash = data["flash"].asBooleanOrNull ?: false
+        val url = data["file"].asString
+        val file = if (url.startsWith("base64://")) {
+            FileHelper.saveFileToCache(ByteArrayInputStream(
+                Base64.decode(url.substring(9), Base64.DEFAULT)
+            ))
+        } else if (url.startsWith("file:///")) {
+            File(url.substring(8))
+        } else {
+            kotlin.run {
+                val respond = GlobalClient.get(url)
+                if (respond.status != HttpStatusCode.OK) {
+                    throw Exception("download image failed: ${respond.status}")
+                }
+                FileHelper.saveFileToCache(respond.bodyAsChannel())
+            }
+        }
+
+        if (chatType == MsgConstant.KCHATTYPEGROUP) {
+            HighwayHelper.transTroopPic(target, file)
         }
 
         val elem = MsgElement()
@@ -92,10 +150,16 @@ internal object MessageMaker {
         pic.md5HexStr = QQNTWrapperUtil.CppProxy.genFileMd5Hex(file.absolutePath)
 
         val msgService = ServiceFetcher.kernelService.msgService!!
-        val originalPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(2, 0, pic.md5HexStr, file.name, 1, 0, null, "", true))
-        val thumbPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(2, 0, pic.md5HexStr, file.name, 2, 720, null, "", true))
-        QQNTWrapperUtil.CppProxy.copyFile(file.absolutePath, originalPath)
-        QQNTWrapperUtil.CppProxy.copyFile(file.absolutePath, thumbPath)
+        val originalPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(
+            2, 0, pic.md5HexStr, file.name, 1, 0, null, "", true
+        ))
+        if (!QQNTWrapperUtil.CppProxy.fileIsExist(originalPath) || QQNTWrapperUtil.CppProxy.getFileSize(originalPath) != file.length()) {
+            val thumbPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(
+                2, 0, pic.md5HexStr, file.name, 2, 720, null, "", true
+            ))
+            QQNTWrapperUtil.CppProxy.copyFile(file.absolutePath, originalPath)
+            QQNTWrapperUtil.CppProxy.copyFile(file.absolutePath, thumbPath)
+        }
 
         val options = BitmapFactory.Options()
         options.inJustDecodeBounds = true
@@ -112,7 +176,8 @@ internal object MessageMaker {
         pic.sourcePath = file.absolutePath
         pic.fileSize = QQNTWrapperUtil.CppProxy.getFileSize(file.absolutePath)
         pic.original = isOriginal
-        pic.picType = PicIdMap[getFileType(file)] ?: 1000
+        pic.picType = FileHelper.getPicType(file)
+        pic.isFlashPic = isFlash
 
         elem.picElement = pic
         return elem
@@ -147,47 +212,6 @@ internal object MessageMaker {
         text.content = data["text"].asStringOrNull ?: "null"
         elem.textElement = text
         return elem
-    }
-
-    private fun getFileType(file: File): String {
-        val bytes = ByteArray(2)
-        file.inputStream().use {
-            it.read(bytes)
-        }
-        return when ("${(bytes[0] and 255.toByte())}${(bytes[1] and 255.toByte())}".toInt()) {
-            6677 -> "bmp"
-            7173 -> "gif"
-            7784 -> "midi"
-            7790 -> "exe"
-            8075 -> "zip"
-            8273 -> "webp"
-            8297 -> "rar"
-            13780 -> "png"
-            255216 -> "jpg"
-            else -> "jpg"
-        }
-    }
-
-    private suspend fun saveImageToCache(channel: ByteReadChannel): File {
-        val tmpFile = CacheDir.resolve(UUID.randomUUID().toString())
-        channel.copyTo(tmpFile.writeChannel())
-        val md5Hex = QQNTWrapperUtil.CppProxy.genFileMd5Hex(tmpFile.absolutePath)
-        val sourceFile = CacheDir.resolve(md5Hex)
-        tmpFile.renameTo(sourceFile)
-        //input.close() 内存流，无需close
-        return sourceFile
-    }
-
-    private fun saveImageToCache(input: ByteArrayInputStream): File {
-        val tmpFile = CacheDir.resolve(UUID.randomUUID().toString())
-        tmpFile.outputStream().use {
-            input.copyTo(it)
-        }
-        val md5Hex = QQNTWrapperUtil.CppProxy.genFileMd5Hex(tmpFile.absolutePath)
-        val sourceFile = CacheDir.resolve(md5Hex)
-        tmpFile.renameTo(sourceFile)
-        //input.close() 内存流，无需close
-        return sourceFile
     }
 
     operator fun get(type: String): IMaker? = makerArray[type]

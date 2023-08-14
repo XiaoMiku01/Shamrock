@@ -12,6 +12,7 @@ import moe.fuqiuluo.http.HTTPServer
 import moe.fuqiuluo.xposed.helper.DynamicReceiver
 import moe.fuqiuluo.xposed.helper.Request
 import moe.fuqiuluo.xposed.loader.ActionLoader
+import moe.fuqiuluo.xposed.loader.NativeLoader
 import mqq.app.MobileQQ
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
@@ -21,6 +22,8 @@ class PullConfig: IAction {
         @JvmStatic
         var isConfigOk = false
     }
+
+    external fun testNativeLibrary(): String
 
     override fun invoke(ctx: Context) {
         if (MobileQQ.getMobileQQ().qqProcessName != "com.tencent.mobileqq") return
@@ -52,6 +55,9 @@ class PullConfig: IAction {
                 putString(   "ws_addr",   it.getStringExtra("ws_addr")) // 被动WS地址
                 putBoolean(  "pro_api",   it.getBooleanExtra("pro_api", false)) // 开发调试API开关
             }
+
+            NativeLoader.load("shamrock")
+            MobileQQ.getContext().toast(testNativeLibrary())
 
             ActionLoader.runService(ctx)
         }

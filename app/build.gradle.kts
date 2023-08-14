@@ -19,6 +19,11 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        externalNativeBuild {
+            cmake {
+                cppFlags += ""
+            }
+        }
     }
 
     buildTypes {
@@ -62,6 +67,12 @@ android {
             excludes +=  "/META-INF/LICENSE.txt"
             excludes +=  "/META-INF/license.txt"
             excludes +=  "/META-INF/*.kotlin_module"
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
         }
     }
 }
