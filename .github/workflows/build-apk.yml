@@ -24,13 +24,27 @@ jobs:
             - name: Setup Android SDK
               uses: android-actions/setup-android@v2
 
-            - name: Build APK
+            - name: Build APK DEBUG
               run: |
                   chmod +x ./gradlew
                   ./gradlew assembleDebug
 
-            - name: Upload APK
+            - name: Build APK RELEASE
+              run: |
+                chmod +x ./gradlew
+                ./gradlew assembleRelease
+
+            - name: Upload APK DEBUG
               uses: actions/upload-artifact@v3
               with:
-                  name: app-debug.apk
+                  name: shamrock-debug.apk
                   path: app/build/outputs/apk/debug/app-debug.apk
+
+            - name: Upload APK RELEASE
+              uses: actions/upload-artifact@v3
+              with:
+                name: shamrock-release.apk
+                path: app/build/outputs/apk/debug/app-release.apk
+
+
+
