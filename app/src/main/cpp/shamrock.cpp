@@ -19,7 +19,7 @@ unsigned long GetHighResolutionTime() /* O: time in usec*/
     return((tv.tv_sec*1000000)+(tv.tv_usec));
 }
 
-double silk_encode(const char* inputFile, const char* outPutFile);
+double silk_encode(int rate, char type, const char* inputFile, const char* outPutFile);
 
 extern "C"
 JNIEXPORT jstring JNICALL
@@ -30,14 +30,16 @@ Java_moe_fuqiuluo_xposed_actions_impl_PullConfig_testNativeLibrary(JNIEnv *env, 
 extern "C"
 JNIEXPORT jdouble JNICALL
 Java_moe_fuqiuluo_http_action_helper_codec_AudioUtils_pcmToSilk(JNIEnv *env, jobject thiz,
+                                                                jint rate,
+                                                                jbyte type,
                                                                 jstring pcm_file,
                                                                 jstring silk_file) {
     auto pcm = env->GetStringUTFChars(pcm_file, nullptr);
     auto silk = env->GetStringUTFChars(silk_file, nullptr);
-    return silk_encode(pcm, silk);
+    return silk_encode(rate, type, pcm, silk);
 }
 
-double silk_encode(const char* inputFile, const char* outPutFile) {
+double silk_encode(int rate, char type, const char* inputFile, const char* outPutFile) {
     unsigned long tottime, starttime;
     double    filetime;
     size_t    counter;
@@ -56,8 +58,8 @@ double silk_encode(const char* inputFile, const char* outPutFile) {
 #endif
 
     /* default settings */
-    SKP_int32 API_fs_Hz = 24000;
-    SKP_int32 max_internal_fs_Hz = 0;
+    SKP_int32 API_fs_Hz = rate;
+    SKP_int32 max_internal_fs_Hz;
     SKP_int32 targetRate_bps = 25000;
     SKP_int32 smplsSinceLastPacket, packetSize_ms = 20;
     SKP_int32 frameSizeReadFromFile_ms = 20;
@@ -77,7 +79,7 @@ double silk_encode(const char* inputFile, const char* outPutFile) {
     strcpy( bitOutFileName,   outPutFile );
 
     /* If no max internal is specified, set to minimum of API fs and 24 kHz */
-    max_internal_fs_Hz = 24000;
+    max_internal_fs_Hz = rate;
 
     /* Open files */
     speechInFile = fopen( speechInFileName, "rb" );
@@ -93,8 +95,9 @@ double silk_encode(const char* inputFile, const char* outPutFile) {
 
     /* Add Silk header to stream */
     {
-        static const char Tencent_break[] = "";
-        fwrite( Tencent_break, sizeof( char ), strlen( Tencent_break ), bitOutFile );
+        char Tencent_break[1];
+        Tencent_break[0] = type;
+        fwrite( Tencent_break, sizeof( char ), 1, bitOutFile );
 
         static const char Silk_header[] = "#!SILK_V3";
         fwrite( Silk_header, sizeof( char ), strlen( Silk_header ), bitOutFile );

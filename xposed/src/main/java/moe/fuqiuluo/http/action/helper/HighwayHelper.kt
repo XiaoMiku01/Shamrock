@@ -69,7 +69,7 @@ internal object HighwayHelper {
         transferRequest.mIsUp = true
         transferRequest.mLocalPath = file.absolutePath
         transferRequest.mBusiType = 1002
-        transferRequest.mPttCompressFinish = FileHelper.isSilk(file)
+        transferRequest.mPttCompressFinish = true
         transferRequest.mPttUploadPanel = 3
         transferRequest.mIsPttPreSend = true
         return transAndWait(runtime, transferRequest, wait)

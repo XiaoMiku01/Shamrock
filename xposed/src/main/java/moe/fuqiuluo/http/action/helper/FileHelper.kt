@@ -2,30 +2,16 @@ package moe.fuqiuluo.http.action.helper
 
 import android.media.MediaExtractor
 import android.media.MediaFormat
-import android.media.MediaMetadataRetriever
 import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
 import io.ktor.util.cio.writeChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.copyTo
-import kotlinx.coroutines.suspendCancellableCoroutine
-import moe.fuqiuluo.http.action.helper.codec.SilkProcessor
 import mqq.app.MobileQQ
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.util.UUID
-import kotlin.concurrent.thread
-import kotlin.coroutines.resume
 import kotlin.experimental.and
 
-
-enum class MediaType {
-    Mp3,
-    Amr,
-    M4a,
-    Pcm,
-    Silk,
-    Wav
-}
 
 object FileHelper {
     private val CacheDir = MobileQQ.getContext().getExternalFilesDir(null)!!
@@ -68,31 +54,6 @@ object FileHelper {
 
     fun getFile(name: String) = CacheDir.resolve(name)
 
-    fun getMediaType(file: File): MediaType {
-        if(isSilk(file)) {
-            return MediaType.Silk
-        }
-
-        val extractor = MediaExtractor()
-        extractor.setDataSource(file.absolutePath)
-        var formatMime = ""
-        for (i in 0 until extractor.trackCount) {
-            val format = extractor.getTrackFormat(i)
-            when(val mime = format.getString(MediaFormat.KEY_MIME)) {
-                "audio/mp4a-latm" -> return MediaType.M4a
-                "audio/amr-wb", "audio/amr", "audio/3gpp" -> return MediaType.Amr
-                "audio/wav" -> return MediaType.Wav
-                "audio/mpeg_L2", "audio/mpeg_L1", "audio/mpeg", "audio/mpeg2" -> return MediaType.Mp3
-                else -> {
-                    if (mime?.startsWith("audio/") == true) formatMime = mime
-                }
-            }
-        }
-
-        extractor.release()
-        error("不支持识别的格式：$formatMime")
-    }
-
     fun getAudioMediaMime(file: File): String? {
         val extractor = MediaExtractor()
         extractor.setDataSource(file.absolutePath)
@@ -107,16 +68,6 @@ object FileHelper {
         }
         extractor.release()
         return audioFormat
-    }
-
-    fun getAudioDuration(audioFilePath: String): Long {
-        // 毫秒
-        val retriever = MediaMetadataRetriever()
-        retriever.setDataSource(audioFilePath)
-        val durationString = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-        val duration = durationString?.toLong() ?: 0
-        retriever.release()
-        return duration
     }
 
     fun getFileType(file: File): String {

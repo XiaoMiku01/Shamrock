@@ -18,8 +18,8 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.json.JsonObject
 import moe.fuqiuluo.http.action.helper.FileHelper
 import moe.fuqiuluo.http.action.helper.HighwayHelper
-import moe.fuqiuluo.http.action.helper.MediaType
 import moe.fuqiuluo.http.action.helper.codec.AudioUtils
+import moe.fuqiuluo.http.action.helper.codec.MediaType
 import moe.fuqiuluo.xposed.helper.ServiceFetcher
 import moe.fuqiuluo.xposed.helper.msgService
 import moe.fuqiuluo.xposed.tools.GlobalClient
@@ -63,24 +63,34 @@ internal object MessageMaker {
 
         val ptt = PttElement()
 
-        when (FileHelper.getMediaType(file)) {
+        when (AudioUtils.getMediaType(file)) {
             MediaType.Silk -> {
                 ptt.formatType = MsgConstant.KPTTFORMATTYPESILK
-                // NOTHING TO DO
+                ptt.duration = 1
             }
             MediaType.Amr -> {
-                ptt.duration = (FileHelper.getAudioDuration(file.absolutePath) * 0.001f).roundToInt()
+                ptt.duration = AudioUtils.getDurationSec(file)
                 ptt.formatType = MsgConstant.KPTTFORMATTYPEAMR
             }
-            else -> {
-                file = AudioUtils.audioToPcm(file)
-                AudioUtils.pcmToSilk(file).let {
-                    file.delete()
-                    file = it.first
-                    ptt.duration = (it.second).roundToInt()
-                }
+            MediaType.Pcm -> {
+                val result = AudioUtils.pcmToSilk(file)
+                ptt.duration = (result.second * 0.001).roundToInt()
+                file = result.first
                 ptt.formatType = MsgConstant.KPTTFORMATTYPESILK
             }
+            else -> {
+                val result = AudioUtils.audioToSilk(file)
+                ptt.duration = result.first
+                file = result.second
+                ptt.formatType = MsgConstant.KPTTFORMATTYPESILK
+            }
+        }
+        val msgService = ServiceFetcher.kernelService.msgService!!
+        val originalPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(
+            MsgConstant.KELEMTYPEPTT, 0, ptt.md5HexStr, file.name, 1, 0, null, "", true
+        ))!!
+        if (!QQNTWrapperUtil.CppProxy.fileIsExist(originalPath) || QQNTWrapperUtil.CppProxy.getFileSize(originalPath) != file.length()) {
+            QQNTWrapperUtil.CppProxy.copyFile(file.absolutePath, originalPath)
         }
 
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
@@ -91,17 +101,9 @@ internal object MessageMaker {
         elem.elementType = MsgConstant.KELEMTYPEPTT
         ptt.md5HexStr = QQNTWrapperUtil.CppProxy.genFileMd5Hex(file.absolutePath)
 
-        val msgService = ServiceFetcher.kernelService.msgService!!
-        val originalPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(
-            4, 0, ptt.md5HexStr, file.name, 1, 0, null, "", true
-        ))!!
-        if (!QQNTWrapperUtil.CppProxy.fileIsExist(originalPath) || QQNTWrapperUtil.CppProxy.getFileSize(originalPath) != file.length()) {
-            QQNTWrapperUtil.CppProxy.copyFile(file.absolutePath, originalPath)
-        }
-
-        ptt.fileName = originalPath.substring(originalPath.lastIndexOf("/") + 1)
-        ptt.filePath = originalPath
-        ptt.fileSize = QQNTWrapperUtil.CppProxy.getFileSize(originalPath)
+        ptt.fileName = file.name
+        ptt.filePath = file.absolutePath
+        ptt.fileSize = file.length()
 
         if (!isMagic) {
             ptt.voiceType = MsgConstant.KPTTVOICETYPESOUNDRECORD
