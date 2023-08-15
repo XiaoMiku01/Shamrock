@@ -1,50 +1,66 @@
 name: Build Android APK
 
 on:
-    workflow_dispatch:
-    push:
-        branches:
-            - master
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - '**.md'
+      - '**.txt'
+      - '.github/**'
+      - '.idea/**'
+      - '!.github/workflows/**'
 
 jobs:
-    build:
-        name: Build APK
-        runs-on: ubuntu-latest
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3.5.3
 
-            - name: Setup JDK
-              uses: actions/setup-java@v3
-              with:
-                  distribution: "temurin"
-                  java-version: 17
+      - name: Setup up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: 17
 
-            - name: Setup Android SDK
-              uses: android-actions/setup-android@v2
+      - name: Setup cmake
+        run: |
+          echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "cmake;3.22.1" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
+          echo "sdk.dir=${ANDROID_HOME}" > local.properties
 
-            - name: Build APK DEBUG
-              run: |
-                  chmod +x ./gradlew
-                  ./gradlew assembleDebug
+      - name: Install ccache
+        run: |
+          sudo apt install -y ccache
+          ccache -o max_size=1G
+          ccache -o hash_dir=false
+          ccache -o hard_link=true
+          ccache -o compiler_check='%compiler% -dumpmachine; %compiler% -dumpversion'
+          ccache -zp
 
-            - name: Build APK RELEASE
-              run: |
-                chmod +x ./gradlew
-                ./gradlew assembleRelease
+      - name: Cache Native Build
+        uses: actions/cache@v3.3.1
+        with:
+          path: |
+            ~/.cache/ccache
+            ~/.ccache
+            app/build/.lto-cache
+          key: native-cache-${{ github.sha }}
+          restore-keys: native-cache-
 
-            - name: Upload APK DEBUG
-              uses: actions/upload-artifact@v3
-              with:
-                  name: shamrock-debug.apk
-                  path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2.7.0
 
-            - name: Upload APK RELEASE
-              uses: actions/upload-artifact@v3
-              with:
-                name: shamrock-release.apk
-                path: app/build/outputs/apk/release/app-release*.apk
+      - name: Build with Gradle
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:assembleRelease --build-cache --parallel --daemon --warning-mode all
+           ccache -s
 
-
-
+      - name: Upload APK RELEASE
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release
+          path: app/build/outputs/apk/release/*.apk
