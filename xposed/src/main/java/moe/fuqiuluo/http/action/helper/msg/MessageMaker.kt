@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import android.media.ExifInterface
 import android.util.Base64
 import com.tencent.mobileqq.emoticon.QQSysFaceUtil
+import com.tencent.mobileqq.troop.api.ITroopMemberInfoService
 import com.tencent.qqnt.kernel.nativeinterface.FaceElement
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import com.tencent.qqnt.kernel.nativeinterface.MsgElement
@@ -18,6 +19,7 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.json.JsonObject
 import moe.fuqiuluo.http.action.helper.FileHelper
 import moe.fuqiuluo.http.action.helper.HighwayHelper
+import moe.fuqiuluo.http.action.helper.TroopHelper
 import moe.fuqiuluo.http.action.helper.codec.AudioUtils
 import moe.fuqiuluo.http.action.helper.codec.MediaType
 import moe.fuqiuluo.xposed.helper.ServiceFetcher
@@ -27,6 +29,8 @@ import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asInt
 import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.asStringOrNull
+import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
+import mqq.app.MobileQQ
 import java.io.ByteArrayInputStream
 import java.io.File
 import kotlin.math.roundToInt
@@ -40,7 +44,42 @@ internal object MessageMaker {
         "pic" to ::createImageElem,
         "image" to ::createImageElem,
         "record" to ::createRecordElem,
+        "at" to ::createAtElem,
     )
+
+    private suspend fun createAtElem(chatType: Int, target: String, data: JsonObject): MsgElement {
+        if (chatType != MsgConstant.KCHATTYPEGROUP) {
+            return MsgElement()
+        }
+        val elem = MsgElement()
+        val qq = data["qq"].asString
+
+        val at = TextElement()
+        when(qq) {
+            "0", "all" -> {
+                at.content = "@全体成员"
+                at.atType = MsgConstant.ATTYPEALL
+                at.atNtUid = "0"
+            }
+            "online" -> {
+                at.content = "@在线成员"
+                at.atType = MsgConstant.ATTYPEONLINE
+                at.atNtUid = "0"
+            }
+            else -> {
+                val info = TroopHelper.getTroopMemberInfoByUin(qq.toLong()) ?: error("获取成员昵称失败")
+                at.content = "@${info.cardName
+                    .ifNullOrEmpty(info.nick)
+                    .ifNullOrEmpty(qq)}"
+                at.atType = MsgConstant.ATTYPEONE
+                at.atNtUid = info.uid
+            }
+        }
+
+        elem.textElement = at
+        elem.elementType = MsgConstant.KELEMTYPETEXT
+        return elem
+    }
 
     private suspend fun createRecordElem(chatType: Int, target: String, data: JsonObject): MsgElement {
         val url = data["file"].asString

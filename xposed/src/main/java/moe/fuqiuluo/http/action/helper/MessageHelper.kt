@@ -6,6 +6,7 @@ import com.tencent.qqnt.kernel.nativeinterface.IOperateCallback
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import com.tencent.qqnt.kernel.nativeinterface.MsgElement
 import com.tencent.qqnt.msg.api.IMsgService
+import de.robv.android.xposed.XposedBridge
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonObject
 import moe.fuqiuluo.http.action.helper.msg.MessageMaker
@@ -37,10 +38,14 @@ internal object MessageHelper {
         val msgList = arrayListOf<MsgElement>()
         messageList.forEach {
             val msg = it.jsonObject
-            val maker = MessageMaker[msg["type"].asString]
-            if(maker != null) {
-                val data = msg["data"].asJsonObject
-                msgList.add(maker(chatType, targetUin, data))
+            kotlin.runCatching {
+                val maker = MessageMaker[msg["type"].asString]
+                if(maker != null) {
+                    val data = msg["data"].asJsonObject
+                    msgList.add(maker(chatType, targetUin, data))
+                }
+            }.onFailure {
+                XposedBridge.log(it)
             }
         }
         return msgList

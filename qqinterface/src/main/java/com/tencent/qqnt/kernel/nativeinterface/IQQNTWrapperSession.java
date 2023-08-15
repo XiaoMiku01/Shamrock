@@ -7,6 +7,10 @@ public interface IQQNTWrapperSession {
 
     //IKernelBuddyService getBuddyService();
 
+    IKernelUixConvertService getUixConvertService();
+
+    IKernelGroupService getGroupService();
+
     ArrayList<String> getCacheErrLog();
 
     //IKernelConfigMgrService getConfigMgrService();
@@ -44,8 +48,6 @@ public interface IQQNTWrapperSession {
    // IKernelTicketService getTicketService();
 
     //IKernelTipOffService getTipOffService();
-
-   //IKernelUixConvertService getUixConvertService();
 
     //IKernelUnitedConfigService getUnitedConfigService();
 

@@ -4,6 +4,7 @@ public final class MsgConstant {
     public static final int ARKSTRUCTELEMENTSUBTYPETENCENTDOCFROMMINIAPP = 1;
     public static final int ARKSTRUCTELEMENTSUBTYPETENCENTDOCFROMPLUSPANEL = 2;
     public static final int ARKSTRUCTELEMENTSUBTYPEUNKNOWN = 0;
+
     public static final int ATTYPEALL = 1;
     public static final int ATTYPECHANNEL = 16;
     public static final int ATTYPEME = 4;
@@ -14,6 +15,7 @@ public final class MsgConstant {
     public static final int ATTYPESUMMONONLINE = 128;
     public static final int ATTYPESUMMONROLE = 256;
     public static final int ATTYPEUNKNOWN = 0;
+
     public static final int CALENDARELEMSUBTYPECOMMON = 3;
     public static final int CALENDARELEMSUBTYPESTRONG = 1;
     public static final int CALENDARELEMSUBTYPEUNKNOWN = 0;
