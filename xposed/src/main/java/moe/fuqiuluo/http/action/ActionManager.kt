@@ -34,7 +34,8 @@ internal object ActionManager {
         "leave_group" to LeaveTroop,
         "send_message" to SendMessage,
         "get_uid" to GetUid,
-        "get_uin_by_uid" to GetUinByUid
+        "get_uin_by_uid" to GetUinByUid,
+        "delete_message" to DeleteMessage
     )
 
     operator fun get(action: String): IActionHandler? {

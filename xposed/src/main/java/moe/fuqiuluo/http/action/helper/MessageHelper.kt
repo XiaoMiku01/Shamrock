@@ -19,11 +19,18 @@ internal object MessageHelper {
     fun sendTroopMessage(groupId: String, msgElements: ArrayList<MsgElement>, callback: IOperateCallback): Pair<Long, Long> {
         val service = QRoute.api(IMsgService::class.java)
         val time = System.currentTimeMillis()
-        val uniseq = createMessageUniseq(time)
+        val uniseq = createMessageUniseq(MsgConstant.KCHATTYPEGROUP, groupId.toLong())
         service.sendMsg(
-            Contact(MsgConstant.KCHATTYPEGROUP, groupId, ""), uniseq, msgElements, callback
+            generateContract(MsgConstant.KCHATTYPEGROUP, groupId),
+            uniseq,
+            msgElements,
+            callback
         )
         return time to uniseq
+    }
+
+    fun generateContract(chatType: Int, id: String, subId: String = ""): Contact {
+        return Contact(chatType, id, subId)
     }
 
     fun obtainMessageTypeByDetailType(detailType: String): Int {
@@ -51,9 +58,12 @@ internal object MessageHelper {
         return msgList
     }
 
-    private fun createMessageUniseq(time: Long): Long {
-        var uniseq = (time / 1000).toInt().toLong()
-        uniseq = uniseq shl 32 or abs(Random.nextInt()).toLong()
-        return uniseq
-    }
+    external fun createMessageUniseq(chatType: Int, peerId: Long): Long
+
+    external fun getPeerId(msgId: Long): Long
+
+    external fun isGroup(msgId: Long): Boolean
+    external fun isPrivate(msgId: Long): Boolean
+    external fun isLess(msgId: Long): Boolean
+    external fun isGuild(msgId: Long): Boolean
 }

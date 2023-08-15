@@ -6,6 +6,9 @@
 # Sets the minimum CMake version required for this project.
 cmake_minimum_required(VERSION 3.22.1)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Declares the project name. The project name can be accessed via ${ PROJECT_NAME},
 # Since this is the top level CMakeLists.txt, the project name is also accessible
 # with ${CMAKE_PROJECT_NAME} (both CMake variables are in-sync within the top level
@@ -33,6 +36,7 @@ AUX_SOURCE_DIRECTORY(src SRC_DIR)
 add_library(${CMAKE_PROJECT_NAME} SHARED
     # List C/C++ source files with relative paths to this CMakeLists.txt.
         ${SRC_DIR}
+        msg.cpp
         shamrock.cpp)
 
 # Specifies libraries CMake should link to your target library. You

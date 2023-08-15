@@ -66,8 +66,14 @@ internal object MessageMaker {
                 at.atType = MsgConstant.ATTYPEONLINE
                 at.atNtUid = "0"
             }
+            "admin" -> {
+                at.content = "@管理员"
+                at.atRoleId = 1
+                at.atType = MsgConstant.ATTYPEROLE
+                at.atNtUid = "0"
+            }
             else -> {
-                val info = TroopHelper.getTroopMemberInfoByUin(qq.toLong()) ?: error("获取成员昵称失败")
+                val info = TroopHelper.getTroopMemberInfoByUin(target, qq.toLong()) ?: error("获取成员昵称失败")
                 at.content = "@${info.cardName
                     .ifNullOrEmpty(info.nick)
                     .ifNullOrEmpty(qq)}"

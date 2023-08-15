@@ -23,7 +23,7 @@ public interface IQQNTWrapperSession {
 
     //IKernelGuildService getGuildService();
 
-    //IKernelMsgService getMsgService();
+    IKernelMsgService getMsgService();
 
     //IKernelProfileService getProfileService();
 

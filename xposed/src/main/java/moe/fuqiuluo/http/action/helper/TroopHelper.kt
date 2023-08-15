@@ -6,12 +6,12 @@ import moe.fuqiuluo.xposed.helper.ServiceFetcher
 import kotlin.coroutines.resume
 
 internal object TroopHelper {
-    suspend fun getTroopMemberInfoByUin(qq: Long): MemberInfo? {
+    suspend fun getTroopMemberInfoByUin(groupId: String, qq: Long): MemberInfo? {
         val kernelService = ServiceFetcher.kernelService
         val sessionService = kernelService.wrapperSession
         val groupService = sessionService.groupService
         return suspendCancellableCoroutine {
-            groupService.getTransferableMemberInfo(702991373) { code, _, data ->
+            groupService.getTransferableMemberInfo(groupId.toLong()) { code, _, data ->
                 if (code != 0) {
                     it.resume(null)
                     return@getTransferableMemberInfo
@@ -27,12 +27,12 @@ internal object TroopHelper {
         }
     }
 
-    suspend fun getTroopMemberInfoByUid(uid: String): MemberInfo? {
+    suspend fun getTroopMemberInfoByUid(groupId: String, uid: String): MemberInfo? {
         val kernelService = ServiceFetcher.kernelService
         val sessionService = kernelService.wrapperSession
         val groupService = sessionService.groupService
         return suspendCancellableCoroutine {
-            groupService.getTransferableMemberInfo(702991373) { code, _, data ->
+            groupService.getTransferableMemberInfo(groupId.toLong()) { code, _, data ->
                 if (code != 0) {
                     it.resume(null)
                     return@getTransferableMemberInfo
