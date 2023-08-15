@@ -43,7 +43,10 @@ internal object SendMessage: IActionHandler() {
             msgElements = MessageHelper.messageArrayToMessageElements(
                 chatType = MsgConstant.KCHATTYPEGROUP,
                 targetUin = groupId,
-                messageList = message)
+                messageList = message
+            ).also {
+                if (it.isNullOrEmpty()) error("message is empty, unable to send")
+            }
         ) { code, _ ->
             DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {
                 put("string", "消息发送 troop: $groupId, code: $code")

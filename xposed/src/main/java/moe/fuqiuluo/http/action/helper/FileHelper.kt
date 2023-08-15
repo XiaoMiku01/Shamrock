@@ -2,10 +2,15 @@ package moe.fuqiuluo.http.action.helper
 
 import android.media.MediaExtractor
 import android.media.MediaFormat
+import android.util.Base64
 import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.http.HttpStatusCode
 import io.ktor.util.cio.writeChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.copyTo
+import moe.fuqiuluo.xposed.tools.GlobalClient
 import mqq.app.MobileQQ
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -28,6 +33,24 @@ object FileHelper {
         "sharpp" to 1004,
         "apng" to 2001,
     )
+
+    suspend fun parseAndSave(file: String): File {
+        return if (file.startsWith("base64://")) {
+            saveFileToCache(ByteArrayInputStream(
+                Base64.decode(file.substring(9), Base64.DEFAULT)
+            ))
+        } else if (file.startsWith("file:///")) {
+            File(file.substring(8))
+        } else {
+            kotlin.run {
+                val respond = GlobalClient.get(file)
+                if (respond.status != HttpStatusCode.OK) {
+                    error("download image failed: ${respond.status}")
+                }
+                saveFileToCache(respond.bodyAsChannel())
+            }
+        }
+    }
 
     fun isSilk(file: File): Boolean {
         if (file.length() <= 7) {

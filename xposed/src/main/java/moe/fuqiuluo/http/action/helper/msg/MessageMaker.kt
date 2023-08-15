@@ -2,9 +2,7 @@ package moe.fuqiuluo.http.action.helper.msg
 
 import android.graphics.BitmapFactory
 import android.media.ExifInterface
-import android.util.Base64
 import com.tencent.mobileqq.emoticon.QQSysFaceUtil
-import com.tencent.mobileqq.troop.api.ITroopMemberInfoService
 import com.tencent.qqnt.kernel.nativeinterface.FaceElement
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import com.tencent.qqnt.kernel.nativeinterface.MsgElement
@@ -13,9 +11,7 @@ import com.tencent.qqnt.kernel.nativeinterface.PttElement
 import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
 import com.tencent.qqnt.kernel.nativeinterface.RichMediaFilePathInfo
 import com.tencent.qqnt.kernel.nativeinterface.TextElement
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsChannel
-import io.ktor.http.HttpStatusCode
+import com.tencent.qqnt.kernel.nativeinterface.VideoElement
 import kotlinx.serialization.json.JsonObject
 import moe.fuqiuluo.http.action.helper.FileHelper
 import moe.fuqiuluo.http.action.helper.HighwayHelper
@@ -24,14 +20,11 @@ import moe.fuqiuluo.http.action.helper.codec.AudioUtils
 import moe.fuqiuluo.http.action.helper.codec.MediaType
 import moe.fuqiuluo.xposed.helper.ServiceFetcher
 import moe.fuqiuluo.xposed.helper.msgService
-import moe.fuqiuluo.xposed.tools.GlobalClient
 import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asInt
 import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.asStringOrNull
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
-import mqq.app.MobileQQ
-import java.io.ByteArrayInputStream
 import java.io.File
 import kotlin.math.roundToInt
 
@@ -45,9 +38,50 @@ internal object MessageMaker {
         "image" to ::createImageElem,
         "record" to ::createRecordElem,
         "at" to ::createAtElem,
+        "video" to ::createVideoElem
     )
 
-    private suspend fun createAtElem(chatType: Int, target: String, data: JsonObject): MsgElement {
+    private suspend fun createVideoElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        val file = FileHelper.parseAndSave(data["file"].asString)
+        val elem = MsgElement()
+        val video = VideoElement()
+
+        video.videoMd5 = QQNTWrapperUtil.CppProxy.genFileMd5Hex(file.absolutePath)
+
+        val msgService = ServiceFetcher.kernelService.msgService!!
+        val originalPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(
+            5, 2, video.videoMd5, file.name, 1, 0, null, "", true
+        ))
+        val thumbPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(
+            5, 1, video.videoMd5, file.name, 2, 0, null, "", true
+        ))
+        if (!QQNTWrapperUtil.CppProxy.fileIsExist(originalPath) || QQNTWrapperUtil.CppProxy.getFileSize(originalPath) != file.length()) {
+            QQNTWrapperUtil.CppProxy.copyFile(file.absolutePath, originalPath)
+            AudioUtils.obtainVideoCover(file.absolutePath, thumbPath!!)
+        }
+
+        if (chatType == MsgConstant.KCHATTYPEGROUP) {
+            HighwayHelper.transTroopVideo(peerId, file, File(thumbPath!!))
+        }
+
+        video.fileTime = AudioUtils.getVideoTime(file)
+        video.fileSize = file.length()
+        video.fileName = file.name
+        video.fileFormat = HighwayHelper.VIDEO_FORMAT_MP4
+        video.thumbSize = QQNTWrapperUtil.CppProxy.getFileSize(thumbPath).toInt()
+        val options = BitmapFactory.Options()
+        BitmapFactory.decodeFile(thumbPath, options)
+        video.thumbWidth = options.outWidth
+        video.thumbHeight = options.outHeight
+        video.thumbMd5 = QQNTWrapperUtil.CppProxy.genFileMd5Hex(thumbPath)
+        video.thumbPath = hashMapOf(0 to thumbPath)
+
+        elem.videoElement = video
+        elem.elementType = MsgConstant.KELEMTYPEVIDEO
+        return elem
+    }
+
+    private suspend fun createAtElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
         if (chatType != MsgConstant.KCHATTYPEGROUP) {
             return MsgElement()
         }
@@ -73,7 +107,7 @@ internal object MessageMaker {
                 at.atNtUid = "0"
             }
             else -> {
-                val info = TroopHelper.getTroopMemberInfoByUin(target, qq.toLong()) ?: error("获取成员昵称失败")
+                val info = TroopHelper.getTroopMemberInfoByUin(peerId, qq.toLong()) ?: error("获取成员昵称失败")
                 at.content = "@${info.cardName
                     .ifNullOrEmpty(info.nick)
                     .ifNullOrEmpty(qq)}"
@@ -87,23 +121,8 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createRecordElem(chatType: Int, target: String, data: JsonObject): MsgElement {
-        val url = data["file"].asString
-        var file = if (url.startsWith("base64://")) {
-            FileHelper.saveFileToCache(ByteArrayInputStream(
-                Base64.decode(url.substring(9), Base64.DEFAULT)
-            ))
-        } else if (url.startsWith("file:///")) {
-            File(url.substring(8))
-        } else {
-            kotlin.run {
-                val respond = GlobalClient.get(url)
-                if (respond.status != HttpStatusCode.OK) {
-                    throw Exception("download image failed: ${respond.status}")
-                }
-                FileHelper.saveFileToCache(respond.bodyAsChannel())
-            }
-        }
+    private suspend fun createRecordElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        var file = FileHelper.parseAndSave(data["file"].asString)
         val isMagic = data["magic"].asBooleanOrNull ?: false
 
         val ptt = PttElement()
@@ -139,7 +158,7 @@ internal object MessageMaker {
         }
 
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
-            HighwayHelper.transTroopVoice(target, file)
+            HighwayHelper.transTroopVoice(peerId, file)
         }
 
         val elem = MsgElement()
@@ -167,28 +186,13 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createImageElem(chatType: Int, target: String, data: JsonObject): MsgElement {
+    private suspend fun createImageElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
         val isOriginal = data["original"].asBooleanOrNull ?: true
         val isFlash = data["flash"].asBooleanOrNull ?: false
-        val url = data["file"].asString
-        val file = if (url.startsWith("base64://")) {
-            FileHelper.saveFileToCache(ByteArrayInputStream(
-                Base64.decode(url.substring(9), Base64.DEFAULT)
-            ))
-        } else if (url.startsWith("file:///")) {
-            File(url.substring(8))
-        } else {
-            kotlin.run {
-                val respond = GlobalClient.get(url)
-                if (respond.status != HttpStatusCode.OK) {
-                    throw Exception("download image failed: ${respond.status}")
-                }
-                FileHelper.saveFileToCache(respond.bodyAsChannel())
-            }
-        }
+        val file = FileHelper.parseAndSave(data["file"].asString)
 
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
-            HighwayHelper.transTroopPic(target, file)
+            HighwayHelper.transTroopPic(peerId, file)
         }
 
         val elem = MsgElement()
@@ -230,7 +234,7 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createFaceElem(chatType: Int, target: String, data: JsonObject): MsgElement {
+    private suspend fun createFaceElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
         val elem = MsgElement()
         elem.elementType = MsgConstant.KELEMTYPEFACE
         val face = FaceElement()
@@ -252,7 +256,7 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createTextElem(chatType: Int, target: String, data: JsonObject): MsgElement {
+    private suspend fun createTextElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
         val elem = MsgElement()
         elem.elementType = MsgConstant.KELEMTYPETEXT
         val text = TextElement()

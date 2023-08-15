@@ -2,6 +2,8 @@
 
 package moe.fuqiuluo.http.action.helper
 
+import com.tencent.mobileqq.data.MessageForShortVideo
+import com.tencent.mobileqq.data.MessageRecord
 import com.tencent.mobileqq.transfile.FileMsg
 import com.tencent.mobileqq.transfile.TransferRequest
 import com.tencent.mobileqq.transfile.api.ITransFileController
@@ -53,6 +55,56 @@ internal object HighwayHelper {
     const val SEND_MSG_BUSINESS_TYPE_ZHITU_PIC = 1049
     const val SEND_MSG_BUSINESS_TYPE_ZPLAN_EMOTICON_GIF = 1060
     const val SEND_MSG_BUSINESS_TYPE_ZPLAN_PIC = 1059
+
+    const val VIDEO_FORMAT_AFS = 7
+    const val VIDEO_FORMAT_AVI = 1
+    const val VIDEO_FORMAT_MKV = 4
+    const val VIDEO_FORMAT_MOD = 9
+    const val VIDEO_FORMAT_MOV = 8
+    const val VIDEO_FORMAT_MP4 = 2
+    const val VIDEO_FORMAT_MTS = 11
+    const val VIDEO_FORMAT_RM = 6
+    const val VIDEO_FORMAT_RMVB = 5
+    const val VIDEO_FORMAT_TS = 10
+    const val VIDEO_FORMAT_WMV = 3
+
+    const val BUSI_TYPE_GUILD_VIDEO = 4601
+    const val BUSI_TYPE_MULTI_FORWARD_VIDEO = 1010
+    const val BUSI_TYPE_PUBACCOUNT_PERM_VIDEO = 1009
+    const val BUSI_TYPE_PUBACCOUNT_TEMP_VIDEO = 1007
+    const val BUSI_TYPE_SHORT_VIDEO = 1
+    const val BUSI_TYPE_SHORT_VIDEO_PTV = 2
+    const val BUSI_TYPE_VIDEO = 0
+    const val BUSI_TYPE_VIDEO_EMOTICON_PIC = 1022
+    const val BUSI_TYPE_VIDEO_EMOTICON_VIDEO = 1021
+
+    suspend fun transTroopVideo(
+        groupId: String,
+        file: File,
+        thumbFile: File,
+        wait: Boolean = true
+    ): Boolean {
+        val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
+        val transferRequest = TransferRequest()
+        transferRequest.mSelfUin = runtime.currentAccountUin
+        transferRequest.mPeerUin = groupId
+        transferRequest.mUinType = FileMsg.UIN_TROOP
+        transferRequest.mFileType = FileMsg.TRANSFILE_TYPE_SHORT_VIDEO_TROOP
+        transferRequest.mUniseq = createMessageUniseq()
+        transferRequest.mIsUp = true
+        transferRequest.mLocalPath = file.absolutePath
+        transferRequest.mBusiType = BUSI_TYPE_SHORT_VIDEO
+        transferRequest.mMd5 = MD5.getFileMD5(file)
+        transferRequest.mLocalPath = file.absolutePath
+        transferRequest.mSourceVideoCodecFormat = VIDEO_FORMAT_MP4
+        transferRequest.mRec = MessageForShortVideo().also {
+            it.busiType = BUSI_TYPE_SHORT_VIDEO
+        }
+        transferRequest.mThumbPath = thumbFile.absolutePath
+        transferRequest.mThumbMd5 = MD5.getFileMD5(thumbFile)
+        //transferRequest.mExtraObj = this.f241967f
+        return transAndWait(runtime, transferRequest, wait)
+    }
 
     suspend fun transTroopVoice(
         groupId: String,

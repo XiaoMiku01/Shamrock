@@ -1,15 +1,17 @@
 package moe.fuqiuluo.http.action.helper.codec
 
+import android.graphics.Bitmap
 import android.media.MediaExtractor
 import android.media.MediaFormat
+import android.media.MediaMetadataRetriever
 import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFprobeKit
-import com.arthenica.ffmpegkit.MediaInformation
 import com.arthenica.ffmpegkit.ReturnCode
-import de.robv.android.xposed.XposedBridge
+import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
 import moe.fuqiuluo.http.action.helper.FileHelper
 import oicq.wlogin_sdk.tools.MD5
 import java.io.File
+import java.io.FileOutputStream
 import kotlin.math.roundToInt
 
 enum class MediaType {
@@ -26,6 +28,37 @@ internal object AudioUtils {
     private val SampleRateMap = intArrayOf(8000, 12000, 16000, 24000, 36000, 44100, 48000)
     private val sampleRate: Int
         get() = SampleRateMap[3]
+
+    fun getVideoTime(file: File): Int {
+        val retriever = MediaMetadataRetriever()
+        val durationMs: Int = try {
+            retriever.setDataSource(file.absolutePath)
+            val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+            duration!!.toInt()
+        } catch (e: Exception) {
+            0
+        } finally {
+            retriever.release()
+        }
+        return (durationMs * 0.001).roundToInt()
+    }
+
+    fun obtainVideoCover(filePath: String, destPath: String) {
+        if (destPath.isEmpty()) {
+            error("short video thumbs path is empty")
+        }
+        if (!QQNTWrapperUtil.CppProxy.fileIsExist(destPath)) {
+            File(destPath).createNewFile()
+        }
+        val output = FileOutputStream(destPath)
+        output.use {
+            val mediaMetadataRetriever = MediaMetadataRetriever()
+            mediaMetadataRetriever.setDataSource(filePath)
+            val frameAtTime = mediaMetadataRetriever.frameAtTime
+            frameAtTime?.compress(Bitmap.CompressFormat.JPEG, 60, it)
+            it.flush()
+        }
+    }
 
     internal fun audioToSilk(audio: File): Pair<Int, File> {
         val md5 = MD5.getFileMD5(audio)
