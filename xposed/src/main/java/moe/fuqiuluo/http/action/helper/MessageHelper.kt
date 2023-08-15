@@ -10,6 +10,7 @@ import de.robv.android.xposed.XposedBridge
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonObject
 import moe.fuqiuluo.http.action.helper.msg.MessageMaker
+import moe.fuqiuluo.xposed.helper.MMKVHelper
 import moe.fuqiuluo.xposed.tools.asJsonObject
 import moe.fuqiuluo.xposed.tools.asString
 import kotlin.math.abs
@@ -18,18 +19,17 @@ import kotlin.random.Random
 internal object MessageHelper {
     fun sendTroopMessage(groupId: String, msgElements: ArrayList<MsgElement>, callback: IOperateCallback): Pair<Long, Long> {
         val service = QRoute.api(IMsgService::class.java)
-        val time = System.currentTimeMillis()
-        val uniseq = createMessageUniseq(MsgConstant.KCHATTYPEGROUP, groupId.toLong())
+        val uniseq = generateMsgId(MsgConstant.KCHATTYPEGROUP, groupId.toLong())
         service.sendMsg(
-            generateContract(MsgConstant.KCHATTYPEGROUP, groupId),
+            generateContact(MsgConstant.KCHATTYPEGROUP, groupId),
             uniseq,
             msgElements,
             callback
         )
-        return time to uniseq
+        return System.currentTimeMillis() to uniseq
     }
 
-    fun generateContract(chatType: Int, id: String, subId: String = ""): Contact {
+    fun generateContact(chatType: Int, id: String, subId: String = ""): Contact {
         return Contact(chatType, id, subId)
     }
 
@@ -58,12 +58,16 @@ internal object MessageHelper {
         return msgList
     }
 
-    external fun createMessageUniseq(chatType: Int, peerId: Long): Long
+    fun generateMsgId(chatType: Int, peerId: Long): Long {
+        val msgId = createMessageUniseq(chatType, System.currentTimeMillis())
+        val mmkv = MMKVHelper.defaultMMKV()
+        if (chatType == MsgConstant.KCHATTYPEGROUP) {
+            mmkv.putLong("troop_$msgId", peerId)
+        }
+        return msgId
+    }
 
-    external fun getPeerId(msgId: Long): Long
+    private external fun createMessageUniseq(chatType: Int, time: Long): Long
 
-    external fun isGroup(msgId: Long): Boolean
-    external fun isPrivate(msgId: Long): Boolean
-    external fun isLess(msgId: Long): Boolean
-    external fun isGuild(msgId: Long): Boolean
+    external fun getChatType(msgId: Long): Int
 }

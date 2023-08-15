@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <random>
 #include <sys/time.h>
 
 #include "SKP_Silk_SDK_API.h"
@@ -212,4 +213,26 @@ double silk_encode(int rate, char type, const char* inputFile, const char* outPu
 
     filetime  = totPackets * 1e-3 * packetSize_ms;
     return filetime;
+}
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_moe_fuqiuluo_http_action_helper_MessageHelper_createMessageUniseq(JNIEnv *env, jobject thiz,
+                                                                       jint chat_type,
+                                                                       jlong time) {
+    static std::random_device rd;
+    static std::mt19937 generator(rd());
+    static std::uniform_int_distribution<int> distribution(INT32_MIN, INT32_MAX);
+    int64_t uniseq = (time / 1000) << (8 * 4);
+    auto msgtype = (int64_t) chat_type;
+    int64_t random = abs(distribution(generator)) & 0xffffff00L;
+    return uniseq | random | msgtype;
+}
+
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_moe_fuqiuluo_http_action_helper_MessageHelper_getChatType(JNIEnv *env, jobject thiz,
+                                                               jlong msg_id) {
+    return (int32_t) ((int64_t) msg_id & 0xffL);
 }

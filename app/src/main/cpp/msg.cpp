@@ -32,6 +32,7 @@ bool isGuildMsg(MessageId msgId);
 
 MessageId calcUniqueMsgId(int32_t chatType, int64_t peerId);
 
+/*
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_moe_fuqiuluo_http_action_helper_MessageHelper_createMessageUniseq(JNIEnv *env, jobject thiz,
@@ -80,6 +81,7 @@ Java_moe_fuqiuluo_http_action_helper_MessageHelper_isPrivate(JNIEnv *env, jobjec
     MessageId id = *(MessageId*) &msg_id;
     return isPrivateMsg(id);
 }
+ */
 
 MessageId calcUniqueMsgId(int32_t chatType, int64_t peerId) {
     MessageId id{};

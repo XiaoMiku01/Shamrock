@@ -5,9 +5,13 @@ import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
 import moe.fuqiuluo.xposed.actions.IAction
 import moe.fuqiuluo.xposed.loader.NativeLoader
+import mqq.app.MobileQQ
 
 internal class FixLibraryLoad: IAction {
     override fun invoke(ctx: Context) {
+        if (MobileQQ.getMobileQQ().qqProcessName != "com.tencent.mobileqq") {
+            return
+        }
         XposedHelpers.findAndHookMethod(com.arthenica.ffmpegkit.NativeLoader::class.java,
             "loadLibrary", String::class.java,
             object: XC_MethodHook() {

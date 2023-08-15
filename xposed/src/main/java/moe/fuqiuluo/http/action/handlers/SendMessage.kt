@@ -46,7 +46,7 @@ internal object SendMessage: IActionHandler() {
                 messageList = message)
         ) { code, _ ->
             DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {
-                put("string", "消息发送 troop: $groupId,code: $code")
+                put("string", "消息发送 troop: $groupId, code: $code")
             })
         }
     }

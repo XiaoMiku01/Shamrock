@@ -40,19 +40,21 @@ internal object GetTroopMemberList: IActionHandler() {
 
         return ok(arrayListOf<SimpleTroopMemberInfo>().apply {
             memberList.forEach {  info ->
-                add(SimpleTroopMemberInfo(
-                    uin = info.memberuin,
-                    name = info.friendnick.ifNullOrEmpty(info.autoremark) ?: "",
-                    showName = info.troopnick.ifNullOrEmpty(info.troopColorNick),
-                    distance = info.distance,
-                    honor = (info.honorList ?: "")
-                        .split("|")
-                        .filter { it.isNotBlank() }
-                        .map { it.toInt() },
-                    joinTime = info.join_time,
-                    lastActiveTime = info.last_active_time,
-                    uniqueName = info.mUniqueTitle
-                ))
+                if (info.memberuin != "0") {
+                    add(SimpleTroopMemberInfo(
+                        uin = info.memberuin,
+                        name = info.friendnick.ifNullOrEmpty(info.autoremark) ?: "",
+                        showName = info.troopnick.ifNullOrEmpty(info.troopColorNick),
+                        distance = info.distance,
+                        honor = (info.honorList ?: "")
+                            .split("|")
+                            .filter { it.isNotBlank() }
+                            .map { it.toInt() },
+                        joinTime = info.join_time,
+                        lastActiveTime = info.last_active_time,
+                        uniqueName = info.mUniqueTitle
+                    ))
+                }
             }
         })
     }
