@@ -10,6 +10,7 @@ import kotlinx.atomicfu.atomic
 import moe.fuqiuluo.xposed.actions.IAction
 import de.robv.android.xposed.XposedBridge.log
 import kotlinx.coroutines.DelicateCoroutinesApi
+import moe.fuqiuluo.xposed.tools.EMPTY_BYTE_ARRAY
 import moe.fuqiuluo.xposed.tools.hookMethod
 import moe.fuqiuluo.xposed.tools.slice
 
@@ -68,6 +69,7 @@ class HookWrapperCodec: IAction {
                 } else {
                     if (from.serviceCmd in IgnoredCmd) {
                         from.serviceCmd = "ShamrockInjectedCmd"
+                        from.putWupBuffer(EMPTY_BYTE_ARRAY)
                         it.args[1] = from
                     } else {
                         pushOnReceive(from)

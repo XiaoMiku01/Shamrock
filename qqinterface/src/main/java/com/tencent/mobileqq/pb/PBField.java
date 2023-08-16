@@ -5,6 +5,10 @@ public abstract class PBField<T> {
         return new PBRepeatMessageField<>(cls);
     }
 
+    public static <T> PBRepeatField<T> initRepeat(PBField<T> pBField) {
+        return new PBRepeatField<>(pBField);
+    }
+
     public static PBUInt32Field initUInt32(int i2) {
         return new PBUInt32Field(i2, false);
     }

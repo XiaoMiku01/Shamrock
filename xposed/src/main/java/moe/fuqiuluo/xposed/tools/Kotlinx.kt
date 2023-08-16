@@ -2,6 +2,8 @@ package moe.fuqiuluo.xposed.tools
 
 import java.util.Locale
 
+val EMPTY_BYTE_ARRAY = ByteArray(0)
+
 class Nullable<T: Any>(
     private var value: T?
 ) {

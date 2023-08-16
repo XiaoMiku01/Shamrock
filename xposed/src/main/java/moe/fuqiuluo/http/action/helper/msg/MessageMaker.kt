@@ -2,7 +2,10 @@ package moe.fuqiuluo.http.action.helper.msg
 
 import android.graphics.BitmapFactory
 import android.media.ExifInterface
+import com.tencent.mobileqq.app.QQAppInterface
 import com.tencent.mobileqq.emoticon.QQSysFaceUtil
+import com.tencent.mobileqq.pb.ByteStringMicro
+import com.tencent.qphone.base.remote.ToServiceMsg
 import com.tencent.qqnt.kernel.nativeinterface.FaceElement
 import com.tencent.qqnt.kernel.nativeinterface.MarkdownElement
 import com.tencent.qqnt.kernel.nativeinterface.MarketFaceElement
@@ -16,8 +19,10 @@ import com.tencent.qqnt.kernel.nativeinterface.RichMediaFilePathInfo
 import com.tencent.qqnt.kernel.nativeinterface.TextElement
 import com.tencent.qqnt.kernel.nativeinterface.VideoElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import moe.fuqiuluo.http.action.helper.FileHelper
 import moe.fuqiuluo.http.action.helper.HighwayHelper
+import moe.fuqiuluo.http.action.helper.PlatformHelper
 import moe.fuqiuluo.http.action.helper.TroopHelper
 import moe.fuqiuluo.http.action.helper.codec.AudioUtils
 import moe.fuqiuluo.http.action.helper.codec.MediaType
@@ -28,6 +33,10 @@ import moe.fuqiuluo.xposed.tools.asInt
 import moe.fuqiuluo.xposed.tools.asIntOrNull
 import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
+import mqq.app.MobileQQ
+import tencent.im.oidb.cmd0xb77.oidb_cmd0xb77
+import tencent.im.oidb.cmd0xdc2.oidb_cmd0xdc2
+import tencent.im.oidb.oidb_sso
 import java.io.File
 import kotlin.math.roundToInt
 
@@ -46,11 +55,68 @@ internal object MessageMaker {
         "dice" to ::createDiceElem,
         "rps" to ::createRpsElem,
         "poke" to ::createPokeElem,
-        "anonymous" to ::createAnonymousElem
+        "anonymous" to ::createAnonymousElem,
+        "share" to ::createShareElem,
+
     )
 
+    private suspend fun createShareElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        data.checkAndThrow("title", "url")
+
+        val url = data["url"].asString
+        val startWithPrefix = url.startsWith("http://") || url.startsWith("https://")
+        val endWithPrefix = url.startsWith("/")
+        val title = data["title"].asString
+
+        val reqBody = oidb_cmd0xdc2.ReqBody()
+        val info = oidb_cmd0xb77.ReqBody()
+        info.appid.set(100446242L)
+        info.app_type.set(1)
+        info.msg_style.set(0)
+        info.recv_uin.set(peerId.toLong())
+        val clientInfo = oidb_cmd0xb77.ClientInfo()
+        clientInfo.platform.set(1)
+        info.client_info.set(clientInfo)
+        val richMsgBody = oidb_cmd0xb77.RichMsgBody()
+        richMsgBody.using_ark.set(true)
+        richMsgBody.title.set(title)
+        // "using_ark", "title", "summary", "brief", "url", "picture_url", "action", "music_url", "image_info"
+        richMsgBody.summary.set(url)
+        richMsgBody.brief.set("[分享] $title")
+        richMsgBody.url.set(url)
+        richMsgBody.picture_url.set("http://" + url.split("/")[if (startWithPrefix) 2 else 0] + if (!endWithPrefix) {
+            "/favicon.ico"
+        } else {
+            "favicon.ico"
+        })
+        info.rich_msg_body.set(richMsgBody)
+        reqBody.msg_body.set(info)
+        val sendTo = oidb_cmd0xdc2.BatchSendReq()
+        when (chatType) {
+            MsgConstant.KCHATTYPEGROUP -> sendTo.send_type.set(1)
+            MsgConstant.KCHATTYPEC2C -> sendTo.send_type.set(0)
+            else -> return createTextElem(
+                chatType = chatType,
+                peerId = peerId,
+                data = JsonObject(mapOf("text" to JsonPrimitive("[分享] $title\n地址: $url")))
+            )
+        }
+        sendTo.recv_uin.set(peerId.toLong())
+        reqBody.batch_send_req.add(sendTo)
+        val app = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
+        val to = ToServiceMsg("mobileqq.service", app.currentAccountUin, "OidbSvc.0xdc2_34")
+        val oidb = oidb_sso.OIDBSSOPkg()
+        oidb.uint32_command.set(0xdc2)
+        oidb.uint32_service_type.set(34)
+        oidb.bytes_bodybuffer.set(ByteStringMicro.copyFrom(reqBody.toByteArray()))
+        oidb.str_client_version.set(PlatformHelper.getClientVersion(MobileQQ.getContext()))
+        to.putWupBuffer(oidb.toByteArray())
+        to.addAttribute("req_pb_protocol_flag", true)
+        app.sendToService(to)
+        return MsgElement()
+    }
+
     private suspend fun createAnonymousElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
-        // TODO(预计于新版本QQ移除，不予实现)
         return MsgElement()
     }
 
