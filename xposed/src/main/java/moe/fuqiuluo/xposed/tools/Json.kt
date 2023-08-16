@@ -10,6 +10,8 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
+val EmptyJsonObject = JsonObject(mapOf())
+
 val JsonElement?.asString: String
     get() = this!!.jsonPrimitive.content
 
