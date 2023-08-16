@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <random>
+#include <android/log.h>
 #include <sys/time.h>
 
 #include "SKP_Silk_SDK_API.h"
@@ -13,14 +14,7 @@
 #define FRAME_LENGTH_MS         20
 #define MAX_API_FS_KHZ          48
 
-unsigned long GetHighResolutionTime() /* O: time in usec*/
-{
-    struct timeval tv{};
-    gettimeofday(&tv, nullptr);
-    return((tv.tv_sec*1000000)+(tv.tv_usec));
-}
-
-double silk_encode(int rate, char type, const char* inputFile, const char* outPutFile);
+int silk_encode(int rate, char type, const char* inputFile, const char* outPutFile);
 
 extern "C"
 JNIEXPORT jstring JNICALL
@@ -29,7 +23,7 @@ Java_moe_fuqiuluo_xposed_actions_impl_PullConfig_testNativeLibrary(JNIEnv *env, 
 }
 
 extern "C"
-JNIEXPORT jdouble JNICALL
+JNIEXPORT jint JNICALL
 Java_moe_fuqiuluo_http_action_helper_codec_AudioUtils_pcmToSilk(JNIEnv *env, jobject thiz,
                                                                 jint rate,
                                                                 jbyte type,
@@ -40,8 +34,7 @@ Java_moe_fuqiuluo_http_action_helper_codec_AudioUtils_pcmToSilk(JNIEnv *env, job
     return silk_encode(rate, type, pcm, silk);
 }
 
-double silk_encode(int rate, char type, const char* inputFile, const char* outPutFile) {
-    unsigned long tottime, starttime;
+int silk_encode(int rate, char type, const char* inputFile, const char* outPutFile) {
     double    filetime;
     size_t    counter;
     SKP_int32 k, totPackets, totActPackets, ret;
@@ -85,13 +78,11 @@ double silk_encode(int rate, char type, const char* inputFile, const char* outPu
     /* Open files */
     speechInFile = fopen( speechInFileName, "rb" );
     if( speechInFile == nullptr ) {
-        printf( "Error: could not open input file %s\n", speechInFileName );
-        exit( 0 );
+        return -1;
     }
     bitOutFile = fopen( bitOutFileName, "wb" );
     if( bitOutFile == nullptr ) {
-        printf( "Error: could not open output file %s\n", bitOutFileName );
-        exit( 0 );
+        return -2;
     }
 
     /* Add Silk header to stream */
@@ -107,8 +98,8 @@ double silk_encode(int rate, char type, const char* inputFile, const char* outPu
     /* Create Encoder */
     ret = SKP_Silk_SDK_Get_Encoder_Size( &encSizeBytes );
     if( ret ) {
-        printf( "\nError: SKP_Silk_create_encoder returned %d\n", ret );
-        exit( 0 );
+        __android_log_print(ANDROID_LOG_ERROR, "SilkCodec", "Error: SKP_Silk_create_encoder returned %d", ret );
+        return  -3;
     }
 
     psEnc = malloc( encSizeBytes );
@@ -116,8 +107,8 @@ double silk_encode(int rate, char type, const char* inputFile, const char* outPu
     /* Reset Encoder */
     ret = SKP_Silk_SDK_InitEncoder( psEnc, &encStatus );
     if( ret ) {
-        printf( "\nError: SKP_Silk_reset_encoder returned %d\n", ret );
-        exit( 0 );
+        __android_log_print(ANDROID_LOG_ERROR, "SilkCodec", "Error: SKP_Silk_reset_encoder returned %d", ret );
+        return -4;
     }
 
     /* Set Encoder parameters */
@@ -130,7 +121,6 @@ double silk_encode(int rate, char type, const char* inputFile, const char* outPu
     encControl.complexity            = complexity_mode;
     encControl.bitRate               = targetRate_bps;
 
-    tottime              = 0;
     totPackets           = 0;
     totActPackets        = 0;
     smplsSinceLastPacket = 0;
@@ -148,24 +138,19 @@ double silk_encode(int rate, char type, const char* inputFile, const char* outPu
             break;
         }
 
+
         /* max payload size */
         nBytes = MAX_BYTES_PER_FRAME * MAX_INPUT_FRAMES;
-
-        starttime = GetHighResolutionTime();
 
         /* Silk Encoder */
         ret = SKP_Silk_SDK_Encode( psEnc, &encControl, in, (SKP_int16)counter, payload, &nBytes );
         if( ret ) {
-            printf( "\nSKP_Silk_Encode returned %d", ret );
+            __android_log_print(ANDROID_LOG_ERROR, "SilkCodec",  "SKP_Silk_Encode returned %d", ret );
         }
-
-        tottime += GetHighResolutionTime() - starttime;
 
         /* Get packet size */
         packetSize_ms = ( SKP_int )( ( 1000 * ( SKP_int32 )encControl.packetSize ) / encControl.API_sampleRate );
-
         smplsSinceLastPacket += ( SKP_int )counter;
-
         if( ( ( 1000 * smplsSinceLastPacket ) / API_fs_Hz ) == packetSize_ms ) {
             /* Sends a dummy zero size packet in case of DTX period  */
             /* to make it work with the decoder test program.        */
@@ -180,7 +165,6 @@ double silk_encode(int rate, char type, const char* inputFile, const char* outPu
                 sumActBytes += nBytes;
                 totActPackets++;
             }
-
             /* Write payload size */
 #ifdef _SYSTEM_IS_BIG_ENDIAN
             nBytes_LE = nBytes;
@@ -189,14 +173,12 @@ double silk_encode(int rate, char type, const char* inputFile, const char* outPu
 #else
             fwrite( &nBytes, sizeof( SKP_int16 ), 1, bitOutFile );
 #endif
-
             /* Write payload */
             fwrite( payload, sizeof( SKP_uint8 ), nBytes, bitOutFile );
-
             smplsSinceLastPacket = 0;
-
-            fprintf(stderr, "\rPackets encoded:                %d", totPackets);
+            //fprintf(stderr, "\rPackets encoded:                %d", totPackets);
         }
+
     }
 
     /* Write dummy because it can not end with 0 bytes */
@@ -212,7 +194,7 @@ double silk_encode(int rate, char type, const char* inputFile, const char* outPu
     fclose( bitOutFile );
 
     filetime  = totPackets * 1e-3 * packetSize_ms;
-    return filetime;
+    return (int) filetime;
 }
 
 extern "C"

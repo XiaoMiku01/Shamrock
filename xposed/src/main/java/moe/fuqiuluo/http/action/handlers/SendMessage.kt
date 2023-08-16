@@ -45,7 +45,7 @@ internal object SendMessage: IActionHandler() {
                 targetUin = groupId,
                 messageList = message
             ).also {
-                if (it.isNullOrEmpty()) error("message is empty, unable to send")
+                if (it.isNullOrEmpty()) kotlin.error("message is empty, unable to send")
             }
         ) { code, _ ->
             DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {

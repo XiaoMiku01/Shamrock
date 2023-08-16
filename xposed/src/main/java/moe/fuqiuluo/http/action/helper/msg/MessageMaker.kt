@@ -4,6 +4,9 @@ import android.graphics.BitmapFactory
 import android.media.ExifInterface
 import com.tencent.mobileqq.emoticon.QQSysFaceUtil
 import com.tencent.qqnt.kernel.nativeinterface.FaceElement
+import com.tencent.qqnt.kernel.nativeinterface.MarkdownElement
+import com.tencent.qqnt.kernel.nativeinterface.MarketFaceElement
+import com.tencent.qqnt.kernel.nativeinterface.MarketFaceSupportSize
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import com.tencent.qqnt.kernel.nativeinterface.MsgElement
 import com.tencent.qqnt.kernel.nativeinterface.PicElement
@@ -38,8 +41,50 @@ internal object MessageMaker {
         "image" to ::createImageElem,
         "record" to ::createRecordElem,
         "at" to ::createAtElem,
-        "video" to ::createVideoElem
+        "video" to ::createVideoElem,
+        "markdown" to ::createMarkdownElem,
+        "dice" to ::createDiceElem,
+        "rps" to ::createRpsElem,
     )
+
+    private suspend fun createRpsElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        val elem = MsgElement()
+        elem.elementType = MsgConstant.KELEMTYPEMARKETFACE
+        val market = MarketFaceElement(
+            6, 1, 11415, 3, 0, 200, 200,
+            "[猜拳]", "83C8A293AE65CA140F348120A77448EE", "7de39febcf45e6db",
+            null, null, 0, 0, 0, 1, 0,
+            null, null, null,
+            "", null, null,
+            null, null, arrayListOf(MarketFaceSupportSize(200, 200)), null)
+        elem.marketFaceElement = market
+        return elem
+    }
+
+    private suspend fun createDiceElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        val elem = MsgElement()
+        elem.elementType = MsgConstant.KELEMTYPEMARKETFACE
+        val market = MarketFaceElement(
+            6, 1, 11464, 3, 0, 200, 200,
+            "[骰子]", "4823d3adb15df08014ce5d6796b76ee1", "409e2a69b16918f9",
+            null, null, 0, 0, 0, 1, 0,
+            null, null, null, // jumpurl
+            "", null, null,
+            null, null, arrayListOf(MarketFaceSupportSize(200, 200)), null)
+        elem.marketFaceElement = market
+        return elem
+    }
+
+    private suspend fun createMarkdownElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        if (chatType != MsgConstant.KCHATTYPEGUILD) {
+            return createTextElem(chatType, peerId, data)
+        }
+        val elem = MsgElement()
+        elem.elementType = MsgConstant.KELEMTYPEMARKDOWN
+        val markdown = MarkdownElement(data["text"].asStringOrNull ?: "null")
+        elem.markdownElement = markdown
+        return elem
+    }
 
     private suspend fun createVideoElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
         val file = FileHelper.parseAndSave(data["file"].asString)

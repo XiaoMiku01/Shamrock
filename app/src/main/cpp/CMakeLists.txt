@@ -36,7 +36,6 @@ AUX_SOURCE_DIRECTORY(src SRC_DIR)
 add_library(${CMAKE_PROJECT_NAME} SHARED
     # List C/C++ source files with relative paths to this CMakeLists.txt.
         ${SRC_DIR}
-        msg.cpp
         shamrock.cpp)
 
 # Specifies libraries CMake should link to your target library. You

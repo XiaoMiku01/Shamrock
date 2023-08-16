@@ -3,20 +3,20 @@ package com.tencent.qqnt.kernel.nativeinterface;
 import java.io.Serializable;
 
 public final class MsgElement implements IKernelModel, Serializable {
-    ArkElement arkElement;
-    AVRecordElement avRecordElement;
+    ArkElement arkElement; // JSON MSG
+    AVRecordElement avRecordElement; // 录音
     CalendarElement calendarElement;
     long elementId;
     int elementType;
     byte[] extBufForUI;
     FaceBubbleElement faceBubbleElement;
-    FaceElement faceElement;
-    FileElement fileElement;
+    FaceElement faceElement; // 表情 | Poke
+    FileElement fileElement; // 文件
     GiphyElement giphyElement;
-    GrayTipElement grayTipElement;
-    InlineKeyboardElement inlineKeyboardElement;
-    LiveGiftElement liveGiftElement;
-    MarkdownElement markdownElement;
+    GrayTipElement grayTipElement; // 灰色提示
+    InlineKeyboardElement inlineKeyboardElement; // 内联键盘
+    LiveGiftElement liveGiftElement; // 直播礼物
+    MarkdownElement markdownElement; // MD
     MarketFaceElement marketFaceElement;
     MultiForwardMsgElement multiForwardMsgElement;
     PicElement picElement;
@@ -28,7 +28,7 @@ public final class MsgElement implements IKernelModel, Serializable {
     TextElement textElement;
     TextGiftElement textGiftElement;
     TofuRecordElement tofuRecordElement;
-    VideoElement videoElement;
+    VideoElement videoElement; // 视频
     WalletElement walletElement;
     YoloGameResultElement yoloGameResultElement;
 

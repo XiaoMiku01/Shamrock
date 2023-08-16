@@ -71,7 +71,7 @@ internal object AudioUtils {
         pcmToSilk(pcmFile).let {
             pcmFile.delete()
             it.first.renameTo(silkFile)
-            duration = (it.second).roundToInt()
+            duration = it.second
         }
         if (duration < 1000) {
             duration = 1000
@@ -79,9 +79,16 @@ internal object AudioUtils {
         return duration to silkFile
     }
 
-    internal fun pcmToSilk(file: File): Pair<File, Double> {
+    internal fun pcmToSilk(file: File): Pair<File, Int> {
         val tmpFile = FileHelper.getTmpFile("silk", false)
-        return tmpFile to pcmToSilk(sampleRate, 2, file.absolutePath, tmpFile.absolutePath)
+        val time = pcmToSilk(sampleRate, 2, file.absolutePath, tmpFile.absolutePath)
+        when (time) {
+            -1 -> error("input pcm file not found")
+            -2 -> error("output silk file cannot open")
+            -3 -> error("cannot create silk encoder")
+            -4 -> error("cannot init silk encoder")
+        }
+        return tmpFile to time
     }
 
     fun audioToPcm(audio: File): File {
@@ -137,5 +144,5 @@ internal object AudioUtils {
         return MediaType.Pcm
     }
 
-    private external fun pcmToSilk(rate: Int, type: Byte, pcmFile: String, silkFile: String): Double
+    private external fun pcmToSilk(rate: Int, type: Byte, pcmFile: String, silkFile: String): Int
 }
