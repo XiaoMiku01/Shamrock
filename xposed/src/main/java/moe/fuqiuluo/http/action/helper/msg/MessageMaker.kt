@@ -46,8 +46,13 @@ internal object MessageMaker {
         "dice" to ::createDiceElem,
         "rps" to ::createRpsElem,
         "poke" to ::createPokeElem,
-
+        "anonymous" to ::createAnonymousElem
     )
+
+    private suspend fun createAnonymousElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        // TODO(预计于新版本QQ移除，不予实现)
+        return MsgElement()
+    }
 
     private suspend fun createPokeElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("type", "id")
