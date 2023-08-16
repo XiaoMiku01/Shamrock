@@ -1,7 +1,9 @@
 package moe.fuqiuluo.http.api
 
+import com.tencent.mobileqq.dt.model.FEBound
 import io.ktor.server.routing.Routing
 import moe.fuqiuluo.http.entries.Protocol
+import moe.fuqiuluo.http.entries.QSignDtConfig
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.xposed.tools.getOrPost
 import moe.fuqiuluo.xposed.tools.respond
@@ -26,6 +28,13 @@ fun Routing.getMsfInfo() {
             buf_to_string(util.get_qimei(ctx))
         }.getOrNull()
 
+        val encodeTable = FEBound::class.java.getDeclaredField("mConfigEnCode").also {
+            it.isAccessible = true
+        }.get(null) as Array<ByteArray>
+        val decodeTable = FEBound::class.java.getDeclaredField("mConfigDeCode").also {
+            it.isAccessible = true
+        }.get(null) as Array<ByteArray>
+
         respond(
             isOk = true,
             code = Status.Ok,
@@ -42,7 +51,9 @@ fun Routing.getMsfInfo() {
                 t100._sso_ver, t100._db_buf_ver,
                 t106._SSoVer, t106._TGTGTVer,
 
-                util.get_android_dev_info(ctx).toHexString()
+                util.get_android_dev_info(ctx).toHexString(),
+
+                qSignDtConfig = QSignDtConfig(encodeTable, decodeTable)
             )
         )
     }

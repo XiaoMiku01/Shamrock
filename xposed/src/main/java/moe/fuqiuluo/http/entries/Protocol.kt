@@ -1,5 +1,6 @@
 package moe.fuqiuluo.http.entries
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -29,5 +30,13 @@ data class Protocol(
     var SSOVer: Int,
     var tgtgtVer: Int,
 
-    var androidDevInfo: String
+    var androidDevInfo: String,
+
+    @SerialName("signDtConfig") var qSignDtConfig: QSignDtConfig? = null
+)
+
+@Serializable
+data class QSignDtConfig(
+    val en: Array<ByteArray>,
+    val de: Array<ByteArray>
 )
