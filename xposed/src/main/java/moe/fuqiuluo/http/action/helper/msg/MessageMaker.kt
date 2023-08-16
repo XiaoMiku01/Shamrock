@@ -25,8 +25,8 @@ import moe.fuqiuluo.xposed.helper.ServiceFetcher
 import moe.fuqiuluo.xposed.helper.msgService
 import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asInt
+import moe.fuqiuluo.xposed.tools.asIntOrNull
 import moe.fuqiuluo.xposed.tools.asString
-import moe.fuqiuluo.xposed.tools.asStringOrNull
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
 import java.io.File
 import kotlin.math.roundToInt
@@ -45,7 +45,57 @@ internal object MessageMaker {
         "markdown" to ::createMarkdownElem,
         "dice" to ::createDiceElem,
         "rps" to ::createRpsElem,
+        "poke" to ::createPokeElem,
+
     )
+
+    private suspend fun createPokeElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        data.checkAndThrow("type", "id")
+        val elem = MsgElement()
+        val face = FaceElement()
+        face.faceIndex = 0
+        face.faceText = ""
+        face.faceType = 5
+        face.packId = null
+        face.pokeType = data["type"].asInt
+        face.spokeSummary = ""
+        face.doubleHit = 0
+        face.vaspokeId = data["id"].asInt
+        face.vaspokeName = ""
+        face.vaspokeMinver = ""
+        face.pokeStrength = (data["strength"].asIntOrNull ?: data["cnt"].asIntOrNull
+                ?: data["count"].asIntOrNull ?: data["time"].asIntOrNull ?: 0).also {
+            if(it < 0 || it > 3) throw ParamsIllegalException("strength")
+        }
+        face.msgType = 0
+        face.faceBubbleCount = 0
+        face.oldVersionStr = "[截一戳]请使用最新版手机QQ体验新功能。"
+        face.pokeFlag = 0
+        elem.elementType = MsgConstant.KELEMTYPEFACE
+        elem.faceElement = face
+        return elem
+    }
+
+    private suspend fun createFaceElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        data.checkAndThrow("id")
+
+        val elem = MsgElement()
+        elem.elementType = MsgConstant.KELEMTYPEFACE
+        val face = FaceElement()
+
+        // 4 is market face
+        // 5 is vas poke
+        face.faceType = 0
+        val serverId =  data["id"].asInt
+        val localId = QQSysFaceUtil.convertToLocal(serverId)
+        face.faceIndex = serverId
+        face.faceText = QQSysFaceUtil.getFaceDescription(localId)
+        face.imageType = 0
+        face.packId = "0"
+        elem.faceElement = face
+
+        return elem
+    }
 
     private suspend fun createRpsElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
         val elem = MsgElement()
@@ -79,14 +129,17 @@ internal object MessageMaker {
         if (chatType != MsgConstant.KCHATTYPEGUILD) {
             return createTextElem(chatType, peerId, data)
         }
+        data.checkAndThrow("text")
         val elem = MsgElement()
         elem.elementType = MsgConstant.KELEMTYPEMARKDOWN
-        val markdown = MarkdownElement(data["text"].asStringOrNull ?: "null")
+        val markdown = MarkdownElement(data["text"].asString)
         elem.markdownElement = markdown
         return elem
     }
 
     private suspend fun createVideoElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        data.checkAndThrow("file")
+
         val file = FileHelper.parseAndSave(data["file"].asString)
         val elem = MsgElement()
         val video = VideoElement()
@@ -130,6 +183,8 @@ internal object MessageMaker {
         if (chatType != MsgConstant.KCHATTYPEGROUP) {
             return MsgElement()
         }
+        data.checkAndThrow("qq")
+
         val elem = MsgElement()
         val qq = data["qq"].asString
 
@@ -167,6 +222,8 @@ internal object MessageMaker {
     }
 
     private suspend fun createRecordElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        data.checkAndThrow("file")
+
         var file = FileHelper.parseAndSave(data["file"].asString)
         val isMagic = data["magic"].asBooleanOrNull ?: false
 
@@ -232,6 +289,8 @@ internal object MessageMaker {
     }
 
     private suspend fun createImageElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        data.checkAndThrow("file")
+
         val isOriginal = data["original"].asBooleanOrNull ?: true
         val isFlash = data["flash"].asBooleanOrNull ?: false
         val file = FileHelper.parseAndSave(data["file"].asString)
@@ -279,35 +338,20 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createFaceElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
-        val elem = MsgElement()
-        elem.elementType = MsgConstant.KELEMTYPEFACE
-        val face = FaceElement()
-
-        // 4 is market face
-        face.faceType = 0
-
-        val serverId =  data["id"].asInt
-        val localId = QQSysFaceUtil.convertToLocal(serverId)
-
-        face.faceIndex = serverId
-
-        face.faceText = QQSysFaceUtil.getFaceDescription(localId)
-
-        face.imageType = 0
-        face.packId = "0"
-        elem.faceElement = face
-
-        return elem
-    }
-
     private suspend fun createTextElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        data.checkAndThrow("text")
         val elem = MsgElement()
         elem.elementType = MsgConstant.KELEMTYPETEXT
         val text = TextElement()
-        text.content = data["text"].asStringOrNull ?: "null"
+        text.content = data["text"].asString
         elem.textElement = text
         return elem
+    }
+
+    private fun JsonObject.checkAndThrow(vararg key: String) {
+        key.forEach {
+            if (!containsKey(it)) throw ParamsException(it)
+        }
     }
 
     operator fun get(type: String): IMaker? = makerArray[type]

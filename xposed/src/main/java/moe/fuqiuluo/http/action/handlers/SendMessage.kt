@@ -1,40 +1,45 @@
 package moe.fuqiuluo.http.action.handlers
 
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonArray
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
 import moe.fuqiuluo.http.action.data.MessageResult
 import moe.fuqiuluo.http.action.helper.MessageHelper
-import moe.fuqiuluo.http.entries.EmptyObject
-import moe.fuqiuluo.http.entries.Status
-import moe.fuqiuluo.http.entries.resultToString
+import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
+import moe.fuqiuluo.http.action.helper.msg.ParamsException
 import moe.fuqiuluo.xposed.helper.DataRequester
 import mqq.app.MobileQQ
-import kotlin.coroutines.resume
-import kotlin.properties.Delegates
 
 internal object SendMessage: IActionHandler() {
     override suspend fun handle(session: ActionSession): String {
-        when(val chatType = MessageHelper.obtainMessageTypeByDetailType(
-            session.getStringOrNull("detail_type") ?: return noParam("detail_type")
-        )) {
-            MsgConstant.KCHATTYPEGROUP -> {
-                val groupId = session.getStringOrNull("group_id") ?: return noParam("group_id")
-                val message = session.getArrayOrNull("message") ?: return noParam("message")
-                val result = sendToTroop(groupId, message)
-                return ok(MessageResult(
-                    msgId = result.second,
-                    time = result.first * 0.001
-                ))
+        val detailType = session.getStringOrNull("detail_type") ?: return noParam("detail_type")
+        kotlin.runCatching {
+            when(val chatType = MessageHelper.obtainMessageTypeByDetailType(detailType)) {
+                MsgConstant.KCHATTYPEGROUP -> {
+                    val groupId = session.getStringOrNull("group_id") ?: return noParam("group_id")
+                    val message = session.getArrayOrNull("message") ?: return noParam("message")
+                    val result = sendToTroop(groupId, message)
+                    return ok(MessageResult(
+                        msgId = result.second,
+                        time = result.first * 0.001
+                    ))
+                }
+
+                else -> {}
+            }
+        }.onFailure {
+            return if (it is InternalMessageMakerError) {
+                if (it is ParamsException) {
+                    noParam(it.message!!)
+                } else {
+                    error(it.message!!)
+                }
+            } else {
+                error(it.message ?: "unknown error")
             }
         }
-        return logic("unable to send message: not support detail_type")
+        return logic("unable to send message: not support $detailType")
     }
 
     private suspend fun sendToTroop(groupId: String, message: JsonArray): Pair<Long, Long> {
@@ -45,7 +50,7 @@ internal object SendMessage: IActionHandler() {
                 targetUin = groupId,
                 messageList = message
             ).also {
-                if (it.isNullOrEmpty()) kotlin.error("message is empty, unable to send")
+                if (it.isEmpty()) kotlin.error("message is empty, unable to send")
             }
         ) { code, _ ->
             DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {

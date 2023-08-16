@@ -10,6 +10,7 @@ import de.robv.android.xposed.XposedBridge
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
 import moe.fuqiuluo.http.action.helper.msg.MessageMaker
 import moe.fuqiuluo.xposed.helper.MMKVHelper
 import moe.fuqiuluo.xposed.tools.EmptyJsonObject
@@ -55,6 +56,9 @@ internal object MessageHelper {
                     msgList.add(maker(chatType, targetUin, data))
                 }
             }.onFailure {
+                if (it is InternalMessageMakerError) {
+                    throw it
+                }
                 XposedBridge.log(it)
             }
         }

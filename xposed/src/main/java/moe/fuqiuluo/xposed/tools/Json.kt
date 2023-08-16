@@ -21,6 +21,9 @@ val JsonElement?.asStringOrNull: String?
 val JsonElement?.asInt: Int
     get() = this!!.jsonPrimitive.int
 
+val JsonElement?.asIntOrNull: Int?
+    get() = this?.jsonPrimitive?.int
+
 val JsonElement?.asBoolean: Boolean
     get() = this!!.jsonPrimitive.boolean
 

@@ -35,7 +35,8 @@ internal object ActionManager {
         "send_message" to SendMessage,
         "get_uid" to GetUid,
         "get_uin_by_uid" to GetUinByUid,
-        "delete_message" to DeleteMessage
+        "delete_message" to DeleteMessage,
+        "sanc_qrcode" to ScanQRCode
     )
 
     operator fun get(action: String): IActionHandler? {
