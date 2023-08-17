@@ -15,6 +15,7 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
+    if: ${{ !startsWith(github.event.head_commit.message, 'Merge remote-tracking branch') }} && github.ref == 'refs/heads/master' }}
 
     steps:
       - name: Checkout code

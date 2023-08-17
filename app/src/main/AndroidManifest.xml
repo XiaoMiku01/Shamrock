@@ -50,6 +50,9 @@
         <meta-data
             android:name="xposedminversion"
             android:value="23" />
+        <meta-data
+            android:name="xposedscope"
+            android:resource="@array/xposed_scope" />
 
         <!--适配华为（huawei）刘海屏-->
         <meta-data
