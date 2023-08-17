@@ -1,3 +1,6 @@
+import com.android.build.api.dsl.ApplicationExtension
+import org.gradle.api.Project
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -79,6 +82,33 @@ android {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
             version = "3.22.1"
+        }
+    }
+    configureAppSigningConfigsForRelease(project)
+}
+
+fun configureAppSigningConfigsForRelease(project: Project) {
+    val keystorePath: String? = System.getenv("KEYSTORE_PATH")
+    if (keystorePath.isNullOrBlank()) {
+        println("ERROR: KEYSTORE_PATH is not set or is blank.")
+        return
+    }
+    project.configure<ApplicationExtension> {
+        signingConfigs {
+            create("release") {
+                storeFile = file(System.getenv("KEYSTORE_PATH"))
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+            }
+        }
+        buildTypes {
+            release {
+                signingConfig = signingConfigs.findByName("release")
+            }
         }
     }
 }
