@@ -75,6 +75,15 @@ object FileHelper {
         }
     }
 
+    fun getFile(dir: String, name: String?): File {
+        if (name == null) return getFile(dir)
+        val file = CacheDir.resolve(dir)
+        if (!file.exists()) {
+            file.mkdirs()
+        }
+        return file.resolve(name)
+    }
+
     fun getFile(name: String) = CacheDir.resolve(name)
 
     fun getAudioMediaMime(file: File): String? {

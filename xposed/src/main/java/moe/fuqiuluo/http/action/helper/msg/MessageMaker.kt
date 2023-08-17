@@ -1,11 +1,14 @@
 package moe.fuqiuluo.http.action.helper.msg
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.media.ExifInterface
 import com.tencent.mobileqq.app.QQAppInterface
 import com.tencent.mobileqq.emoticon.QQSysFaceUtil
 import com.tencent.mobileqq.pb.ByteStringMicro
 import com.tencent.qphone.base.remote.ToServiceMsg
+import com.tencent.qqnt.kernel.nativeinterface.ArkElement
 import com.tencent.qqnt.kernel.nativeinterface.FaceElement
 import com.tencent.qqnt.kernel.nativeinterface.MarkdownElement
 import com.tencent.qqnt.kernel.nativeinterface.MarketFaceElement
@@ -20,6 +23,7 @@ import com.tencent.qqnt.kernel.nativeinterface.TextElement
 import com.tencent.qqnt.kernel.nativeinterface.VideoElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import moe.fuqiuluo.http.action.helper.ContactHelper
 import moe.fuqiuluo.http.action.helper.FileHelper
 import moe.fuqiuluo.http.action.helper.HighwayHelper
 import moe.fuqiuluo.http.action.helper.PlatformHelper
@@ -57,8 +61,30 @@ internal object MessageMaker {
         "poke" to ::createPokeElem,
         "anonymous" to ::createAnonymousElem,
         "share" to ::createShareElem,
-
+        "contact" to ::createContactElem
     )
+
+    private suspend fun createContactElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        data.checkAndThrow("type", "id")
+        val type = data["type"].asString
+        val id = data["id"].asString
+        val elem = MsgElement()
+
+        when (type) {
+            "qq" -> {
+                val ark = ArkElement(ContactHelper.getSharePrivateContact(id.toLong()), null, null)
+                elem.arkElement = ark
+            }
+            "group" -> {
+                val ark = ArkElement(ContactHelper.getShareTroopContact(id.toLong()), null, null)
+                elem.arkElement = ark
+            }
+            else -> throw ParamsIllegalException("type")
+        }
+
+        elem.elementType = MsgConstant.KELEMTYPEARKSTRUCT
+        return elem
+    }
 
     private suspend fun createShareElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("title", "url")

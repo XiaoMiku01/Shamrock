@@ -9,32 +9,43 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import mqq.app.MobileQQ
 
 internal object DynamicReceiver: BroadcastReceiver() {
-    private val hashHandler = mutableSetOf<Request>()
-    private val cmdHandler = mutableMapOf<String, Request>()
+    private val hashHandler = mutableSetOf<IPCRequest>()
+    private val cmdHandler = mutableMapOf<String, IPCRequest>()
     private val mutex = Mutex() // 滥用的锁，所以说尽量减少使用
 
     override fun onReceive(ctx: Context, intent: Intent) {
         val hash = intent.getIntExtra("hash", -1)
         val cmd = intent.getStringExtra("cmd") ?: ""
-        if (cmd.isNotBlank()) {
-            cmdHandler[cmd]?.callback?.handle(intent)
-        } else GlobalScope.launch { mutex.withLock {
-            hashHandler.forEach {
-                if (hash == -1) return@forEach
+        kotlin.runCatching {
+            if (cmd.isNotBlank()) {
+                cmdHandler[cmd].also {
+                    if (it == null) DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {
+                        put("string", "无广播处理器: $cmd")
+                    })
+                }?.callback?.handle(intent)
+            } else GlobalScope.launch { mutex.withLock {
+                hashHandler.forEach {
+                    if (hash == -1) return@forEach
 
-                if (hash == it.hashCode()) {
-                    it.callback?.handle(intent)
-                    if (it.seq != -1)
-                        hashHandler.remove(it)
-                    return@forEach
+                    if (hash == it.hashCode()) {
+                        it.callback?.handle(intent)
+                        if (it.seq != -1)
+                            hashHandler.remove(it)
+                        return@forEach
+                    }
                 }
-            }
-        } }
+            } }
+        }.onFailure {
+            DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {
+                put("string", "处理器[$cmd]错误: $it")
+            })
+        }
     }
 
-    fun register(cmd: String, request: Request) {
+    fun register(cmd: String, request: IPCRequest) {
         cmdHandler[cmd] = request
     }
 
@@ -42,7 +53,7 @@ internal object DynamicReceiver: BroadcastReceiver() {
         cmdHandler.remove(cmd)
     }
 
-    fun register(request: Request) {
+    fun register(request: IPCRequest) {
         GlobalScope.launch {
             mutex.withLock {
                 hashHandler.add(request)

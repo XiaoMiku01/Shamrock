@@ -2,15 +2,13 @@ package moe.fuqiuluo.xposed.actions.impl
 
 import android.content.ContentValues
 import android.content.Context
-import android.widget.Toast
 import androidx.core.content.edit
 import moe.fuqiuluo.xposed.actions.IAction
 import moe.fuqiuluo.xposed.helper.DataRequester
 
-import de.robv.android.xposed.XposedBridge.log
 import moe.fuqiuluo.http.HTTPServer
 import moe.fuqiuluo.xposed.helper.DynamicReceiver
-import moe.fuqiuluo.xposed.helper.Request
+import moe.fuqiuluo.xposed.helper.IPCRequest
 import moe.fuqiuluo.xposed.loader.ActionLoader
 import moe.fuqiuluo.xposed.loader.NativeLoader
 import mqq.app.MobileQQ
@@ -28,7 +26,7 @@ class PullConfig: IAction {
     override fun invoke(ctx: Context) {
         if (MobileQQ.getMobileQQ().qqProcessName != "com.tencent.mobileqq") return
 
-        DynamicReceiver.register("fetchPort", Request("", 0, ContentValues()) {
+        DynamicReceiver.register("fetchPort", IPCRequest("", 0, ContentValues()) {
             DataRequester.request(ctx, "success", bodyBuilder = {
                 put("port", HTTPServer.PORT)
             })

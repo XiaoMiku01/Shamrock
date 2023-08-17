@@ -4,9 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import kotlinx.atomicfu.atomic
-import moe.fuqiuluo.xposed.actions.impl.GlobalUi
 import kotlin.concurrent.timer
 
 object DataRequester {
@@ -44,7 +42,7 @@ object DataRequester {
             DynamicReceiver.unregister(currentSeq)
             this.cancel()
         }
-        val request = Request(cmd, currentSeq, values) {
+        val request = IPCRequest(cmd, currentSeq, values) {
             kotlin.runCatching {
                 job.cancel()
             }
@@ -54,29 +52,18 @@ object DataRequester {
 
         return currentSeq
     }
-
-    /*fun requestService(
-        cmd: String,
-        bodyBuilder: (ContentValues.() -> Unit)? = null,
-        onFailure: ((Throwable) -> Unit)? = null,
-        callback: ((ContentValues) -> Unit)? = null
-    ) {
-
-    }*/
 }
 
 fun interface ICallback {
     fun handle(intent: Intent)
 }
 
-data class Request(
-    val cmd: String,
-    val seq: Int,
+data class IPCRequest(
+    val cmd: String = "",
+    val seq: Int = -1,
     val values: ContentValues? = null,
     var callback: ICallback? = null,
 ) {
-    var callbackV2: ((ContentValues) -> Unit)? = null
-
     override fun hashCode(): Int {
         return (cmd + seq).hashCode()
     }

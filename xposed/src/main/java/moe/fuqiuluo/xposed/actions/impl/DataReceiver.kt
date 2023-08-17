@@ -7,16 +7,13 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Handler
 import android.widget.Toast
-import com.tencent.mobileqq.sign.QQSecuritySign
 import de.robv.android.xposed.XposedBridge
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.xposed.actions.IAction
 import moe.fuqiuluo.xposed.helper.DynamicReceiver
-import moe.fuqiuluo.xposed.helper.Request
 import mqq.app.MobileQQ
-import kotlin.coroutines.resume
 
 internal lateinit var GlobalUi: Handler
 

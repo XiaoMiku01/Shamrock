@@ -1,7 +1,6 @@
 @file:OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
 package moe.fuqiuluo.http.api
 
-import com.tencent.mobileqq.fe.FEKit
 import com.tencent.mobileqq.sign.QQSecuritySign.SignResult
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -13,18 +12,13 @@ import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.Serializable
-import moe.fuqiuluo.xposed.actions.impl.DataReceiver
-import moe.fuqiuluo.xposed.helper.DataRequester
 import moe.fuqiuluo.xposed.helper.DynamicReceiver
-import moe.fuqiuluo.xposed.helper.Request
+import moe.fuqiuluo.xposed.helper.IPCRequest
 import moe.fuqiuluo.xposed.tools.broadcast
 import moe.fuqiuluo.xposed.tools.fetchGet
 import moe.fuqiuluo.xposed.tools.fetchPost
@@ -75,7 +69,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.requestSign(
     val sign = reqLock.withLock {
         withTimeoutOrNull(5000) {
             suspendCancellableCoroutine { con ->
-                DynamicReceiver.register("sign_callback", Request("sign", -1) {
+                DynamicReceiver.register("sign_callback", IPCRequest("sign") {
                     con.resume(SignResult().apply {
                         this.sign = it.getByteArrayExtra("sign") ?: error("无法获取SIGN")
                         this.token = it.getByteArrayExtra("token")

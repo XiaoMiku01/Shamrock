@@ -24,7 +24,7 @@ public final class MsgElement implements IKernelModel, Serializable {
     ReplyElement replyElement;
     ShareLocationElement shareLocationElement;
     StructLongMsgElement structLongMsgElement;
-    StructMsgElement structMsgElement;
+    StructMsgElement structMsgElement; // xml
     TextElement textElement;
     TextGiftElement textGiftElement;
     TofuRecordElement tofuRecordElement;

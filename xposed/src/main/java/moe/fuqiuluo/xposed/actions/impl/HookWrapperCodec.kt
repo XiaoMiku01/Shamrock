@@ -23,7 +23,8 @@ class HookWrapperCodec: IAction {
         "trpc.qpay.homepage2.Homepage2.SsoGetHomepage",
         "trpc.qpay.value_added_info.Query.SsoGetPrivilege",
         "trpc.qqshop.qgghomepage.Config.SsoGetBottomTab",
-        "ClubInfoSvc.queryPrivExt"
+        "ClubInfoSvc.queryPrivExt",
+        "OidbSvc.0xcf8"
     )
 
     override fun invoke(ctx: Context) {
