@@ -1,7 +1,5 @@
 package moe.fuqiuluo.http.action.helper.msg
 
-import android.app.Activity
-import android.content.Intent
 import android.graphics.BitmapFactory
 import android.media.ExifInterface
 import com.tencent.mobileqq.app.QQAppInterface
@@ -26,11 +24,11 @@ import kotlinx.serialization.json.JsonPrimitive
 import moe.fuqiuluo.http.action.helper.ContactHelper
 import moe.fuqiuluo.http.action.helper.FileHelper
 import moe.fuqiuluo.http.action.helper.HighwayHelper
-import moe.fuqiuluo.http.action.helper.PlatformHelper
+import moe.fuqiuluo.xposed.helper.PlatformHelper
 import moe.fuqiuluo.http.action.helper.TroopHelper
 import moe.fuqiuluo.http.action.helper.codec.AudioUtils
 import moe.fuqiuluo.http.action.helper.codec.MediaType
-import moe.fuqiuluo.xposed.helper.ServiceFetcher
+import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import moe.fuqiuluo.xposed.helper.msgService
 import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asInt
@@ -61,8 +59,18 @@ internal object MessageMaker {
         "poke" to ::createPokeElem,
         "anonymous" to ::createAnonymousElem,
         "share" to ::createShareElem,
-        "contact" to ::createContactElem
+        "contact" to ::createContactElem,
+        "location" to ::createLocationElem
     )
+
+    private suspend fun createLocationElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+        data.checkAndThrow("lat", "lon")
+        val elem = MsgElement()
+
+
+
+        return elem
+    }
 
     private suspend fun createContactElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("type", "id")
@@ -83,6 +91,7 @@ internal object MessageMaker {
         }
 
         elem.elementType = MsgConstant.KELEMTYPEARKSTRUCT
+
         return elem
     }
 
@@ -243,7 +252,7 @@ internal object MessageMaker {
 
         video.videoMd5 = QQNTWrapperUtil.CppProxy.genFileMd5Hex(file.absolutePath)
 
-        val msgService = ServiceFetcher.kernelService.msgService!!
+        val msgService = NTServiceFetcher.kernelService.msgService!!
         val originalPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(
             5, 2, video.videoMd5, file.name, 1, 0, null, "", true
         ))
@@ -348,7 +357,7 @@ internal object MessageMaker {
                 ptt.formatType = MsgConstant.KPTTFORMATTYPESILK
             }
         }
-        val msgService = ServiceFetcher.kernelService.msgService!!
+        val msgService = NTServiceFetcher.kernelService.msgService!!
         val originalPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(
             MsgConstant.KELEMTYPEPTT, 0, ptt.md5HexStr, file.name, 1, 0, null, "", true
         ))!!
@@ -401,7 +410,7 @@ internal object MessageMaker {
         val pic = PicElement()
         pic.md5HexStr = QQNTWrapperUtil.CppProxy.genFileMd5Hex(file.absolutePath)
 
-        val msgService = ServiceFetcher.kernelService.msgService!!
+        val msgService = NTServiceFetcher.kernelService.msgService!!
         val originalPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(
             2, 0, pic.md5HexStr, file.name, 1, 0, null, "", true
         ))

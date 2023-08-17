@@ -4,7 +4,7 @@ import com.tencent.mmkv.MMKV
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
-internal object MMKVHelper {
+internal object MMKVFetcher {
     private lateinit var METHOD_GET_MMKV: Method
 
     fun defaultMMKV(): MMKV {

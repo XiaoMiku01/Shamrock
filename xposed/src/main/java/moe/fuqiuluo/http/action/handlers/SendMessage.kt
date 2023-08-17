@@ -8,7 +8,8 @@ import moe.fuqiuluo.http.action.data.MessageResult
 import moe.fuqiuluo.http.action.helper.MessageHelper
 import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
 import moe.fuqiuluo.http.action.helper.msg.ParamsException
-import moe.fuqiuluo.xposed.helper.DataRequester
+import moe.fuqiuluo.xposed.helper.LogCenter
+import moe.fuqiuluo.xposed.helper.internal.DataRequester
 import mqq.app.MobileQQ
 
 internal object SendMessage: IActionHandler() {
@@ -53,9 +54,7 @@ internal object SendMessage: IActionHandler() {
                 if (it.isEmpty()) kotlin.error("message is empty, unable to send")
             }
         ) { code, _ ->
-            DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {
-                put("string", "消息发送 troop: $groupId, code: $code")
-            })
+            LogCenter.log("消息发送 troop: $groupId, code: $code")
         }
     }
 

@@ -8,11 +8,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.http.HTTPServer
 import moe.fuqiuluo.xposed.actions.IAction
-import mqq.app.MobileQQ
+import moe.fuqiuluo.xposed.helper.PlatformHelper
 
 class CreateHTTP: IAction {
     override fun invoke(ctx: Context) {
-        if (MobileQQ.getMobileQQ().qqProcessName != "com.tencent.mobileqq") return
+        if (!PlatformHelper.isMainProcess()) return
 
         val shamrockConfig = ctx.getSharedPreferences("shamrock_config", 0)
         val port = shamrockConfig.getInt("port", 5700)

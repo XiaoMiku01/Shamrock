@@ -1,7 +1,5 @@
 package moe.fuqiuluo.http
 
-import android.widget.Toast
-import androidx.core.content.edit
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
@@ -27,7 +25,8 @@ import moe.fuqiuluo.http.api.getStartTime
 import moe.fuqiuluo.http.api.sign
 import moe.fuqiuluo.http.api.uploadGroupImage
 import moe.fuqiuluo.http.entries.Status
-import moe.fuqiuluo.xposed.helper.DataRequester
+import moe.fuqiuluo.xposed.helper.LogCenter
+import moe.fuqiuluo.xposed.helper.internal.DataRequester
 import mqq.app.MobileQQ
 
 object HTTPServer {
@@ -84,11 +83,9 @@ object HTTPServer {
             startTime = System.currentTimeMillis()
             isQueryServiceStarted = true
             this.PORT = port
-            log("Start HTTP Server: http://0.0.0.0:$PORT/")
+            LogCenter.log("Start HTTP Server: http://0.0.0.0:$PORT/")
 
-            DataRequester.request(ctx, "success", bodyBuilder = {
-                put("port", PORT)
-            })
+            DataRequester.request("success", mapOf("port" to PORT))
         }
     }
 

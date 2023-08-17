@@ -2,12 +2,12 @@ package moe.fuqiuluo.http.action.helper
 
 import com.tencent.qqnt.kernel.nativeinterface.MemberInfo
 import kotlinx.coroutines.suspendCancellableCoroutine
-import moe.fuqiuluo.xposed.helper.ServiceFetcher
+import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import kotlin.coroutines.resume
 
 internal object TroopHelper {
     suspend fun getTroopMemberInfoByUin(groupId: String, qq: Long): MemberInfo? {
-        val kernelService = ServiceFetcher.kernelService
+        val kernelService = NTServiceFetcher.kernelService
         val sessionService = kernelService.wrapperSession
         val groupService = sessionService.groupService
         return suspendCancellableCoroutine {
@@ -28,7 +28,7 @@ internal object TroopHelper {
     }
 
     suspend fun getTroopMemberInfoByUid(groupId: String, uid: String): MemberInfo? {
-        val kernelService = ServiceFetcher.kernelService
+        val kernelService = NTServiceFetcher.kernelService
         val sessionService = kernelService.wrapperSession
         val groupService = sessionService.groupService
         return suspendCancellableCoroutine {

@@ -1,5 +1,3 @@
-@file:OptIn(DelicateCoroutinesApi::class)
-
 package moe.fuqiuluo.http.action.helper
 
 import android.util.LruCache
@@ -10,9 +8,8 @@ import com.tencent.qphone.base.remote.ToServiceMsg
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
-import moe.fuqiuluo.xposed.helper.DynamicReceiver
-import moe.fuqiuluo.xposed.helper.IPCRequest
-import moe.fuqiuluo.xposed.tools.broadcast
+import moe.fuqiuluo.xposed.helper.PacketHandler
+import moe.fuqiuluo.xposed.helper.PlatformHelper
 import moe.fuqiuluo.xposed.tools.slice
 import mqq.app.MobileQQ
 import tencent.im.oidb.cmd0x11b2.oidb_0x11b2
@@ -23,16 +20,8 @@ internal object ContactHelper {
     private val LruCacheTroop = LruCache<Long, String>(5)
 
     init {
-        MobileQQ.getContext().broadcast("msf") {
-            putExtra("cmd", "register_handler_cmd")
-            putExtra("handler_cmd", "OidbSvcTrpcTcp.0x11ca_0")
-        }
-        MobileQQ.getContext().broadcast("msf") {
-            putExtra("cmd", "register_handler_cmd")
-            putExtra("handler_cmd", "GroupSvc.JoinGroupLink")
-        }
         val privatePattern = Regex("uin=([0-9]+)\"")
-        DynamicReceiver.register("OidbSvcTrpcTcp.0x11ca_0", IPCRequest {
+        PacketHandler.register("OidbSvcTrpcTcp.0x11ca_0") {
             val body = oidb_sso.OIDBSSOPkg()
             body.mergeFrom(it.getByteArrayExtra("buffer")!!.slice(4))
             val rsp = oidb_0x11b2.BusinessCardV3Rsp()
@@ -41,14 +30,14 @@ internal object ContactHelper {
             val matcher = privatePattern.findAll(text)
             val id = matcher.first().groups[1]!!.value
             LruCachePrivate.put(id.toLong(), text)
-        })
-        DynamicReceiver.register("GroupSvc.JoinGroupLink", IPCRequest {
+        }
+        PacketHandler.register("GroupSvc.JoinGroupLink") {
             val body = join_group_link.RspBody()
             body.mergeFrom(it.getByteArrayExtra("buffer")!!.slice(4))
             val text = body.signed_ark.get().toStringUtf8()
             val groupId = body.group_code.get()
             LruCacheTroop.put(groupId, text)
-        })
+        }
     }
 
     suspend fun getSharePrivateContact(peerId: Long): String {

@@ -6,10 +6,6 @@ import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.http.entries.resultToString
 import de.robv.android.xposed.XposedBridge.log
-import kotlinx.coroutines.suspendCancellableCoroutine
-import moe.fuqiuluo.xposed.actions.impl.FetchService
-import moe.fuqiuluo.xposed.helper.ServiceFetcher
-import kotlin.coroutines.resume
 
 internal object TestHandler: IActionHandler() {
     override suspend fun handle(session: ActionSession): String {

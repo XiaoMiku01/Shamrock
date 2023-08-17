@@ -148,6 +148,9 @@ object FuzzySearchClass {
     }
 }
 
+/**
+ * 打印一个类的内部数据（调试）
+ */
 internal fun Any.toInnerValuesString(): String {
     val builder = StringBuilder()
     val clz = javaClass

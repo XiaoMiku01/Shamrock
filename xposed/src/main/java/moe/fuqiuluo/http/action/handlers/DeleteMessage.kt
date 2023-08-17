@@ -7,8 +7,8 @@ import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
 import moe.fuqiuluo.http.action.helper.MessageHelper
 import moe.fuqiuluo.http.entries.EmptyObject
-import moe.fuqiuluo.xposed.helper.MMKVHelper
-import moe.fuqiuluo.xposed.helper.ServiceFetcher
+import moe.fuqiuluo.xposed.helper.MMKVFetcher
+import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import kotlin.coroutines.resume
 
 internal object DeleteMessage: IActionHandler() {
@@ -16,7 +16,7 @@ internal object DeleteMessage: IActionHandler() {
         val msgId = (session.getStringOrNull("message_id")
             ?: return noParam("message_id")).toLong()
 
-        val kernelService = ServiceFetcher.kernelService
+        val kernelService = NTServiceFetcher.kernelService
         val sessionService = kernelService.wrapperSession
         val msgService = sessionService.msgService
 
@@ -34,7 +34,7 @@ internal object DeleteMessage: IActionHandler() {
 
     private fun generateContact(msgId: Long): Contact {
         val chatType = MessageHelper.getChatType(msgId)
-        val mmkv = MMKVHelper.defaultMMKV()
+        val mmkv = MMKVFetcher.defaultMMKV()
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
             val key = "troop_$msgId"
             val groupId = mmkv.getLong(key, 0)

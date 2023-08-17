@@ -1,6 +1,7 @@
 @file:OptIn(DelicateCoroutinesApi::class)
 package com.tencent.mobileqq.listener
 
+import com.arthenica.ffmpegkit.Log
 import com.tencent.mobileqq.listener.helper.MsgRecordHelper
 import com.tencent.qqnt.kernel.nativeinterface.BroadcastHelperTransNotifyInfo
 import com.tencent.qqnt.kernel.nativeinterface.Contact
@@ -41,7 +42,8 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import moe.fuqiuluo.xposed.helper.DataRequester
+import moe.fuqiuluo.xposed.helper.LogCenter
+import moe.fuqiuluo.xposed.helper.internal.DataRequester
 import moe.fuqiuluo.xposed.tools.GlobalClient
 import mqq.app.MobileQQ
 import java.util.ArrayList
@@ -78,7 +80,7 @@ internal object AIOMSGListener: IKernelMsgListener {
     }
 
     override fun onAddSendMsg(record: MsgRecord) {
-        DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = { put("string", record.toString()) })
+        LogCenter.log(record.toString())
     }
 
     override fun onRecvMsgSvrRspTransInfo(

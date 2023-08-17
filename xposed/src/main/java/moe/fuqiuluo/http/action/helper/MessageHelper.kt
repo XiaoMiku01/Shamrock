@@ -8,17 +8,13 @@ import com.tencent.qqnt.kernel.nativeinterface.MsgElement
 import com.tencent.qqnt.msg.api.IMsgService
 import de.robv.android.xposed.XposedBridge
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
 import moe.fuqiuluo.http.action.helper.msg.MessageMaker
-import moe.fuqiuluo.xposed.helper.MMKVHelper
+import moe.fuqiuluo.xposed.helper.MMKVFetcher
 import moe.fuqiuluo.xposed.tools.EmptyJsonObject
-import moe.fuqiuluo.xposed.tools.asJsonObject
 import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
 import moe.fuqiuluo.xposed.tools.asString
-import kotlin.math.abs
-import kotlin.random.Random
 
 internal object MessageHelper {
     fun sendTroopMessage(groupId: String, msgElements: ArrayList<MsgElement>, callback: IOperateCallback): Pair<Long, Long> {
@@ -67,7 +63,7 @@ internal object MessageHelper {
 
     fun generateMsgId(chatType: Int, peerId: Long): Long {
         val msgId = createMessageUniseq(chatType, System.currentTimeMillis())
-        val mmkv = MMKVHelper.defaultMMKV()
+        val mmkv = MMKVFetcher.defaultMMKV()
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
             mmkv.putLong("troop_$msgId", peerId)
         }

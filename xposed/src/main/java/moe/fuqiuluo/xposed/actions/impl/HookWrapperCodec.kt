@@ -24,7 +24,8 @@ class HookWrapperCodec: IAction {
         "trpc.qpay.value_added_info.Query.SsoGetPrivilege",
         "trpc.qqshop.qgghomepage.Config.SsoGetBottomTab",
         "ClubInfoSvc.queryPrivExt",
-        "OidbSvc.0xcf8"
+        "OidbSvc.0xcf8",
+        "LbsSvc.lbs_report"
     )
 
     override fun invoke(ctx: Context) {
@@ -71,6 +72,7 @@ class HookWrapperCodec: IAction {
                     if (from.serviceCmd in IgnoredCmd) {
                         from.serviceCmd = "ShamrockInjectedCmd"
                         from.putWupBuffer(EMPTY_BYTE_ARRAY)
+                        from.requestSsoSeq = 0
                         it.args[1] = from
                     } else {
                         pushOnReceive(from)

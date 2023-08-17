@@ -1,5 +1,5 @@
 @file:OptIn(DelicateCoroutinesApi::class)
-package moe.fuqiuluo.xposed.helper
+package moe.fuqiuluo.xposed.helper.internal
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -9,22 +9,24 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import mqq.app.MobileQQ
+import moe.fuqiuluo.xposed.helper.LogCenter
 
+/**
+ * 动态广播
+ */
 internal object DynamicReceiver: BroadcastReceiver() {
     private val hashHandler = mutableSetOf<IPCRequest>()
     private val cmdHandler = mutableMapOf<String, IPCRequest>()
-    private val mutex = Mutex() // 滥用的锁，所以说尽量减少使用
+    private val mutex = Mutex() // 滥用的锁，尽量减少使用
 
     override fun onReceive(ctx: Context, intent: Intent) {
-        val hash = intent.getIntExtra("hash", -1)
-        val cmd = intent.getStringExtra("cmd") ?: ""
+        val hash = intent.getIntExtra("__hash", -1)
+        val cmd = intent.getStringExtra("__cmd") ?: ""
         kotlin.runCatching {
             if (cmd.isNotBlank()) {
                 cmdHandler[cmd].also {
-                    if (it == null) DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {
-                        put("string", "无广播处理器: $cmd")
-                    })
+                    if (it == null)
+                        LogCenter.log("无广播处理器: $cmd")
                 }?.callback?.handle(intent)
             } else GlobalScope.launch { mutex.withLock {
                 hashHandler.forEach {
@@ -39,12 +41,11 @@ internal object DynamicReceiver: BroadcastReceiver() {
                 }
             } }
         }.onFailure {
-            DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {
-                put("string", "处理器[$cmd]错误: $it")
-            })
+            LogCenter.log("处理器[$cmd]错误: $it")
         }
     }
 
+    // 注册持久化处理器
     fun register(cmd: String, request: IPCRequest) {
         cmdHandler[cmd] = request
     }
@@ -53,6 +54,7 @@ internal object DynamicReceiver: BroadcastReceiver() {
         cmdHandler.remove(cmd)
     }
 
+    // 注册临时处理器，用完即删除
     fun register(request: IPCRequest) {
         GlobalScope.launch {
             mutex.withLock {

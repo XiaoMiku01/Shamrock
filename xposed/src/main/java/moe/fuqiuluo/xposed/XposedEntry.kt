@@ -41,7 +41,6 @@ class XposedEntry: IXposedHookLoadPackage {
                 it.type == clz
             }
             val app: Context? = field.get(null) as? Context
-            log("Found Entry For QQ.")
             if (app != null) {
                 execStartupInit(app)
             }

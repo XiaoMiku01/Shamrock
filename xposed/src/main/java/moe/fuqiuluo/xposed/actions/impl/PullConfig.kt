@@ -1,17 +1,16 @@
 package moe.fuqiuluo.xposed.actions.impl
 
-import android.content.ContentValues
 import android.content.Context
 import androidx.core.content.edit
 import moe.fuqiuluo.xposed.actions.IAction
-import moe.fuqiuluo.xposed.helper.DataRequester
+import moe.fuqiuluo.xposed.helper.internal.DataRequester
 
 import moe.fuqiuluo.http.HTTPServer
-import moe.fuqiuluo.xposed.helper.DynamicReceiver
-import moe.fuqiuluo.xposed.helper.IPCRequest
+import moe.fuqiuluo.xposed.helper.PlatformHelper
+import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
+import moe.fuqiuluo.xposed.helper.internal.IPCRequest
 import moe.fuqiuluo.xposed.loader.ActionLoader
 import moe.fuqiuluo.xposed.loader.NativeLoader
-import mqq.app.MobileQQ
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
@@ -21,27 +20,29 @@ class PullConfig: IAction {
         var isConfigOk = false
     }
 
-    external fun testNativeLibrary(): String
+    private external fun testNativeLibrary(): String
 
     override fun invoke(ctx: Context) {
-        if (MobileQQ.getMobileQQ().qqProcessName != "com.tencent.mobileqq") return
+        if (!PlatformHelper.isMainProcess()) return
 
-        DynamicReceiver.register("fetchPort", IPCRequest("", 0, ContentValues()) {
-            DataRequester.request(ctx, "success", bodyBuilder = {
-                put("port", HTTPServer.PORT)
-            })
+        DynamicReceiver.register("fetchPort", IPCRequest {
+            DataRequester.request("success", mapOf("port" to HTTPServer.PORT))
         })
 
-        DataRequester.request(ctx, "init", onFailure = {
-            ctx.toast("请启动Shamrock主进程以初始化服务，进程将退出。")
-            thread {
-                Thread.sleep(3000)
-                exitProcess(1)
+        val preferences = ctx.getSharedPreferences("shamrock_config", 0)
+
+        DataRequester.request("init", onFailure = {
+            if (!preferences.getBoolean("isInit", false)) {
+                ctx.toast("请启动Shamrock主进程以初始化服务，进程将退出。")
+                thread {
+                    Thread.sleep(3000)
+                    exitProcess(1)
+                }
+            } else {
+                ctx.toast("Shamrock进程未启动，不会推送配置文件。。")
             }
-        }) {
+        }, bodyBuilder = null) {
             isConfigOk = true
-            // do something
-            val preferences = ctx.getSharedPreferences("shamrock_config", 0)
             preferences.edit {
                 putBoolean(  "tablet",    it.getBooleanExtra("tablet", false)) // 强制平板模式
                 putInt(      "port",      it.getIntExtra("port", 5700)) // 主动HTTP端口
@@ -52,10 +53,11 @@ class PullConfig: IAction {
                 putBoolean(  "ws_client", it.getBooleanExtra("ws_client", false)) // 被动WS开关
                 putString(   "ws_addr",   it.getStringExtra("ws_addr")) // 被动WS地址
                 putBoolean(  "pro_api",   it.getBooleanExtra("pro_api", false)) // 开发调试API开关
+                putBoolean("isInit", true)
             }
 
             NativeLoader.load("shamrock")
-            MobileQQ.getContext().toast(testNativeLibrary())
+            ctx.toast(testNativeLibrary())
 
             ActionLoader.runService(ctx)
         }

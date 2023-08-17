@@ -17,8 +17,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.Serializable
-import moe.fuqiuluo.xposed.helper.DynamicReceiver
-import moe.fuqiuluo.xposed.helper.IPCRequest
+import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
+import moe.fuqiuluo.xposed.helper.internal.IPCRequest
 import moe.fuqiuluo.xposed.tools.broadcast
 import moe.fuqiuluo.xposed.tools.fetchGet
 import moe.fuqiuluo.xposed.tools.fetchPost
@@ -69,7 +69,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.requestSign(
     val sign = reqLock.withLock {
         withTimeoutOrNull(5000) {
             suspendCancellableCoroutine { con ->
-                DynamicReceiver.register("sign_callback", IPCRequest("sign") {
+                DynamicReceiver.register("sign_callback", IPCRequest {
                     con.resume(SignResult().apply {
                         this.sign = it.getByteArrayExtra("sign") ?: error("无法获取SIGN")
                         this.token = it.getByteArrayExtra("token")
@@ -77,7 +77,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.requestSign(
                     })
                 })
                 MobileQQ.getContext().broadcast("msf") {
-                    putExtra("cmd", "sign")
+                    putExtra("__cmd", "sign")
                     putExtra("wupCmd", cmd)
                     putExtra("uin", uin)
                     putExtra("seq", seq)

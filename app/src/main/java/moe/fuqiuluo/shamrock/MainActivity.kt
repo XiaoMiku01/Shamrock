@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.ColorRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -49,7 +48,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -63,22 +61,18 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.shamrock.ui.app.AppRuntime
-import moe.fuqiuluo.shamrock.ui.app.Level
 import moe.fuqiuluo.shamrock.ui.app.Logger
 import moe.fuqiuluo.shamrock.ui.app.RuntimeState
 import moe.fuqiuluo.shamrock.ui.fragment.DashboardFragment
 import moe.fuqiuluo.shamrock.ui.fragment.HomeFragment
 import moe.fuqiuluo.shamrock.ui.fragment.LabFragment
 import moe.fuqiuluo.shamrock.ui.fragment.LogFragment
-import moe.fuqiuluo.shamrock.ui.service.broadcast
+import moe.fuqiuluo.shamrock.ui.service.internal.broadcastToModule
 import moe.fuqiuluo.shamrock.ui.theme.LocalString
 import moe.fuqiuluo.shamrock.ui.theme.ShamrockTheme
-import moe.fuqiuluo.shamrock.ui.theme.TabDividerColor
 import moe.fuqiuluo.shamrock.ui.theme.TabSelectedColor
-import moe.fuqiuluo.shamrock.ui.theme.TabUnSelectedColor
 import moe.fuqiuluo.shamrock.ui.theme.ToolbarColor
 import moe.fuqiuluo.shamrock.ui.tools.NoIndication
 import moe.fuqiuluo.shamrock.ui.tools.ShamrockTab
@@ -97,7 +91,7 @@ class MainActivity: ComponentActivity() {
                 isAppearanceLightStatusBars = true
             }
             WindowCompat.setDecorFitsSystemWindows(window, true)
-            broadcast { putExtra("cmd", "fetchPort") }
+            broadcastToModule { putExtra("cmd", "fetchPort") }
         }
     }
 }

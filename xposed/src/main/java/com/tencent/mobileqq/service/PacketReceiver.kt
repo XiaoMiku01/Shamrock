@@ -1,23 +1,14 @@
 package com.tencent.mobileqq.service
 
-import com.tencent.mobileqq.sign.QQSecuritySign
 import com.tencent.qphone.base.remote.FromServiceMsg
-import de.robv.android.xposed.XposedBridge
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import moe.fuqiuluo.http.action.helper.ContactHelper
-import moe.fuqiuluo.http.action.helper.FileHelper
-import moe.fuqiuluo.xposed.actions.impl.toast
-import moe.fuqiuluo.xposed.helper.DataRequester
-import moe.fuqiuluo.xposed.helper.DynamicReceiver
-import moe.fuqiuluo.xposed.helper.IPCRequest
+import moe.fuqiuluo.xposed.helper.internal.DataRequester
+import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
+import moe.fuqiuluo.xposed.helper.internal.IPCRequest
+import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.tools.broadcast
 import mqq.app.MobileQQ
-import tencent.im.oidb.cmd0x11b2.oidb_0x11b2
-import tencent.im.oidb.oidb_sso
-import kotlin.coroutines.resume
-
-internal typealias PacketHandler = (FromServiceMsg) -> Unit
 
 internal object PacketReceiver {
     private val allowCommandList: MutableSet<String> by lazy { mutableSetOf(
@@ -31,10 +22,13 @@ internal object PacketReceiver {
     init {
         DynamicReceiver.register("register_handler_cmd", IPCRequest {
             val cmd = it.getStringExtra("handler_cmd")!!
-            DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {
-                put("string", "RegisterHandler(cmd = $cmd)")
-            })
+            LogCenter.log("RegisterHandler(cmd = $cmd)")
             HandlerByIpcSet.add(cmd)
+        })
+        DynamicReceiver.register("unregister_handler_cmd", IPCRequest {
+            val cmd = it.getStringExtra("handler_cmd")!!
+            LogCenter.log("UnRegisterHandler(cmd = $cmd)")
+            HandlerByIpcSet.remove(cmd)
         })
     }
 
@@ -44,11 +38,11 @@ internal object PacketReceiver {
 
     private fun onReceive(from: FromServiceMsg) {
         if (HandlerByIpcSet.contains(from.serviceCmd)) {
-            DataRequester.request(MobileQQ.getContext(), "send_message", bodyBuilder = {
+            DataRequester.request("send_message", bodyBuilder = {
                 put("string", "ReceivePacket(cmd = ${from.serviceCmd})")
             })
             MobileQQ.getContext().broadcast("xqbot") {
-                putExtra("cmd", from.serviceCmd)
+                putExtra("__cmd", from.serviceCmd)
                 putExtra("buffer", from.wupBuffer)
             }
         }

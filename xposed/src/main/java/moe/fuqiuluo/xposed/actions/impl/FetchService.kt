@@ -8,7 +8,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.xposed.actions.IAction
-import moe.fuqiuluo.xposed.helper.ServiceFetcher
+import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import mqq.app.AppRuntime
 import mqq.app.MobileQQ
 import mqq.app.api.IRuntimeService
@@ -23,7 +23,7 @@ class FetchService: IAction {
                 val service = param.result as? IRuntimeService
                 GlobalScope.launch {
                     if (service != null) {
-                        ServiceFetcher.onFetch(service)
+                        NTServiceFetcher.onFetch(service)
                     }
                 }
             }
