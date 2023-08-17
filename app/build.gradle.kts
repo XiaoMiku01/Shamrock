@@ -37,7 +37,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -76,6 +76,7 @@ android {
             excludes +=  "/META-INF/LICENSE.txt"
             excludes +=  "/META-INF/license.txt"
             excludes +=  "/META-INF/*.kotlin_module"
+            excludes +=  "/META-INF/services/reactor.blockhound.integration.BlockHoundIntegration"
         }
     }
     externalNativeBuild {

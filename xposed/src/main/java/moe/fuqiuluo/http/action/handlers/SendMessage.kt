@@ -1,5 +1,6 @@
 package moe.fuqiuluo.http.action.handlers
 
+import com.tencent.qqnt.kernel.nativeinterface.IOperateCallback
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import kotlinx.serialization.json.JsonArray
 import moe.fuqiuluo.http.action.ActionSession
@@ -42,7 +43,7 @@ internal object SendMessage: IActionHandler() {
     }
 
     private suspend fun sendToTroop(groupId: String, message: JsonArray): Pair<Long, Long> {
-        var nonElem: Boolean = false
+        var nonElem: Boolean
         val result =  MessageHelper.sendTroopMessage(
             groupId = groupId,
             msgElements = MessageHelper.messageArrayToMessageElements(
@@ -55,14 +56,20 @@ internal object SendMessage: IActionHandler() {
                 it.elementType != -1
             }.also {
                 nonElem = it.isEmpty()
-            }
-        ) { code, _ ->
-            LogCenter.log("消息发送 troop: $groupId, code: $code")
-        }
+            }, MessageCallback(groupId)
+        )
         return if (nonElem) {
             result.first to 0
         } else {
             result
+        }
+    }
+
+    class MessageCallback(
+        private val peerId: String
+    ): IOperateCallback {
+        override fun onResult(code: Int, reason: String?) {
+            LogCenter.log("消息发送: $peerId, code: $code $reason")
         }
     }
 
