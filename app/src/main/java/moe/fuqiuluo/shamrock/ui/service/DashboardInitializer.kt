@@ -25,8 +25,8 @@ object DashboardInitializer {
                     } else {
                         AppRuntime.state.isFined.value = true
                         AppRuntime.AccountInfo.let {
-                            it.uin.value = result.data?.uin.toString()
-                            it.nick.value = result.data?.nick ?: "error"
+                            it.uin.value = result.data.uin.toString()
+                            it.nick.value = result.data.nick
                         }
                     }
                 }.onFailure {

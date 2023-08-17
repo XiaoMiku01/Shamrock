@@ -23,7 +23,7 @@ internal object ContactHelper {
         val privatePattern = Regex("uin=([0-9]+)\"")
         PacketHandler.register("OidbSvcTrpcTcp.0x11ca_0") {
             val body = oidb_sso.OIDBSSOPkg()
-            body.mergeFrom(it.getByteArrayExtra("buffer")!!.slice(4))
+            body.mergeFrom(it.slice(4))
             val rsp = oidb_0x11b2.BusinessCardV3Rsp()
             rsp.mergeFrom(body.bytes_bodybuffer.get().toByteArray())
             val text = rsp.signed_ark_msg.get()
@@ -33,7 +33,7 @@ internal object ContactHelper {
         }
         PacketHandler.register("GroupSvc.JoinGroupLink") {
             val body = join_group_link.RspBody()
-            body.mergeFrom(it.getByteArrayExtra("buffer")!!.slice(4))
+            body.mergeFrom(it.slice(4))
             val text = body.signed_ark.get().toStringUtf8()
             val groupId = body.group_code.get()
             LruCacheTroop.put(groupId, text)

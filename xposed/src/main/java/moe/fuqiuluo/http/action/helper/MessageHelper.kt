@@ -6,24 +6,24 @@ import com.tencent.qqnt.kernel.nativeinterface.IOperateCallback
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import com.tencent.qqnt.kernel.nativeinterface.MsgElement
 import com.tencent.qqnt.msg.api.IMsgService
-import de.robv.android.xposed.XposedBridge
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonObject
 import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
 import moe.fuqiuluo.http.action.helper.msg.MessageMaker
+import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.MMKVFetcher
 import moe.fuqiuluo.xposed.tools.EmptyJsonObject
 import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
 import moe.fuqiuluo.xposed.tools.asString
 
 internal object MessageHelper {
-    fun sendTroopMessage(groupId: String, msgElements: ArrayList<MsgElement>, callback: IOperateCallback): Pair<Long, Long> {
+    fun sendTroopMessage(groupId: String, msgElements: List<MsgElement>, callback: IOperateCallback): Pair<Long, Long> {
         val service = QRoute.api(IMsgService::class.java)
         val uniseq = generateMsgId(MsgConstant.KCHATTYPEGROUP, groupId.toLong())
         service.sendMsg(
             generateContact(MsgConstant.KCHATTYPEGROUP, groupId),
             uniseq,
-            msgElements,
+            msgElements as ArrayList<MsgElement>,
             callback
         )
         return System.currentTimeMillis() to uniseq
@@ -55,7 +55,7 @@ internal object MessageHelper {
                 if (it is InternalMessageMakerError) {
                     throw it
                 }
-                XposedBridge.log(it)
+                LogCenter.log(it.stackTraceToString())
             }
         }
         return msgList

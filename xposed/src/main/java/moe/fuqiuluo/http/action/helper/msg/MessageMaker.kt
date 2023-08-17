@@ -24,6 +24,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import moe.fuqiuluo.http.action.helper.ContactHelper
 import moe.fuqiuluo.http.action.helper.FileHelper
 import moe.fuqiuluo.http.action.helper.HighwayHelper
+import moe.fuqiuluo.http.action.helper.LocationHelper
 import moe.fuqiuluo.xposed.helper.PlatformHelper
 import moe.fuqiuluo.http.action.helper.TroopHelper
 import moe.fuqiuluo.http.action.helper.codec.AudioUtils
@@ -65,11 +66,15 @@ internal object MessageMaker {
 
     private suspend fun createLocationElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("lat", "lon")
-        val elem = MsgElement()
 
+        val lat = data["lat"].asString.toDouble()
+        val lon = data["lon"].asString.toDouble()
 
+        LocationHelper.sendShareLocation(chatType, peerId.toLong(), lat, lon)
 
-        return elem
+        return MsgElement().also {
+            it.elementType = -1
+        }
     }
 
     private suspend fun createContactElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
@@ -91,7 +96,6 @@ internal object MessageMaker {
         }
 
         elem.elementType = MsgConstant.KELEMTYPEARKSTRUCT
-
         return elem
     }
 
@@ -148,11 +152,15 @@ internal object MessageMaker {
         to.putWupBuffer(oidb.toByteArray())
         to.addAttribute("req_pb_protocol_flag", true)
         app.sendToService(to)
-        return MsgElement()
+        return MsgElement().also {
+            it.elementType = -1
+        }
     }
 
     private suspend fun createAnonymousElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
-        return MsgElement()
+        return MsgElement().also {
+            it.elementType = -1
+        }
     }
 
     private suspend fun createPokeElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {

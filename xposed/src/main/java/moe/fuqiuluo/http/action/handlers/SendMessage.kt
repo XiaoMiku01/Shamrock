@@ -9,8 +9,6 @@ import moe.fuqiuluo.http.action.helper.MessageHelper
 import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
 import moe.fuqiuluo.http.action.helper.msg.ParamsException
 import moe.fuqiuluo.xposed.helper.LogCenter
-import moe.fuqiuluo.xposed.helper.internal.DataRequester
-import mqq.app.MobileQQ
 
 internal object SendMessage: IActionHandler() {
     override suspend fun handle(session: ActionSession): String {
@@ -44,7 +42,8 @@ internal object SendMessage: IActionHandler() {
     }
 
     private suspend fun sendToTroop(groupId: String, message: JsonArray): Pair<Long, Long> {
-        return MessageHelper.sendTroopMessage(
+        var nonElem: Boolean = false
+        val result =  MessageHelper.sendTroopMessage(
             groupId = groupId,
             msgElements = MessageHelper.messageArrayToMessageElements(
                 chatType = MsgConstant.KCHATTYPEGROUP,
@@ -52,9 +51,18 @@ internal object SendMessage: IActionHandler() {
                 messageList = message
             ).also {
                 if (it.isEmpty()) kotlin.error("message is empty, unable to send")
+            }.filter {
+                it.elementType != -1
+            }.also {
+                nonElem = it.isEmpty()
             }
         ) { code, _ ->
             LogCenter.log("消息发送 troop: $groupId, code: $code")
+        }
+        return if (nonElem) {
+            result.first to 0
+        } else {
+            result
         }
     }
 

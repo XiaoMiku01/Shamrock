@@ -91,7 +91,7 @@ class MainActivity: ComponentActivity() {
                 isAppearanceLightStatusBars = true
             }
             WindowCompat.setDecorFitsSystemWindows(window, true)
-            broadcastToModule { putExtra("cmd", "fetchPort") }
+            broadcastToModule { putExtra("__cmd", "fetchPort") }
         }
     }
 }
