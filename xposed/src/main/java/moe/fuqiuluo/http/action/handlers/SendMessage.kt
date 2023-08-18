@@ -42,7 +42,7 @@ internal object SendMessage: IActionHandler() {
         return logic("unable to send message: not support $detailType")
     }
 
-    private suspend fun sendToTroop(groupId: String, message: JsonArray): Pair<Long, Long> {
+    private suspend fun sendToTroop(groupId: String, message: JsonArray): Pair<Long, Int> {
         return MessageHelper.sendTroopMessage(
             groupId = groupId, message, MessageCallback(groupId)
         )

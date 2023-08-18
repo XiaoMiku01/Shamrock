@@ -13,8 +13,9 @@ import kotlin.coroutines.resume
 
 internal object DeleteMessage: IActionHandler() {
     override suspend fun handle(session: ActionSession): String {
-        val msgId = (session.getStringOrNull("message_id")
-            ?: return noParam("message_id")).toLong()
+        val hashCode = (session.getStringOrNull("message_id")
+            ?: return noParam("message_id")).toInt()
+        val msgId = MessageHelper.getMsgIdByHashCode(hashCode)
 
         val kernelService = NTServiceFetcher.kernelService
         val sessionService = kernelService.wrapperSession
