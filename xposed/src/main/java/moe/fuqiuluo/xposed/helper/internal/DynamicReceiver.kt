@@ -9,6 +9,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 
 /**
@@ -26,7 +27,7 @@ internal object DynamicReceiver: BroadcastReceiver() {
             if (cmd.isNotBlank()) {
                 cmdHandler[cmd].also {
                     if (it == null)
-                        LogCenter.log("无广播处理器: $cmd")
+                        LogCenter.log("无广播处理器: $cmd", Level.ERROR)
                 }?.callback?.handle(intent)
             } else GlobalScope.launch { mutex.withLock {
                 hashHandler.forEach {
@@ -41,7 +42,7 @@ internal object DynamicReceiver: BroadcastReceiver() {
                 }
             } }
         }.onFailure {
-            LogCenter.log("处理器[$cmd]错误: $it")
+            LogCenter.log("处理器[$cmd]错误: $it", Level.ERROR)
         }
     }
 

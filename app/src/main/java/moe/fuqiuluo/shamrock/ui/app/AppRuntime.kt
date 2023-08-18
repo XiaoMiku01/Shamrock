@@ -52,12 +52,13 @@ class RuntimeState(
 }
 
 enum class Level(
-    val color: Color
+    val color: Color,
+    val id: Byte
 ) {
-    DEBUG(Color(0xFF4CAF50)),
-    INFO(Color(0xff6c6c6c)),
-    WARN(Color(0xFFFF9800)),
-    ERROR(Color(0xFFE91E63)),
+    DEBUG(Color(0xFF4CAF50), 0),
+    INFO(Color(0xff6c6c6c), 1),
+    WARN(Color(0xFFFF9800), 2),
+    ERROR(Color(0xFFE91E63), 3),
 }
 
 class Logger(

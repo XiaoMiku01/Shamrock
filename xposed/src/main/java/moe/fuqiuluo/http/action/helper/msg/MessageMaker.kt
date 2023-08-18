@@ -25,6 +25,7 @@ import moe.fuqiuluo.http.action.helper.ContactHelper
 import moe.fuqiuluo.http.action.helper.FileHelper
 import moe.fuqiuluo.http.action.helper.HighwayHelper
 import moe.fuqiuluo.http.action.helper.LocationHelper
+import moe.fuqiuluo.http.action.helper.MusicHelper
 import moe.fuqiuluo.xposed.helper.PlatformHelper
 import moe.fuqiuluo.http.action.helper.TroopHelper
 import moe.fuqiuluo.http.action.helper.codec.AudioUtils
@@ -35,6 +36,7 @@ import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asInt
 import moe.fuqiuluo.xposed.tools.asIntOrNull
 import moe.fuqiuluo.xposed.tools.asString
+import moe.fuqiuluo.xposed.tools.asStringOrNull
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
 import mqq.app.MobileQQ
 import tencent.im.oidb.cmd0xb77.oidb_cmd0xb77
@@ -43,7 +45,7 @@ import tencent.im.oidb.oidb_sso
 import java.io.File
 import kotlin.math.roundToInt
 
-internal typealias IMaker = suspend (Int, String, JsonObject) -> MsgElement
+internal typealias IMaker = suspend (Int, Long, String, JsonObject) -> MsgElement
 
 internal object MessageMaker {
     private val makerArray = mutableMapOf(
@@ -61,10 +63,50 @@ internal object MessageMaker {
         "anonymous" to ::createAnonymousElem,
         "share" to ::createShareElem,
         "contact" to ::createContactElem,
-        "location" to ::createLocationElem
+        "location" to ::createLocationElem,
+        "music" to ::createMusicElem
     )
 
-    private suspend fun createLocationElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createMusicElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
+        data.checkAndThrow("type")
+
+        when(data["type"].asString) {
+            "qq" -> {
+                data.checkAndThrow("id")
+                val id = data["id"].asString
+                if(!MusicHelper.trySendQQMusicInfoById(chatType, peerId.toLong(), msgId, id)) {
+                    throw LogicException("无法发送QQ音乐分享")
+                }
+            }
+            "163" -> {
+                data.checkAndThrow("id")
+                val id = data["id"].asString
+                if(!MusicHelper.trySend163MusicInfoById(chatType, peerId.toLong(), msgId, id)) {
+                    throw LogicException("无法发送网易云音乐分享")
+                }
+            }
+            "custom" -> {
+                data.checkAndThrow("url", "audio", "title")
+                MusicHelper.trySendMusicShareCustom(
+                    chatType,
+                    peerId.toLong(),
+                    msgId,
+                    data["title"].asString,
+                    data["singer"].asStringOrNull ?: "",
+                    data["url"].asString,
+                    "",
+                    data["url"].asString
+                )
+            }
+            else -> error("不支持该类型音乐发送")
+        }
+
+        return MsgElement().also {
+            it.elementType = -1
+        }
+    }
+
+    private suspend fun createLocationElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("lat", "lon")
 
         val lat = data["lat"].asString.toDouble()
@@ -77,7 +119,7 @@ internal object MessageMaker {
         }
     }
 
-    private suspend fun createContactElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createContactElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("type", "id")
         val type = data["type"].asString
         val id = data["id"].asString
@@ -99,7 +141,7 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createShareElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createShareElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("title", "url")
 
         val url = data["url"].asString
@@ -128,6 +170,9 @@ internal object MessageMaker {
         } else {
             "favicon.ico"
         })
+        info.ext_info.set(oidb_cmd0xb77.ExtInfo().also {
+            it.msg_seq.set(msgId)
+        })
         info.rich_msg_body.set(richMsgBody)
         reqBody.msg_body.set(info)
         val sendTo = oidb_cmd0xdc2.BatchSendReq()
@@ -136,6 +181,7 @@ internal object MessageMaker {
             MsgConstant.KCHATTYPEC2C -> sendTo.send_type.set(0)
             else -> return createTextElem(
                 chatType = chatType,
+                msgId = msgId,
                 peerId = peerId,
                 data = JsonObject(mapOf("text" to JsonPrimitive("[分享] $title\n地址: $url")))
             )
@@ -157,13 +203,13 @@ internal object MessageMaker {
         }
     }
 
-    private suspend fun createAnonymousElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createAnonymousElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         return MsgElement().also {
             it.elementType = -1
         }
     }
 
-    private suspend fun createPokeElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createPokeElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("type", "id")
         val elem = MsgElement()
         val face = FaceElement()
@@ -190,7 +236,7 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createFaceElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createFaceElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("id")
 
         val elem = MsgElement()
@@ -211,7 +257,7 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createRpsElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createRpsElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         val elem = MsgElement()
         elem.elementType = MsgConstant.KELEMTYPEMARKETFACE
         val market = MarketFaceElement(
@@ -225,7 +271,7 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createDiceElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createDiceElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         val elem = MsgElement()
         elem.elementType = MsgConstant.KELEMTYPEMARKETFACE
         val market = MarketFaceElement(
@@ -239,9 +285,9 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createMarkdownElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createMarkdownElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         if (chatType != MsgConstant.KCHATTYPEGUILD) {
-            return createTextElem(chatType, peerId, data)
+            return createTextElem(chatType, msgId, peerId, data)
         }
         data.checkAndThrow("text")
         val elem = MsgElement()
@@ -251,7 +297,7 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createVideoElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createVideoElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("file")
 
         val file = FileHelper.parseAndSave(data["file"].asString)
@@ -293,7 +339,7 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createAtElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createAtElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         if (chatType != MsgConstant.KCHATTYPEGROUP) {
             return MsgElement()
         }
@@ -335,7 +381,7 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createRecordElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createRecordElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("file")
 
         var file = FileHelper.parseAndSave(data["file"].asString)
@@ -402,7 +448,7 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createImageElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createImageElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("file")
 
         val isOriginal = data["original"].asBooleanOrNull ?: true
@@ -452,7 +498,7 @@ internal object MessageMaker {
         return elem
     }
 
-    private suspend fun createTextElem(chatType: Int, peerId: String, data: JsonObject): MsgElement {
+    private suspend fun createTextElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("text")
         val elem = MsgElement()
         elem.elementType = MsgConstant.KELEMTYPETEXT

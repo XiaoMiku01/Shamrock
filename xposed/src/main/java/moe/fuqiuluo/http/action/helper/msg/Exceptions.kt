@@ -7,3 +7,6 @@ internal class ParamsException(key: String)
 
 internal class ParamsIllegalException(key: String)
     :RuntimeException("Illegal param $key"), InternalMessageMakerError
+
+internal class LogicException(why: String)
+    :RuntimeException(why), InternalMessageMakerError

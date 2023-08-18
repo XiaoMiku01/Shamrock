@@ -10,6 +10,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonObject
 import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
 import moe.fuqiuluo.http.action.helper.msg.MessageMaker
+import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.MMKVFetcher
 import moe.fuqiuluo.xposed.tools.EmptyJsonObject
@@ -17,15 +18,25 @@ import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
 import moe.fuqiuluo.xposed.tools.asString
 
 internal object MessageHelper {
-    fun sendTroopMessage(groupId: String, msgElements: List<MsgElement>, callback: IOperateCallback): Pair<Long, Long> {
+    suspend fun sendTroopMessage(groupId: String, message: JsonArray, callback: IOperateCallback): Pair<Long, Long> {
         val service = QRoute.api(IMsgService::class.java)
         val uniseq = generateMsgId(MsgConstant.KCHATTYPEGROUP, groupId.toLong())
-        service.sendMsg(
-            generateContact(MsgConstant.KCHATTYPEGROUP, groupId),
-            uniseq,
-            msgElements as ArrayList<MsgElement>,
-            callback
-        )
+        var nonMsg: Boolean
+        val msg = messageArrayToMessageElements(MsgConstant.KCHATTYPEGROUP, uniseq, groupId, message).also {
+            if (it.isEmpty()) error("message is empty, unable to send")
+        }.filter {
+            it.elementType != -1
+        }.also {
+            nonMsg = it.isEmpty()
+        }
+        if (!nonMsg) {
+            service.sendMsg(
+                generateContact(MsgConstant.KCHATTYPEGROUP, groupId),
+                uniseq,
+                msg as ArrayList<MsgElement>,
+                callback
+            )
+        }
         return System.currentTimeMillis() to uniseq
     }
 
@@ -41,7 +52,7 @@ internal object MessageHelper {
         }
     }
 
-    suspend fun messageArrayToMessageElements(chatType: Int, targetUin: String, messageList: JsonArray): ArrayList<MsgElement> {
+    suspend fun messageArrayToMessageElements(chatType: Int, msgId: Long, targetUin: String, messageList: JsonArray): ArrayList<MsgElement> {
         val msgList = arrayListOf<MsgElement>()
         messageList.forEach {
             val msg = it.jsonObject
@@ -49,13 +60,13 @@ internal object MessageHelper {
                 val maker = MessageMaker[msg["type"].asString]
                 if(maker != null) {
                     val data = msg["data"].asJsonObjectOrNull ?: EmptyJsonObject
-                    msgList.add(maker(chatType, targetUin, data))
+                    msgList.add(maker(chatType, msgId, targetUin, data))
                 }
             }.onFailure {
                 if (it is InternalMessageMakerError) {
                     throw it
                 }
-                LogCenter.log(it.stackTraceToString())
+                LogCenter.log(it.stackTraceToString(), Level.ERROR)
             }
         }
         return msgList

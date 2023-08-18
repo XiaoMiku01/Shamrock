@@ -43,26 +43,9 @@ internal object SendMessage: IActionHandler() {
     }
 
     private suspend fun sendToTroop(groupId: String, message: JsonArray): Pair<Long, Long> {
-        var nonElem: Boolean
-        val result =  MessageHelper.sendTroopMessage(
-            groupId = groupId,
-            msgElements = MessageHelper.messageArrayToMessageElements(
-                chatType = MsgConstant.KCHATTYPEGROUP,
-                targetUin = groupId,
-                messageList = message
-            ).also {
-                if (it.isEmpty()) kotlin.error("message is empty, unable to send")
-            }.filter {
-                it.elementType != -1
-            }.also {
-                nonElem = it.isEmpty()
-            }, MessageCallback(groupId)
+        return MessageHelper.sendTroopMessage(
+            groupId = groupId, message, MessageCallback(groupId)
         )
-        return if (nonElem) {
-            result.first to 0
-        } else {
-            result
-        }
     }
 
     class MessageCallback(

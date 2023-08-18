@@ -15,7 +15,7 @@ class ForceTablet: IAction {
         val preferences = ctx.getSharedPreferences("shamrock_config", 0)
         if (preferences.getBoolean("tablet", true)) {
             if (PlatformHelper.isMainProcess()) {
-                LogCenter.log("强制协议类型 (PAD)", true)
+                LogCenter.log("强制协议类型 (PAD)", toast = true)
             }
             FuzzySearchClass.findAllClassByMethod(
                 LuoClassloader.hostClassLoader, "com.tencent.common.config.pad"

@@ -3,6 +3,7 @@ package com.tencent.mobileqq.service
 import com.tencent.qphone.base.remote.FromServiceMsg
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
 import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
 import moe.fuqiuluo.xposed.helper.internal.IPCRequest
@@ -22,12 +23,12 @@ internal object PacketReceiver {
     init {
         DynamicReceiver.register("register_handler_cmd", IPCRequest {
             val cmd = it.getStringExtra("handler_cmd")!!
-            LogCenter.log("RegisterHandler(cmd = $cmd)")
+            LogCenter.log("RegisterHandler(cmd = $cmd)", Level.DEBUG)
             HandlerByIpcSet.add(cmd)
         })
         DynamicReceiver.register("unregister_handler_cmd", IPCRequest {
             val cmd = it.getStringExtra("handler_cmd")!!
-            LogCenter.log("UnRegisterHandler(cmd = $cmd)")
+            LogCenter.log("UnRegisterHandler(cmd = $cmd)", Level.DEBUG)
             HandlerByIpcSet.remove(cmd)
         })
     }
