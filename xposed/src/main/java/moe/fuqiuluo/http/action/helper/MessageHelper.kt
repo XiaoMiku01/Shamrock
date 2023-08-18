@@ -16,13 +16,16 @@ import moe.fuqiuluo.xposed.helper.MMKVFetcher
 import moe.fuqiuluo.xposed.tools.EmptyJsonObject
 import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
 import moe.fuqiuluo.xposed.tools.asString
+import kotlin.math.abs
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 internal object MessageHelper {
-    suspend fun sendTroopMessage(groupId: String, message: JsonArray, callback: IOperateCallback): Pair<Long, Long> {
+    suspend fun sendTroopMessage(groupId: String, message: JsonArray, callback: IOperateCallback): Pair<Long, Int> {
         val service = QRoute.api(IMsgService::class.java)
         var uniseq = generateMsgId(MsgConstant.KCHATTYPEGROUP, groupId.toLong())
         var nonMsg: Boolean
-        val msg = messageArrayToMessageElements(MsgConstant.KCHATTYPEGROUP, uniseq, groupId, message).also {
+        val msg = messageArrayToMessageElements(MsgConstant.KCHATTYPEGROUP, uniseq.second, groupId, message).also {
             if (it.isEmpty()) error("message is empty, unable to send")
         }.filter {
             it.elementType != -1
@@ -32,14 +35,14 @@ internal object MessageHelper {
         if (!nonMsg) {
             service.sendMsg(
                 generateContact(MsgConstant.KCHATTYPEGROUP, groupId),
-                uniseq,
+                uniseq.second,
                 msg as ArrayList<MsgElement>,
                 callback
             )
         } else {
-            uniseq = 0
+            uniseq = 0 to 0
         }
-        return System.currentTimeMillis() to uniseq
+        return System.currentTimeMillis() to uniseq.first
     }
 
     fun generateContact(chatType: Int, id: String, subId: String = ""): Contact {
@@ -74,13 +77,23 @@ internal object MessageHelper {
         return msgList
     }
 
-    fun generateMsgId(chatType: Int, peerId: Long): Long {
+    fun generateMsgId(chatType: Int, peerId: Long): Pair<Int, Long> {
         val msgId = createMessageUniseq(chatType, System.currentTimeMillis())
+        val hashCode: Int
         val mmkv = MMKVFetcher.defaultMMKV()
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
-            mmkv.putLong("troop_$msgId", peerId)
+            val key = "troop_$msgId"
+            hashCode = abs(key.hashCode()) + Random.nextInt(0 .. 10000)
+            mmkv.putLong(key, peerId)
+            mmkv.putLong(hashCode.toString(), msgId)
+        } else {
+            error("不支持的消息来源类型: $chatType, $peerId")
         }
-        return msgId
+        return hashCode to msgId
+    }
+
+    fun getMsgIdByHashCode(hashCode: Int): Long {
+        return MMKVFetcher.defaultMMKV().getLong(hashCode.toString(), 0)
     }
 
     private external fun createMessageUniseq(chatType: Int, time: Long): Long
