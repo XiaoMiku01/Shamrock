@@ -16,6 +16,7 @@ import com.tencent.qqnt.kernel.nativeinterface.MsgElement
 import com.tencent.qqnt.kernel.nativeinterface.PicElement
 import com.tencent.qqnt.kernel.nativeinterface.PttElement
 import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
+import com.tencent.qqnt.kernel.nativeinterface.ReplyElement
 import com.tencent.qqnt.kernel.nativeinterface.RichMediaFilePathInfo
 import com.tencent.qqnt.kernel.nativeinterface.TextElement
 import com.tencent.qqnt.kernel.nativeinterface.VideoElement
@@ -64,8 +65,19 @@ internal object MessageMaker {
         "share" to ::createShareElem,
         "contact" to ::createContactElem,
         "location" to ::createLocationElem,
-        "music" to ::createMusicElem
+        "music" to ::createMusicElem,
+        "reply" to ::createReplyElem,
     )
+
+    private suspend fun createReplyElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
+        data.checkAndThrow("id")
+        val element = MsgElement()
+        element.elementType = MsgConstant.KELEMTYPEREPLY
+        val reply = ReplyElement()
+        reply.replayMsgId = data["id"].asString.toLong()
+        element.replyElement = reply
+        return element
+    }
 
     private suspend fun createMusicElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("type")
