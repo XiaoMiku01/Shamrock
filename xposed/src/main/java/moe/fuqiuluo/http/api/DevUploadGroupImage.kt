@@ -4,12 +4,8 @@ import android.util.Base64
 import com.tencent.mobileqq.transfile.TransferRequest
 import com.tencent.mobileqq.transfile.TransferRequest.PicUpExtraInfo
 import com.tencent.mobileqq.transfile.api.ITransFileController
-import io.ktor.server.application.call
-import io.ktor.server.request.receiveParameters
-import io.ktor.server.response.respond
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.post
-import moe.fuqiuluo.http.entries.CommonResult
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.xposed.tools.fetchPost
 import moe.fuqiuluo.xposed.tools.respond
@@ -20,16 +16,14 @@ import kotlin.random.nextLong
 
 fun Routing.uploadGroupImage() {
     post("/upload_group_image") {
-        val params = call.receiveParameters()
-
-        val troop = params.fetchPost("troop")
-        val picBytes = Base64.decode(params.fetchPost("pic"), Base64.DEFAULT)
+        val troop = fetchPost("troop")
+        val picBytes = Base64.decode(fetchPost("pic"), Base64.DEFAULT)
         val md5Str = MD5.getMD5String(picBytes)
         val file = MobileQQ.getContext().cacheDir.resolve("vas_ad").also {
             if (!it.exists()) it.mkdir()
         }.resolve("$md5Str.jpg")
         file.writeBytes(picBytes)
-        val sender = params.fetchPost("sender")
+        val sender = fetchPost("sender")
 
         val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
         val transferRequest = TransferRequest()

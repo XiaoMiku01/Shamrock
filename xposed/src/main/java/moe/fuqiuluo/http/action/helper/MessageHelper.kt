@@ -20,7 +20,7 @@ import moe.fuqiuluo.xposed.tools.asString
 internal object MessageHelper {
     suspend fun sendTroopMessage(groupId: String, message: JsonArray, callback: IOperateCallback): Pair<Long, Long> {
         val service = QRoute.api(IMsgService::class.java)
-        val uniseq = generateMsgId(MsgConstant.KCHATTYPEGROUP, groupId.toLong())
+        var uniseq = generateMsgId(MsgConstant.KCHATTYPEGROUP, groupId.toLong())
         var nonMsg: Boolean
         val msg = messageArrayToMessageElements(MsgConstant.KCHATTYPEGROUP, uniseq, groupId, message).also {
             if (it.isEmpty()) error("message is empty, unable to send")
@@ -36,6 +36,8 @@ internal object MessageHelper {
                 msg as ArrayList<MsgElement>,
                 callback
             )
+        } else {
+            uniseq = 0
         }
         return System.currentTimeMillis() to uniseq
     }

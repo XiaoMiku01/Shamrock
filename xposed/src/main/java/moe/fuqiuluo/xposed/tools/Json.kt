@@ -9,6 +9,7 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
 
 val EmptyJsonObject = JsonObject(mapOf())
 
@@ -20,6 +21,9 @@ val JsonElement?.asStringOrNull: String?
 
 val JsonElement?.asInt: Int
     get() = this!!.jsonPrimitive.int
+
+val JsonElement?.asLong: Long
+    get() = this!!.jsonPrimitive.long
 
 val JsonElement?.asIntOrNull: Int?
     get() = this?.jsonPrimitive?.int

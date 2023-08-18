@@ -1,7 +1,9 @@
 package moe.fuqiuluo.http.action
 
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import moe.fuqiuluo.http.action.handlers.*
 import moe.fuqiuluo.http.entries.EmptyObject
 import moe.fuqiuluo.http.entries.Status
@@ -9,6 +11,7 @@ import moe.fuqiuluo.http.entries.resultToString
 import moe.fuqiuluo.xposed.tools.asBoolean
 import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asInt
+import moe.fuqiuluo.xposed.tools.asIntOrNull
 import moe.fuqiuluo.xposed.tools.asJsonArray
 import moe.fuqiuluo.xposed.tools.asJsonArrayOrNull
 import moe.fuqiuluo.xposed.tools.asJsonObject
@@ -36,7 +39,8 @@ internal object ActionManager {
         "get_uid" to GetUid,
         "get_uin_by_uid" to GetUinByUid,
         "delete_message" to DeleteMessage,
-        "sanc_qrcode" to ScanQRCode
+        "sanc_qrcode" to ScanQRCode,
+        "set_qq_profile" to SetProfileCard
     )
 
     operator fun get(action: String): IActionHandler? {
@@ -48,6 +52,10 @@ internal abstract class IActionHandler {
     abstract suspend fun handle(session: ActionSession): String
 
     abstract fun path(): String
+
+    fun ok(msg: String = ""): String {
+        return resultToString(true, Status.Ok, EmptyObject, msg)
+    }
 
     inline fun <reified T> ok(data: T, msg: String = ""): String {
         return resultToString(true, Status.Ok, data!!, msg)
@@ -74,11 +82,40 @@ internal abstract class IActionHandler {
     }
 }
 
-internal class ActionSession(
+internal class ActionSession {
     private val params: JsonObject
-) {
+
+    constructor(values: Map<String, Any?>) {
+        val map = hashMapOf<String, JsonElement>()
+        values.forEach { (key, value) ->
+            if (value != null) {
+                when (value) {
+                    is String -> map[key] = JsonPrimitive(value)
+                    is Int -> map[key] = JsonPrimitive(value)
+                    is Long -> map[key] = JsonPrimitive(value)
+                    is Byte -> map[key] = JsonPrimitive(value)
+                    is Char -> map[key] = JsonPrimitive(value.code.toByte())
+                    is Short -> map[key] = JsonPrimitive(value)
+                    is Boolean -> map[key] = JsonPrimitive(value)
+                    is JsonObject -> map[key] = value
+                    is JsonArray -> map[key] = value
+                    else -> error("unsupported type: ${value::class.java}")
+                }
+            }
+        }
+        this.params = JsonObject(map)
+    }
+
+    constructor(params: JsonObject) {
+        this.params = params
+    }
+
     fun getInt(key: String): Int {
         return params[key].asInt
+    }
+
+    fun getIntOrNull(key: String): Int? {
+        return params[key].asIntOrNull
     }
 
     fun getString(key: String): String {

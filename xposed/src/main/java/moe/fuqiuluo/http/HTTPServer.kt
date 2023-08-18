@@ -18,10 +18,14 @@ import moe.fuqiuluo.http.api.index
 import moe.fuqiuluo.http.entries.CommonResult
 import moe.fuqiuluo.http.entries.ErrorCatch
 import de.robv.android.xposed.XposedBridge.log
+import moe.fuqiuluo.http.action.helper.msg.ParamsException
 import moe.fuqiuluo.http.api.energy
 import moe.fuqiuluo.http.api.getAccountInfo
 import moe.fuqiuluo.http.api.getMsfInfo
 import moe.fuqiuluo.http.api.getStartTime
+import moe.fuqiuluo.http.api.isBlackListUin
+import moe.fuqiuluo.http.api.setProfileCard
+import moe.fuqiuluo.http.api.shut
 import moe.fuqiuluo.http.api.sign
 import moe.fuqiuluo.http.api.uploadGroupImage
 import moe.fuqiuluo.http.entries.Status
@@ -42,7 +46,10 @@ object HTTPServer {
         Routing::getStartTime to false,
         Routing::uploadGroupImage to true,
         Routing::energy to true,
-        Routing::sign to true
+        Routing::sign to true,
+        Routing::isBlackListUin to false,
+        Routing::setProfileCard to false,
+        Routing::shut to false
     )
     private val mutex = Mutex()
     private lateinit var server: ApplicationEngine
@@ -62,9 +69,15 @@ object HTTPServer {
                 }
                 install(StatusPages) {
                     exception<Throwable> { call, cause ->
-                        call.respond(CommonResult("failed", Status.InternalHandlerError.code, ErrorCatch(
-                            call.request.uri, cause.stackTraceToString())
-                        ))
+                        if (cause is ParamsException) {
+                            call.respond(CommonResult("failed", Status.BadParam.code, ErrorCatch(
+                                call.request.uri, cause.message ?: "")
+                            ))
+                        } else {
+                            call.respond(CommonResult("failed", Status.InternalHandlerError.code, ErrorCatch(
+                                call.request.uri, cause.stackTraceToString())
+                            ))
+                        }
                     }
                 }
                 routing {

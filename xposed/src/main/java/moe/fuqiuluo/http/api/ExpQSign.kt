@@ -1,17 +1,13 @@
-@file:OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
 package moe.fuqiuluo.http.api
 
 import com.tencent.mobileqq.sign.QQSecuritySign.SignResult
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
-import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -38,12 +34,10 @@ fun Routing.sign() {
     }
 
     post("/sign") {
-        val param = call.receiveParameters()
-
-        val uin = param.fetchPost("uin")
-        val cmd = param.fetchPost("cmd")
-        val seq = param.fetchPost("seq").toInt()
-        val buffer = param.fetchPost("buffer").hex2ByteArray()
+        val uin = fetchPost("uin")
+        val cmd = fetchPost("cmd")
+        val seq = fetchPost("seq").toInt()
+        val buffer = fetchPost("buffer").hex2ByteArray()
 
         requestSign(cmd, uin, seq, buffer)
     }

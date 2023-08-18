@@ -1,25 +1,13 @@
+@file:Suppress("UNUSED_PARAMETER", "RedundantSuspendModifier")
 package moe.fuqiuluo.http.action.helper.msg
 
 import android.graphics.BitmapFactory
-import android.media.ExifInterface
+import androidx.exifinterface.media.ExifInterface
 import com.tencent.mobileqq.app.QQAppInterface
 import com.tencent.mobileqq.emoticon.QQSysFaceUtil
 import com.tencent.mobileqq.pb.ByteStringMicro
 import com.tencent.qphone.base.remote.ToServiceMsg
-import com.tencent.qqnt.kernel.nativeinterface.ArkElement
-import com.tencent.qqnt.kernel.nativeinterface.FaceElement
-import com.tencent.qqnt.kernel.nativeinterface.MarkdownElement
-import com.tencent.qqnt.kernel.nativeinterface.MarketFaceElement
-import com.tencent.qqnt.kernel.nativeinterface.MarketFaceSupportSize
-import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
-import com.tencent.qqnt.kernel.nativeinterface.MsgElement
-import com.tencent.qqnt.kernel.nativeinterface.PicElement
-import com.tencent.qqnt.kernel.nativeinterface.PttElement
-import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
-import com.tencent.qqnt.kernel.nativeinterface.ReplyElement
-import com.tencent.qqnt.kernel.nativeinterface.RichMediaFilePathInfo
-import com.tencent.qqnt.kernel.nativeinterface.TextElement
-import com.tencent.qqnt.kernel.nativeinterface.VideoElement
+import com.tencent.qqnt.kernel.nativeinterface.*
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import moe.fuqiuluo.http.action.helper.ContactHelper
@@ -36,6 +24,7 @@ import moe.fuqiuluo.xposed.helper.msgService
 import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asInt
 import moe.fuqiuluo.xposed.tools.asIntOrNull
+import moe.fuqiuluo.xposed.tools.asLong
 import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.asStringOrNull
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
@@ -75,6 +64,13 @@ internal object MessageMaker {
         element.elementType = MsgConstant.KELEMTYPEREPLY
         val reply = ReplyElement()
         reply.replayMsgId = data["id"].asString.toLong()
+        if(data.containsKey("text")) {
+            data.checkAndThrow("qq", "time", "seq")
+            reply.replayMsgSeq = data["seq"].asLong
+            reply.sourceMsgText = data["text"].asString
+            reply.replyMsgTime = data["time"].asLong
+            reply.senderUid = data["qq"].asString.toLong()
+        }
         element.replyElement = reply
         return element
     }
@@ -157,9 +153,19 @@ internal object MessageMaker {
         data.checkAndThrow("title", "url")
 
         val url = data["url"].asString
-        val startWithPrefix = url.startsWith("http://") || url.startsWith("https://")
-        val endWithPrefix = url.startsWith("/")
+        val image = if (data.containsKey("image")) {
+            data["image"].asString
+        } else {
+            val startWithPrefix = url.startsWith("http://") || url.startsWith("https://")
+            val endWithPrefix = url.startsWith("/")
+            "http://" + url.split("/")[if (startWithPrefix) 2 else 0] + if (!endWithPrefix) {
+                "/favicon.ico"
+            } else {
+                "favicon.ico"
+            }
+        }
         val title = data["title"].asString
+        val content = data["content"].asStringOrNull
 
         val reqBody = oidb_cmd0xdc2.ReqBody()
         val info = oidb_cmd0xb77.ReqBody()
@@ -174,14 +180,10 @@ internal object MessageMaker {
         richMsgBody.using_ark.set(true)
         richMsgBody.title.set(title)
         // "using_ark", "title", "summary", "brief", "url", "picture_url", "action", "music_url", "image_info"
-        richMsgBody.summary.set(url)
+        richMsgBody.summary.set(content ?: url)
         richMsgBody.brief.set("[分享] $title")
         richMsgBody.url.set(url)
-        richMsgBody.picture_url.set("http://" + url.split("/")[if (startWithPrefix) 2 else 0] + if (!endWithPrefix) {
-            "/favicon.ico"
-        } else {
-            "favicon.ico"
-        })
+        richMsgBody.picture_url.set(image)
         info.ext_info.set(oidb_cmd0xb77.ExtInfo().also {
             it.msg_seq.set(msgId)
         })
@@ -397,7 +399,7 @@ internal object MessageMaker {
         data.checkAndThrow("file")
 
         var file = FileHelper.parseAndSave(data["file"].asString)
-        val isMagic = data["magic"].asBooleanOrNull ?: false
+        val isMagic = data["magic"].asStringOrNull == "1"
 
         val ptt = PttElement()
 
@@ -504,6 +506,8 @@ internal object MessageMaker {
         pic.fileSize = QQNTWrapperUtil.CppProxy.getFileSize(file.absolutePath)
         pic.original = isOriginal
         pic.picType = FileHelper.getPicType(file)
+        // GO-CQHTTP扩展参数 支持
+        pic.picSubType = data["subType"].asIntOrNull ?: 0
         pic.isFlashPic = isFlash
 
         elem.picElement = pic
