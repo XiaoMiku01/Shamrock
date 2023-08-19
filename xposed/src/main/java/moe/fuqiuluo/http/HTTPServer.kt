@@ -23,6 +23,7 @@ import moe.fuqiuluo.http.action.helper.msg.ParamsException
 import moe.fuqiuluo.http.api.energy
 import moe.fuqiuluo.http.api.getAccountInfo
 import moe.fuqiuluo.http.api.getMsfInfo
+import moe.fuqiuluo.http.api.getMsg
 import moe.fuqiuluo.http.api.getStartTime
 import moe.fuqiuluo.http.api.isBlackListUin
 import moe.fuqiuluo.http.api.sendGroupMessage
@@ -52,7 +53,8 @@ object HTTPServer {
         Routing::isBlackListUin to false,
         Routing::setProfileCard to false,
         Routing::shut to false,
-        Routing::sendGroupMessage to false
+        Routing::sendGroupMessage to false,
+        Routing::getMsg to false,
     )
     private val mutex = Mutex()
     private lateinit var server: ApplicationEngine

@@ -20,6 +20,7 @@ import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
 import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.json
 import moe.fuqiuluo.xposed.tools.jsonArray
+import oicq.wlogin_sdk.tools.MD5
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.random.nextInt
@@ -96,24 +97,50 @@ internal object MessageHelper {
         return msgList
     }
 
+    fun generateMsgIdHash(chatType: Int, msgId: Long): Int {
+        return when (chatType) {
+            MsgConstant.KCHATTYPEGROUP -> {
+                val key = "troop$msgId"
+                abs(MD5.getMD5String(key.toByteArray()).hashCode())
+            }
+            MsgConstant.KCHATTYPEC2C -> {
+                val key = "c2c$msgId"
+                abs(MD5.getMD5String(key.toByteArray()).hashCode())
+            }
+            else -> error("不支持的消息来源类型 | generateMsgIdHash: $chatType")
+        }
+    }
+
     fun generateMsgId(chatType: Int, peerId: Long): Pair<Int, Long> {
         val msgId = createMessageUniseq(chatType, System.currentTimeMillis())
-        val hashCode: Int
+        val hashCode: Int = generateMsgIdHash(chatType, msgId)
         val mmkv = MMKVFetcher.defaultMMKV()
-        if (chatType == MsgConstant.KCHATTYPEGROUP) {
-            val key = "troop$msgId"
-            hashCode = abs(key.hashCode()) + Random.nextInt(0 .. 10000)
-            mmkv.putLong(key, peerId)
-            mmkv.putLong(hashCode.toString(), msgId)
-        } else if (chatType == MsgConstant.KCHATTYPEC2C) {
-            val key = "c2c$msgId"
-            hashCode = abs(key.hashCode()) + Random.nextInt(0 .. 10000)
-            mmkv.putLong(key, peerId)
-            mmkv.putLong(hashCode.toString(), msgId)
-        } else {
-            error("不支持的消息来源类型: $chatType, $peerId")
+        when (chatType) {
+            MsgConstant.KCHATTYPEGROUP -> {
+                mmkv.putLong("troop$msgId", peerId)
+                mmkv.putLong(hashCode.toString(), msgId)
+            }
+            MsgConstant.KCHATTYPEC2C -> {
+                mmkv.putLong("c2c$msgId", peerId)
+                mmkv.putLong(hashCode.toString(), msgId)
+            }
+            else -> {
+                error("不支持的消息来源类型: $chatType, $peerId")
+            }
         }
         return hashCode to msgId
+    }
+
+    fun removeMsgByHashCode(hashCode: Int) {
+        val msgId = getMsgIdByHashCode(hashCode)
+        val chatType = getChatType(msgId)
+        val mmkv = MMKVFetcher.defaultMMKV()
+        mmkv.remove(hashCode.toString())
+        when (chatType) {
+            MsgConstant.KCHATTYPEGROUP -> mmkv.remove("troop$msgId")
+            MsgConstant.KCHATTYPEC2C -> mmkv.remove("c2c$msgId")
+            else -> error("暂时不支持该类型消息: $chatType")
+        }
     }
 
     fun getMsgIdByHashCode(hashCode: Int): Long {

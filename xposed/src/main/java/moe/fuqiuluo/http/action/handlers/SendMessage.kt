@@ -69,13 +69,20 @@ internal object SendMessage: IActionHandler() {
     }
 
     private suspend fun sendToAIO(chatType: Int, peedId: String, message: JsonArray): Pair<Long, Int> {
-        return MessageHelper.sendMessageWithoutMsgId(chatType, peedId, message, MessageCallback(peedId))
+        val callback = MessageCallback(peedId, 0)
+        val result = MessageHelper.sendMessageWithoutMsgId(chatType, peedId, message, callback)
+        callback.hashCode = result.second
+        return result
     }
 
     class MessageCallback(
-        private val peerId: String
+        private val peerId: String,
+        var hashCode: Int
     ): IOperateCallback {
         override fun onResult(code: Int, reason: String?) {
+            if (code != 0 && hashCode != 0) {
+                MessageHelper.removeMsgByHashCode(hashCode)
+            }
             LogCenter.log("消息发送: $peerId, code: $code $reason")
         }
     }

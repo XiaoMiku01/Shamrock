@@ -108,7 +108,7 @@ public interface IMsgService extends QRouteApi {
 
     void getMsgs(@NotNull Contact contact, long j2, int i2, boolean z, @NotNull IMsgOperateCallback iMsgOperateCallback);
 
-    void getMsgsByMsgId(@Nullable Contact contact, @Nullable ArrayList<Long> arrayList, @Nullable IMsgOperateCallback iMsgOperateCallback);
+    void getMsgsByMsgId(@Nullable Contact contact, @Nullable ArrayList<Long> msgIds, @Nullable IMsgOperateCallback callback);
 
     void getMsgsBySeqAndCount(@Nullable Contact contact, long j2, int i2, boolean z, @Nullable IMsgOperateCallback iMsgOperateCallback);
 

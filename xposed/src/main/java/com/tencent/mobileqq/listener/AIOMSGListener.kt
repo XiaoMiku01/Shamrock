@@ -1,7 +1,6 @@
 @file:OptIn(DelicateCoroutinesApi::class)
 package com.tencent.mobileqq.listener
 
-import com.arthenica.ffmpegkit.Log
 import com.tencent.mobileqq.listener.helper.MsgRecordHelper
 import com.tencent.qqnt.kernel.nativeinterface.BroadcastHelperTransNotifyInfo
 import com.tencent.qqnt.kernel.nativeinterface.Contact
@@ -63,6 +62,10 @@ internal object AIOMSGListener: IKernelMsgListener {
                 msg.elements.addAll(msgRecord.elements)
             }
         }
+
+        LogCenter.log("ReceiveMsg: ${msg.chatType}, ${msg.senderUin}, ${msg.senderUid}, ${msg.elements.joinToString {
+            it.toString()
+        }}")
 
         if (msg.chatType == MsgConstant.KCHATTYPEGROUP) {
             if (msg.senderUin == 0L) return

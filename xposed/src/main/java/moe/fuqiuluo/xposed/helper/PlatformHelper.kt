@@ -5,6 +5,11 @@ import android.content.pm.PackageInfo
 import mqq.app.MobileQQ
 
 internal object PlatformHelper {
+    fun getVersion(context: Context): String {
+        val packageInfo: PackageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+        return packageInfo.versionName
+    }
+
     /**
      * 获取OIDB包的ClientVersion信息
      */

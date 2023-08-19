@@ -14,6 +14,7 @@ import moe.fuqiuluo.xposed.tools.GlobalClient
 import mqq.app.MobileQQ
 import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.InputStream
 import java.util.UUID
 import kotlin.experimental.and
 
@@ -40,7 +41,9 @@ object FileHelper {
                 Base64.decode(file.substring(9), Base64.DEFAULT)
             ))
         } else if (file.startsWith("file:///")) {
-            File(file.substring(8))
+            File(file.substring(8)).inputStream().use {
+                saveFileToCache( it )
+            }
         } else {
             kotlin.run {
                 val respond = GlobalClient.get(file)
@@ -135,7 +138,7 @@ object FileHelper {
         return sourceFile
     }
 
-    fun saveFileToCache(input: ByteArrayInputStream): File {
+    fun saveFileToCache(input: InputStream): File {
         val tmpFile = getTmpFile()
         tmpFile.outputStream().use {
             input.copyTo(it)
