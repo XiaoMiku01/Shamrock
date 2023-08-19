@@ -49,8 +49,11 @@ internal object MessageHelper {
         return System.currentTimeMillis() to uniseq.first
     }
 
-    fun generateContact(chatType: Int, id: String, subId: String = ""): Contact {
-        return Contact(chatType, id, subId)
+    suspend fun generateContact(chatType: Int, id: String, subId: String = ""): Contact {
+        val peerId = if (MsgConstant.KCHATTYPEC2C == chatType) {
+           ContactHelper.getUidByUin(id.toLong())
+        } else id
+        return Contact(chatType, peerId, subId)
     }
 
     fun obtainMessageTypeByDetailType(detailType: String): Int {

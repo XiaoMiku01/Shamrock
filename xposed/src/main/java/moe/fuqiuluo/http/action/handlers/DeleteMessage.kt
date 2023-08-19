@@ -21,8 +21,9 @@ internal object DeleteMessage: IActionHandler() {
         val sessionService = kernelService.wrapperSession
         val msgService = sessionService.msgService
 
+        val contact = generateContact(msgId)
         val result = suspendCancellableCoroutine { continuation ->
-            msgService.recallMsg(generateContact(msgId), arrayListOf(msgId)) { code, why ->
+            msgService.recallMsg(contact, arrayListOf(msgId)) { code, why ->
                 continuation.resume(code to why)
             }
         }
@@ -33,7 +34,7 @@ internal object DeleteMessage: IActionHandler() {
         }
     }
 
-    private fun generateContact(msgId: Long): Contact {
+    private suspend fun generateContact(msgId: Long): Contact {
         val chatType = MessageHelper.getChatType(msgId)
         val mmkv = MMKVFetcher.defaultMMKV()
         if (chatType == MsgConstant.KCHATTYPEGROUP) {

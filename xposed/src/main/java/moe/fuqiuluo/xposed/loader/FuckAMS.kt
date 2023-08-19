@@ -39,6 +39,7 @@ internal object FuckAMS {
     private fun checkThread() {
         if (!::KeepThread.isInitialized || !KeepThread.isAlive) {
             KeepThread = Thread {
+                val deletedList = mutableSetOf<Any>()
                 while (true) {
                     Thread.sleep(100)
                     KeepRecords.forEach {
@@ -48,11 +49,15 @@ internal object FuckAMS {
                             }.getOrElse { false }
                         } else false
                         if (isKilled) {
-                            KeepRecords.remove(it)
+                            deletedList.add(it)
                             XposedBridge.log("Process Closed: $it")
                         } else {
                             keepByAdj(it)
                         }
+                    }
+                    if (deletedList.isNotEmpty()) {
+                        KeepRecords.removeAll(deletedList)
+                        deletedList.clear()
                     }
                 }
             }.also {

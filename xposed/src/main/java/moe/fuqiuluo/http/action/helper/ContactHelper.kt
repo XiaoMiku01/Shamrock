@@ -7,13 +7,17 @@ import com.tencent.protofile.join_group_link.join_group_link
 import com.tencent.qphone.base.remote.ToServiceMsg
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
+import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.helper.PlatformHelper
+import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.slice
 import mqq.app.MobileQQ
 import tencent.im.oidb.cmd0x11b2.oidb_0x11b2
 import tencent.im.oidb.oidb_sso
+import kotlin.coroutines.resume
 
 internal object ContactHelper {
     private val LruCachePrivate = LruCache<Long, String>(5)
@@ -38,6 +42,16 @@ internal object ContactHelper {
             val groupId = body.group_code.get()
             LruCacheTroop.put(groupId, text)
         }
+    }
+
+    suspend fun getUidByUin(peerId: Long): String {
+        val kernelService = NTServiceFetcher.kernelService
+        val sessionService = kernelService.wrapperSession
+        return suspendCancellableCoroutine { continuation ->
+            sessionService.uixConvertService.getUid(hashSetOf(peerId)) {
+                continuation.resume(it)
+            }
+        }[peerId]!!
     }
 
     suspend fun getSharePrivateContact(peerId: Long): String {
