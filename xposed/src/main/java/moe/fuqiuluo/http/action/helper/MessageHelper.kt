@@ -25,11 +25,11 @@ import kotlin.random.Random
 import kotlin.random.nextInt
 
 internal object MessageHelper {
-    suspend fun sendTroopMessage(groupId: String, message: JsonArray, callback: IOperateCallback): Pair<Long, Int> {
+    suspend fun sendMessageWithoutMsgId(chatType: Int, peerId: String, message: JsonArray, callback: IOperateCallback): Pair<Long, Int> {
         val service = QRoute.api(IMsgService::class.java)
-        var uniseq = generateMsgId(MsgConstant.KCHATTYPEGROUP, groupId.toLong())
+        var uniseq = generateMsgId(chatType, peerId.toLong())
         var nonMsg: Boolean
-        val msg = messageArrayToMessageElements(MsgConstant.KCHATTYPEGROUP, uniseq.second, groupId, message).also {
+        val msg = messageArrayToMessageElements(chatType, uniseq.second, peerId, message).also {
             if (it.isEmpty()) error("message is empty, unable to send")
         }.filter {
             it.elementType != -1
@@ -38,7 +38,7 @@ internal object MessageHelper {
         }
         if (!nonMsg) {
             service.sendMsg(
-                generateContact(MsgConstant.KCHATTYPEGROUP, groupId),
+                generateContact(chatType, peerId),
                 uniseq.second,
                 msg as ArrayList<MsgElement>,
                 callback
@@ -86,7 +86,12 @@ internal object MessageHelper {
         val hashCode: Int
         val mmkv = MMKVFetcher.defaultMMKV()
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
-            val key = "troop_$msgId"
+            val key = "troop$msgId"
+            hashCode = abs(key.hashCode()) + Random.nextInt(0 .. 10000)
+            mmkv.putLong(key, peerId)
+            mmkv.putLong(hashCode.toString(), msgId)
+        } else if (chatType == MsgConstant.KCHATTYPEC2C) {
+            val key = "c2c$msgId"
             hashCode = abs(key.hashCode()) + Random.nextInt(0 .. 10000)
             mmkv.putLong(key, peerId)
             mmkv.putLong(hashCode.toString(), msgId)

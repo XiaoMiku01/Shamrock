@@ -40,7 +40,7 @@ internal object FuckAMS {
         if (!::KeepThread.isInitialized || !KeepThread.isAlive) {
             KeepThread = Thread {
                 while (true) {
-                    Thread.sleep(1000)
+                    Thread.sleep(100)
                     KeepRecords.forEach {
                         val isKilled = if (::METHOD_IS_KILLED.isInitialized) {
                             kotlin.runCatching {
@@ -49,6 +49,7 @@ internal object FuckAMS {
                         } else false
                         if (isKilled) {
                             KeepRecords.remove(it)
+                            XposedBridge.log("Process Closed: $it")
                         } else {
                             keepByAdj(it)
                         }
@@ -69,9 +70,10 @@ internal object FuckAMS {
             if (!it.isAccessible) it.isAccessible = true
         }.get(record) as ApplicationInfo
         if(applicationInfo.processName in KeepPackage) {
+            XposedBridge.log("Process is keeping: $record")
             KeepRecords.add(record)
             keepByAdj(record)
-            keepByPersistent(record)
+            //keepByPersistent(record) 过于逆天
             checkThread()
         }
     }
@@ -91,11 +93,11 @@ internal object FuckAMS {
             }.get(record)
             val MethodSetMaxAdj = newState.javaClass.getDeclaredMethod("setMaxAdj", Int::class.java).also {
                 if (!it.isAccessible) it.isAccessible = true
-            }.invoke(newState, 0)
+            }.invoke(newState, 2)
         }.onFailure {
             clazz.getDeclaredField("maxAdj").also {
                 if (!it.isAccessible) it.isAccessible = true
-            }.set(record, 0)
+            }.set(record, 2)
         }
     }
 

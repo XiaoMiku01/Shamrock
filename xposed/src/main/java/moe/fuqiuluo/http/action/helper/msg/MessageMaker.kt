@@ -334,6 +334,8 @@ internal object MessageMaker {
 
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
             HighwayHelper.transTroopVideo(peerId, file, File(thumbPath!!))
+        } else if (chatType == MsgConstant.KCHATTYPEC2C) {
+            HighwayHelper.transC2CVideo(peerId, file, File(thumbPath!!))
         }
 
         video.fileTime = AudioUtils.getVideoTime(file)
@@ -435,6 +437,8 @@ internal object MessageMaker {
 
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
             HighwayHelper.transTroopVoice(peerId, file)
+        } else if (chatType == MsgConstant.KCHATTYPEC2C) {
+            HighwayHelper.transC2CVoice(peerId, file)
         }
 
         val elem = MsgElement()
@@ -471,6 +475,8 @@ internal object MessageMaker {
 
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
             HighwayHelper.transTroopPic(peerId, file)
+        } else if (chatType == MsgConstant.KCHATTYPEC2C) {
+            HighwayHelper.transC2CPic(peerId, file)
         }
 
         val elem = MsgElement()

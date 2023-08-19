@@ -41,6 +41,11 @@ internal object DeleteMessage: IActionHandler() {
             val groupId = mmkv.getLong(key, 0)
             mmkv.remove(key)
             return MessageHelper.generateContact(chatType, groupId.toString())
+        } else if (chatType == MsgConstant.KCHATTYPEC2C) {
+            val key = "c2c$msgId"
+            val friendId = mmkv.getLong(key, 0)
+            mmkv.remove(key)
+            return MessageHelper.generateContact(chatType, friendId.toString())
         }
         kotlin.error("暂时不支持撤回该类型消息: $chatType")
     }

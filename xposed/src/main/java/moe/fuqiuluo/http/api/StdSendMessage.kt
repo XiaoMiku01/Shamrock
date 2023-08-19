@@ -19,6 +19,7 @@ import moe.fuqiuluo.xposed.tools.isString
 fun Routing.sendGroupMessage() {
     get("/send_msg") {
 
+
     }
 
     get("/send_group_msg") {

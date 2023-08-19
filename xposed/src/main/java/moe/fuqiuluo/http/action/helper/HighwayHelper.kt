@@ -78,6 +78,33 @@ internal object HighwayHelper {
     const val BUSI_TYPE_VIDEO_EMOTICON_PIC = 1022
     const val BUSI_TYPE_VIDEO_EMOTICON_VIDEO = 1021
 
+    suspend fun transC2CVideo(
+        friendId: String,
+        file: File,
+        thumbFile: File,
+        wait: Boolean = true
+    ): Boolean {
+        val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
+        val transferRequest = TransferRequest()
+        transferRequest.mSelfUin = runtime.currentAccountUin
+        transferRequest.mPeerUin = friendId
+        transferRequest.mUinType = FileMsg.UIN_BUDDY
+        transferRequest.mFileType = FileMsg.TRANSFILE_TYPE_SHORT_VIDEO_C2C
+        transferRequest.mUniseq = createMessageUniseq()
+        transferRequest.mIsUp = true
+        transferRequest.mLocalPath = file.absolutePath
+        transferRequest.mBusiType = BUSI_TYPE_SHORT_VIDEO
+        transferRequest.mMd5 = MD5.getFileMD5(file)
+        transferRequest.mLocalPath = file.absolutePath
+        transferRequest.mSourceVideoCodecFormat = VIDEO_FORMAT_MP4
+        transferRequest.mRec = MessageForShortVideo().also {
+            it.busiType = BUSI_TYPE_SHORT_VIDEO
+        }
+        transferRequest.mThumbPath = thumbFile.absolutePath
+        transferRequest.mThumbMd5 = MD5.getFileMD5(thumbFile)
+        return transAndWait(runtime, transferRequest, wait)
+    }
+
     suspend fun transTroopVideo(
         groupId: String,
         file: File,
@@ -102,7 +129,27 @@ internal object HighwayHelper {
         }
         transferRequest.mThumbPath = thumbFile.absolutePath
         transferRequest.mThumbMd5 = MD5.getFileMD5(thumbFile)
-        //transferRequest.mExtraObj = this.f241967f
+        return transAndWait(runtime, transferRequest, wait)
+    }
+
+    suspend fun transC2CVoice(
+        friendId: String,
+        file: File,
+        wait: Boolean = true
+    ): Boolean {
+        val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
+        val transferRequest = TransferRequest()
+        transferRequest.mSelfUin = runtime.currentAccountUin
+        transferRequest.mPeerUin = friendId
+        transferRequest.mUinType = FileMsg.UIN_BUDDY
+        transferRequest.mFileType = FileMsg.TRANSFILE_TYPE_PTT
+        transferRequest.mUniseq = createMessageUniseq()
+        transferRequest.mIsUp = true
+        transferRequest.mLocalPath = file.absolutePath
+        transferRequest.mBusiType = 1002
+        transferRequest.mPttCompressFinish = true
+        transferRequest.mPttUploadPanel = 3
+        transferRequest.mIsPttPreSend = true
         return transAndWait(runtime, transferRequest, wait)
     }
 
@@ -124,6 +171,31 @@ internal object HighwayHelper {
         transferRequest.mPttCompressFinish = true
         transferRequest.mPttUploadPanel = 3
         transferRequest.mIsPttPreSend = true
+        return transAndWait(runtime, transferRequest, wait)
+    }
+
+    suspend fun transC2CPic(
+        friendId: String,
+        file: File,
+        wait: Boolean = true
+    ): Boolean {
+        val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
+        val transferRequest = TransferRequest()
+        transferRequest.needSendMsg = false
+        transferRequest.mSelfUin = runtime.account
+        transferRequest.mPeerUin = friendId
+        transferRequest.mSecondId = runtime.currentAccountUin
+        transferRequest.mUinType = FileMsg.UIN_BUDDY
+        transferRequest.mFileType = FileMsg.TRANSFILE_TYPE_PIC
+        transferRequest.mUniseq = createMessageUniseq()
+        transferRequest.mIsUp = true
+        transferRequest.mBusiType = SEND_MSG_BUSINESS_TYPE_PIC_SHARE
+        transferRequest.mMd5 = MD5.getFileMD5(file)
+        transferRequest.mLocalPath = file.absolutePath
+        val picUpExtraInfo = TransferRequest.PicUpExtraInfo()
+        picUpExtraInfo.mIsRaw = true
+        transferRequest.mPicSendSource = 8
+        transferRequest.mExtraObj = picUpExtraInfo
         return transAndWait(runtime, transferRequest, wait)
     }
 
