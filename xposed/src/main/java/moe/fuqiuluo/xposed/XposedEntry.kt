@@ -7,6 +7,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 import de.robv.android.xposed.XposedBridge.log
 import moe.fuqiuluo.xposed.loader.ActionLoader
 import moe.fuqiuluo.xposed.loader.FixedLoader
+import moe.fuqiuluo.xposed.loader.FuckAMS
 import moe.fuqiuluo.xposed.loader.LuoClassloader
 import moe.fuqiuluo.xposed.tools.FuzzySearchClass
 import moe.fuqiuluo.xposed.tools.afterHook
@@ -30,6 +31,8 @@ class XposedEntry: IXposedHookLoadPackage {
     override fun handleLoadPackage(param: XC_LoadPackage.LoadPackageParam) {
         if (param.packageName == PACKAGE_NAME_QQ) {
             entryMQQ(param.classLoader)
+        } else if (param.packageName == "android") {
+            FuckAMS.injectAMS(param.classLoader)
         }
     }
 

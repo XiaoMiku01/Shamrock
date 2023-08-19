@@ -17,6 +17,10 @@ import moe.fuqiuluo.xposed.tools.isJsonData
 import moe.fuqiuluo.xposed.tools.isString
 
 fun Routing.sendGroupMessage() {
+    get("/send_msg") {
+
+    }
+
     get("/send_group_msg") {
         val groupId = fetchGetOrThrow("group_id")
         val message = fetchGetOrThrow("message")
