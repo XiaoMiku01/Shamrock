@@ -7,6 +7,8 @@ import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import com.tencent.qqnt.kernel.nativeinterface.MsgElement
 import com.tencent.qqnt.msg.api.IMsgService
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
 import moe.fuqiuluo.http.action.helper.msg.MessageMaker
@@ -16,6 +18,8 @@ import moe.fuqiuluo.xposed.helper.MMKVFetcher
 import moe.fuqiuluo.xposed.tools.EmptyJsonObject
 import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
 import moe.fuqiuluo.xposed.tools.asString
+import moe.fuqiuluo.xposed.tools.json
+import moe.fuqiuluo.xposed.tools.jsonArray
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.random.nextInt
@@ -97,6 +101,27 @@ internal object MessageHelper {
     }
 
     private external fun createMessageUniseq(chatType: Int, time: Long): Long
+
+    fun decodeCQCode(code: String): JsonArray {
+        val arrayList = ArrayList<JsonElement>()
+        val msgList = nativeDecodeCQCode(code)
+        msgList.forEach {
+            val params = hashMapOf<String, JsonElement>()
+            it.forEach { (key, value) ->
+                if (key != "type") {
+                    params[key] = value.json
+                }
+            }
+            val data = hashMapOf(
+                "type" to it["type"]!!.json,
+                "data" to JsonObject(params)
+            )
+            arrayList.add(JsonObject(data))
+        }
+        return arrayList.jsonArray
+    }
+
+    private external fun nativeDecodeCQCode(code: String): List<Map<String, String>>
 
     external fun getChatType(msgId: Long): Int
 }

@@ -19,6 +19,7 @@ import io.ktor.util.Attributes
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.reflect.TypeInfo
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import moe.fuqiuluo.http.action.helper.msg.ParamsException
@@ -53,10 +54,36 @@ suspend fun PipelineContext<Unit, ApplicationCall>.fetchPostOrThrow(key: String)
     return fetchPostOrNull(key) ?: throw ParamsException(key)
 }
 
+fun PipelineContext<Unit, ApplicationCall>.isJsonData(): Boolean {
+    return ContentType.Application.Json == call.request.contentType()
+}
+
+suspend fun PipelineContext<Unit, ApplicationCall>.fetchPostJsonObject(key: String): JsonObject {
+    val cacheKey = AttributeKey<JsonObject>("paramsJson")
+    val data = if (call.attributes.contains(cacheKey)) {
+        call.attributes[cacheKey]
+    } else {
+        Json.parseToJsonElement(call.receiveText()).jsonObject.also {
+            call.attributes.put(cacheKey, it)
+        }
+    }
+    return data[key].asJsonObject
+}
+
+suspend fun PipelineContext<Unit, ApplicationCall>.fetchPostJsonArray(key: String): JsonArray {
+    val cacheKey = AttributeKey<JsonObject>("paramsJson")
+    val data = if (call.attributes.contains(cacheKey)) {
+        call.attributes[cacheKey]
+    } else {
+        Json.parseToJsonElement(call.receiveText()).jsonObject.also {
+            call.attributes.put(cacheKey, it)
+        }
+    }
+    return data[key].asJsonArray
+}
 
 suspend fun PipelineContext<Unit, ApplicationCall>.fetchPostOrNull(key: String): String? {
-    val contentType = call.request.contentType()
-    if (ContentType.Application.Json == contentType) {
+    if (isJsonData()) {
         val cacheKey = AttributeKey<JsonObject>("paramsJson")
         val data = if (call.attributes.contains(cacheKey)) {
             call.attributes[cacheKey]

@@ -24,6 +24,7 @@ import moe.fuqiuluo.http.api.getAccountInfo
 import moe.fuqiuluo.http.api.getMsfInfo
 import moe.fuqiuluo.http.api.getStartTime
 import moe.fuqiuluo.http.api.isBlackListUin
+import moe.fuqiuluo.http.api.sendGroupMessage
 import moe.fuqiuluo.http.api.setProfileCard
 import moe.fuqiuluo.http.api.shut
 import moe.fuqiuluo.http.api.sign
@@ -49,7 +50,8 @@ object HTTPServer {
         Routing::sign to true,
         Routing::isBlackListUin to false,
         Routing::setProfileCard to false,
-        Routing::shut to false
+        Routing::shut to false,
+        Routing::sendGroupMessage to false
     )
     private val mutex = Mutex()
     private lateinit var server: ApplicationEngine

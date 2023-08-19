@@ -7,6 +7,7 @@
 #include <sys/time.h>
 
 #include "SKP_Silk_SDK_API.h"
+#include "cqcode.h"
 
 /* Define codec specific settings */
 #define MAX_BYTES_PER_FRAME     250 // Equals peak bitrate of 100 kbps
@@ -217,4 +218,46 @@ JNIEXPORT jint JNICALL
 Java_moe_fuqiuluo_http_action_helper_MessageHelper_getChatType(JNIEnv *env, jobject thiz,
                                                                jlong msg_id) {
     return (int32_t) ((int64_t) msg_id & 0xffL);
+}
+
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_moe_fuqiuluo_http_action_helper_MessageHelper_nativeDecodeCQCode(JNIEnv *env, jobject thiz,
+                                                                jstring code) {
+    jclass ArrayList = env->FindClass("java/util/ArrayList");
+    jmethodID NewArrayList = env->GetMethodID(ArrayList, "<init>", "()V");
+    jmethodID ArrayListAdd = env->GetMethodID(ArrayList, "add", "(Ljava/lang/Object;)Z");
+    jobject arrayList = env->NewObject(ArrayList, NewArrayList);
+
+    const char* cCode = env->GetStringUTFChars(code, nullptr);
+    std::string cppCode = cCode;
+    std::vector<std::unordered_map<std::string, std::string>> dest;
+    try {
+        decode_cqcode(cppCode, dest);
+    } catch (illegal_code& code) {
+        return arrayList;
+    }
+
+    jclass HashMap = env->FindClass("java/util/HashMap");
+    jmethodID NewHashMap = env->GetMethodID(HashMap, "<init>", "()V");
+    jclass String = env->FindClass("java/lang/String");
+    jmethodID NewString = env->GetMethodID(String, "<init>", "([BLjava/lang/String;)V");
+    jstring charset = env->NewStringUTF("UTF-8");
+    jmethodID put = env->GetMethodID(HashMap, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+    for (auto& map : dest) {
+        jobject hashMap = env->NewObject(HashMap, NewHashMap);
+        for (const auto& pair : map) {
+            jbyteArray keyArray = env->NewByteArray((int) pair.first.size());
+            jbyteArray valueArray = env->NewByteArray((int) pair.second.size());
+            env->SetByteArrayRegion(keyArray, 0, (int) pair.first.size(), (jbyte*)pair.first.c_str());
+            env->SetByteArrayRegion(valueArray, 0, (int) pair.second.size(), (jbyte*)pair.second.c_str());
+            auto key = (jstring) env->NewObject(String, NewString, keyArray, charset);
+            auto value = (jstring) env->NewObject(String, NewString, valueArray, charset);
+            env->CallObjectMethod(hashMap, put, key, value);
+        }
+        env->CallBooleanMethod(arrayList, ArrayListAdd, hashMap);
+    }
+
+    return arrayList;
 }

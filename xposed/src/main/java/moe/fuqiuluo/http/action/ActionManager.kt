@@ -18,6 +18,7 @@ import moe.fuqiuluo.xposed.tools.asJsonObject
 import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
 import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.asStringOrNull
+import moe.fuqiuluo.xposed.tools.json
 
 internal object ActionManager {
     val actionMap = mutableMapOf(
@@ -90,13 +91,10 @@ internal class ActionSession {
         values.forEach { (key, value) ->
             if (value != null) {
                 when (value) {
-                    is String -> map[key] = JsonPrimitive(value)
-                    is Int -> map[key] = JsonPrimitive(value)
-                    is Long -> map[key] = JsonPrimitive(value)
-                    is Byte -> map[key] = JsonPrimitive(value)
+                    is String -> map[key] = value.json
+                    is Number -> map[key] = value.json
                     is Char -> map[key] = JsonPrimitive(value.code.toByte())
-                    is Short -> map[key] = JsonPrimitive(value)
-                    is Boolean -> map[key] = JsonPrimitive(value)
+                    is Boolean -> map[key] = value.json
                     is JsonObject -> map[key] = value
                     is JsonArray -> map[key] = value
                     else -> error("unsupported type: ${value::class.java}")
@@ -116,6 +114,21 @@ internal class ActionSession {
 
     fun getIntOrNull(key: String): Int? {
         return params[key].asIntOrNull
+    }
+
+    fun isString(key: String): Boolean {
+       val element = params[key]
+        return element is JsonPrimitive && element.isString
+    }
+
+    fun isArray(key: String): Boolean {
+        val element = params[key]
+        return element is JsonArray
+    }
+
+    fun isObject(key: String): Boolean {
+        val element = params[key]
+        return element is JsonObject
     }
 
     fun getString(key: String): String {

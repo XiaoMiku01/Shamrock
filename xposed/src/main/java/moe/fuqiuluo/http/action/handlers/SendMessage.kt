@@ -10,6 +10,7 @@ import moe.fuqiuluo.http.action.helper.MessageHelper
 import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
 import moe.fuqiuluo.http.action.helper.msg.ParamsException
 import moe.fuqiuluo.xposed.helper.LogCenter
+import moe.fuqiuluo.xposed.tools.json
 
 internal object SendMessage: IActionHandler() {
     override suspend fun handle(session: ActionSession): String {
@@ -18,14 +19,39 @@ internal object SendMessage: IActionHandler() {
             when(val chatType = MessageHelper.obtainMessageTypeByDetailType(detailType)) {
                 MsgConstant.KCHATTYPEGROUP -> {
                     val groupId = session.getStringOrNull("group_id") ?: return noParam("group_id")
-                    val message = session.getArrayOrNull("message") ?: return noParam("message")
-                    val result = sendToTroop(groupId, message)
-                    return ok(MessageResult(
-                        msgId = result.second,
-                        time = result.first * 0.001
-                    ))
+                    if (session.isString("message")) {
+                        // CQ码 | 纯文本
+                        val autoEscape = session.getBooleanOrDefault("auto_escape", false)
+                        val message = session.getString("message")
+                        if (autoEscape) {
+                            val result = sendToTroop(groupId, arrayListOf(message).json)
+                            return ok(MessageResult(
+                                msgId = result.second,
+                                time = result.first * 0.001
+                            ))
+                        } else {
+                            val msg = MessageHelper.decodeCQCode(message)
+                            if (msg.isEmpty()) {
+                                LogCenter.log("CQ码解码失败，CQ码不合法")
+                            } else {
+                                LogCenter.log(msg.toString())
+                                val result = sendToTroop(groupId, MessageHelper.decodeCQCode(message))
+                                return ok(MessageResult(
+                                    msgId = result.second,
+                                    time = result.first * 0.001
+                                ))
+                            }
+                        }
+                    } else {
+                        // 消息段
+                        val message = session.getArrayOrNull("message") ?: return noParam("message")
+                        val result = sendToTroop(groupId, message)
+                        return ok(MessageResult(
+                            msgId = result.second,
+                            time = result.first * 0.001
+                        ))
+                    }
                 }
-
                 else -> {}
             }
         }.onFailure {
