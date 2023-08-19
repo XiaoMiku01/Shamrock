@@ -18,8 +18,30 @@ import moe.fuqiuluo.xposed.tools.isString
 
 fun Routing.sendGroupMessage() {
     get("/send_msg") {
+        val msgType = fetchGetOrThrow("message_type")
+        val message = fetchGetOrThrow("message")
+        val autoEscape = fetchGetOrNull("auto_escape")?.toBoolean() ?: false
+        val peerIdKey = if(msgType == "group") "group_id" else "user_id"
+        call.respondText(ActionManager["send_message"]?.handle(ActionSession(mapOf(
+            "detail_type" to msgType,
+            peerIdKey to fetchGetOrThrow(peerIdKey),
+            "message" to message,
+            "auto_escape" to autoEscape
+        ))) ?: throw LogicException("Unable to obtain send_message handler."))
+    }
 
-
+    post("/send_msg") {
+        val msgType = fetchPostOrThrow("message_type")
+        val autoEscape = fetchPostOrNull("auto_escape")?.toBoolean() ?: false
+        val peerIdKey = if(msgType == "group") "group_id" else "user_id"
+        call.respondText(ActionManager["send_message"]?.handle(ActionSession(mapOf(
+            "detail_type" to msgType,
+            peerIdKey to fetchPostOrThrow(peerIdKey),
+            "message" to if (isJsonData() && !isString("message")) {
+                fetchPostJsonArray("message")
+            } else fetchPostOrThrow("message"),
+            "auto_escape" to autoEscape
+        ))) ?: throw LogicException("Unable to obtain send_message handler."))
     }
 
     get("/send_group_msg") {
@@ -41,6 +63,32 @@ fun Routing.sendGroupMessage() {
         call.respondText(ActionManager["send_message"]?.handle(ActionSession(mapOf(
             "detail_type" to "group",
             "group_id" to groupId,
+            "message" to if (isJsonData() && !isString("message")) {
+                fetchPostJsonArray("message")
+            } else fetchPostOrThrow("message"),
+            "auto_escape" to autoEscape
+        ))) ?: throw LogicException("Unable to obtain send_message handler."))
+    }
+
+    get("/send_private_msg") {
+        val userId = fetchGetOrThrow("user_id")
+        val message = fetchGetOrThrow("message")
+        val autoEscape = fetchGetOrNull("auto_escape")?.toBoolean() ?: false
+
+        call.respondText(ActionManager["send_message"]?.handle(ActionSession(mapOf(
+            "detail_type" to "private",
+            "user_id" to userId,
+            "message" to message,
+            "auto_escape" to autoEscape
+        ))) ?: throw LogicException("Unable to obtain send_message handler."))
+    }
+
+    post("/send_private_msg") {
+        val userId = fetchPostOrThrow("user_id")
+        val autoEscape = fetchPostOrNull("auto_escape")?.toBoolean() ?: false
+        call.respondText(ActionManager["send_message"]?.handle(ActionSession(mapOf(
+            "detail_type" to "private",
+            "user_id" to userId,
             "message" to if (isJsonData() && !isString("message")) {
                 fetchPostJsonArray("message")
             } else fetchPostOrThrow("message"),

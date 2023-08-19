@@ -6,7 +6,6 @@ import kotlinx.serialization.json.JsonArray
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
 import moe.fuqiuluo.http.action.data.MessageResult
-import moe.fuqiuluo.http.action.helper.ContactHelper
 import moe.fuqiuluo.http.action.helper.MessageHelper
 import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
 import moe.fuqiuluo.http.action.helper.msg.ParamsException
