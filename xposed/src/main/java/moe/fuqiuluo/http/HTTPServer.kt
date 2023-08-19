@@ -18,6 +18,7 @@ import moe.fuqiuluo.http.api.index
 import moe.fuqiuluo.http.entries.CommonResult
 import moe.fuqiuluo.http.entries.ErrorCatch
 import de.robv.android.xposed.XposedBridge.log
+import moe.fuqiuluo.http.action.helper.msg.LogicException
 import moe.fuqiuluo.http.action.helper.msg.ParamsException
 import moe.fuqiuluo.http.api.energy
 import moe.fuqiuluo.http.api.getAccountInfo
@@ -73,6 +74,10 @@ object HTTPServer {
                     exception<Throwable> { call, cause ->
                         if (cause is ParamsException) {
                             call.respond(CommonResult("failed", Status.BadParam.code, ErrorCatch(
+                                call.request.uri, cause.message ?: "")
+                            ))
+                        } else if (cause is LogicException) {
+                            call.respond(CommonResult("failed", Status.LogicError.code, ErrorCatch(
                                 call.request.uri, cause.message ?: "")
                             ))
                         } else {

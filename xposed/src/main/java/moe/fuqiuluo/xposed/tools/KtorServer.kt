@@ -21,6 +21,7 @@ import io.ktor.util.reflect.TypeInfo
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import moe.fuqiuluo.http.action.helper.msg.ParamsException
 import moe.fuqiuluo.http.entries.CommonResult
@@ -56,6 +57,19 @@ suspend fun PipelineContext<Unit, ApplicationCall>.fetchPostOrThrow(key: String)
 
 fun PipelineContext<Unit, ApplicationCall>.isJsonData(): Boolean {
     return ContentType.Application.Json == call.request.contentType()
+}
+
+suspend fun PipelineContext<Unit, ApplicationCall>.isString(key: String): Boolean {
+    if (!isJsonData()) return true
+    val cacheKey = AttributeKey<JsonObject>("paramsJson")
+    val data = if (call.attributes.contains(cacheKey)) {
+        call.attributes[cacheKey]
+    } else {
+        Json.parseToJsonElement(call.receiveText()).jsonObject.also {
+            call.attributes.put(cacheKey, it)
+        }
+    }
+    return data[key] is JsonPrimitive
 }
 
 suspend fun PipelineContext<Unit, ApplicationCall>.fetchPostJsonObject(key: String): JsonObject {
