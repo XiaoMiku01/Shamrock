@@ -15,7 +15,7 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
-    if: ${{ !startsWith(github.event.head_commit.message, 'Merge remote-tracking branch') }} && github.ref == 'refs/heads/master' }}
+    if: "! contains(github.event.head_commit.message, 'Merge remote-tracking branch')"
 
     steps:
       - name: Checkout code
@@ -26,6 +26,7 @@ jobs:
         with:
           distribution: "temurin"
           java-version: 17
+          cache: 'gradle'
 
       - name: Setup cmake
         run: |
@@ -39,7 +40,7 @@ jobs:
         run: |
           echo ${{ secrets.SIGN_KEYSTORE_BASE64 }} | base64 -d > keystore.jks
           chmod +x ./gradlew
-          ./gradlew :app:assembleRelease --build-cache --parallel --daemon --warning-mode all
+          ./gradlew :app:assembleAppRelease --build-cache --parallel --daemon --warning-mode all
            echo "APK_FILE=$(find app/build/outputs/apk/release -name '*.apk')" >> $GITHUB_ENV
         env:
           KEYSTORE_PATH: "../keystore.jks"

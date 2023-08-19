@@ -7,6 +7,8 @@ plugins {
     kotlin("plugin.serialization") version "1.8.10"
 }
 
+var isSign = false
+
 android {
     namespace = "moe.fuqiuluo.shamrock"
     compileSdk = 33
@@ -24,14 +26,8 @@ android {
         }
         externalNativeBuild {
             cmake {
-                abiFilters += "arm64-v8a"
                 cppFlags += ""
             }
-        }
-        packagingOptions {
-            exclude("lib/armeabi-v7a/*")
-            exclude("lib/x86/*")
-            exclude("lib/x86_64/*")
         }
     }
 
@@ -44,6 +40,37 @@ android {
             )
         }
     }
+
+    android.applicationVariants.all {
+        outputs.map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach {
+                val fileName = StringBuffer("Shamrock-v$versionName.r$versionCode")
+                val command = gradle.startParameter.taskNames.firstOrNull()
+                if (command != null) {
+                    if (command.endsWith("Release")) {
+                        fileName.append("-release")
+                    } else if(command.endsWith("Debug")) {
+                        fileName.append("-debug")
+                    }
+                    if (!isSign) {
+                        fileName.append("-unsigned")
+                    }
+                    it.outputFileName = fileName.append(".apk").toString()
+                }
+            }
+    }
+
+    flavorDimensions.add("mode")
+
+    productFlavors {
+        create("app") {
+            dimension = "mode"
+            ndk {
+                abiFilters.add("arm64-v8a")
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -94,6 +121,7 @@ fun configureAppSigningConfigsForRelease(project: Project) {
         println("ERROR: KEYSTORE_PATH is not set or is blank.")
         return
     }
+    isSign = true
     project.configure<ApplicationExtension> {
         signingConfigs {
             create("release") {
