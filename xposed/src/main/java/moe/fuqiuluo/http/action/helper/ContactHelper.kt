@@ -44,6 +44,21 @@ internal object ContactHelper {
         }
     }
 
+    suspend fun getUinByUid(uid: String): String {
+        if (uid.isBlank() || uid == "0") {
+            return "0"
+        }
+
+        val kernelService = NTServiceFetcher.kernelService
+        val sessionService = kernelService.wrapperSession
+
+        return suspendCancellableCoroutine { continuation ->
+            sessionService.uixConvertService.getUin(hashSetOf(uid)) {
+                continuation.resume(it)
+            }
+        }[uid]?.toString() ?: "0"
+    }
+
     suspend fun getUidByUin(peerId: Long): String {
         val kernelService = NTServiceFetcher.kernelService
         val sessionService = kernelService.wrapperSession

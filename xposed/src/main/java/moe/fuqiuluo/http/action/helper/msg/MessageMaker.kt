@@ -314,7 +314,16 @@ internal object MessageMaker {
     private suspend fun createVideoElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("file")
 
-        val file = FileHelper.parseAndSave(data["file"].asString)
+        val file = data["file"].asString.let {
+            if (it.length == 32) {
+                FileHelper.getFile(it)
+            } else {
+                FileHelper.parseAndSave(it)
+            }
+        }
+        if (!file.exists()) {
+            throw LogicException("Video file is not exists, please check your filename.")
+        }
         val elem = MsgElement()
         val video = VideoElement()
 
@@ -383,12 +392,12 @@ internal object MessageMaker {
                 at.atNtUid = "0"
             }
             else -> {
-                val info = TroopHelper.getTroopMemberInfoByUin(peerId, qq.toLong()) ?: error("获取成员昵称失败")
-                at.content = "@${info.cardName
-                    .ifNullOrEmpty(info.nick)
+                val info = TroopHelper.getTroopMemberInfoByUin(peerId, qq, true) ?: error("获取成员信息失败")
+                at.content = "@${info.troopnick
+                    .ifNullOrEmpty(info.friendnick)
                     .ifNullOrEmpty(qq)}"
                 at.atType = MsgConstant.ATTYPEONE
-                at.atNtUid = info.uid
+                at.atNtUid = ContactHelper.getUidByUin(qq.toLong())
             }
         }
 
@@ -400,7 +409,16 @@ internal object MessageMaker {
     private suspend fun createRecordElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("file")
 
-        var file = FileHelper.parseAndSave(data["file"].asString)
+        var file = data["file"].asString.let {
+            if (it.length == 32) {
+                FileHelper.getFile(it)
+            } else {
+                FileHelper.parseAndSave(it)
+            }
+        }
+        if (!file.exists()) {
+            throw LogicException("Voice file is not exists, please check your filename.")
+        }
         val isMagic = data["magic"].asStringOrNull == "1"
 
         val ptt = PttElement()
@@ -471,7 +489,16 @@ internal object MessageMaker {
 
         val isOriginal = data["original"].asBooleanOrNull ?: true
         val isFlash = data["flash"].asBooleanOrNull ?: false
-        val file = FileHelper.parseAndSave(data["file"].asString)
+        val file = data["file"].asString.let {
+            if (it.length == 32) {
+                FileHelper.getFile(it)
+            } else {
+                FileHelper.parseAndSave(it)
+            }
+        }
+        if (!file.exists()) {
+            throw LogicException("Image file is not exists, please check your filename.")
+        }
 
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
             HighwayHelper.transTroopPic(peerId, file)

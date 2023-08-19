@@ -41,7 +41,8 @@ internal object ActionManager {
         "get_uin_by_uid" to GetUinByUid,
         "delete_message" to DeleteMessage,
         "sanc_qrcode" to ScanQRCode,
-        "set_qq_profile" to SetProfileCard
+        "set_qq_profile" to SetProfileCard,
+        "get_msg" to GetMsg
     )
 
     operator fun get(action: String): IActionHandler? {

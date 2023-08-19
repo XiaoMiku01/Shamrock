@@ -60,6 +60,18 @@ internal object MessageHelper {
         return when(detailType) {
             "troop", "group" -> MsgConstant.KCHATTYPEGROUP
             "private" -> MsgConstant.KCHATTYPEC2C
+            "less" -> MsgConstant.KCHATTYPETEMPC2CFROMUNKNOWN
+            "guild" -> MsgConstant.KCHATTYPEGUILD
+            else -> error("不支持的消息来源类型")
+        }
+    }
+
+    fun obtainDetailTypeByMsgType(msgType: Int): String {
+        return when(msgType) {
+            MsgConstant.KCHATTYPEGROUP -> "group"
+            MsgConstant.KCHATTYPEC2C -> "private"
+            MsgConstant.KCHATTYPEGUILD -> "guild"
+            MsgConstant.KCHATTYPETEMPC2CFROMUNKNOWN -> "less"
             else -> error("不支持的消息来源类型")
         }
     }
@@ -129,7 +141,18 @@ internal object MessageHelper {
         return arrayList.jsonArray
     }
 
+    fun getPeerIdByMsgId(msgId: Long): Long {
+        val chatType = getChatType(msgId)
+        val mmkv = MMKVFetcher.defaultMMKV()
+        return when (chatType) {
+            MsgConstant.KCHATTYPEGROUP -> mmkv.getLong("troop$msgId", 0)
+            MsgConstant.KCHATTYPEC2C -> mmkv.getLong("c2c$msgId", 0)
+            else -> error("暂时不支持该类型消息: $chatType")
+        }
+    }
+
     private external fun nativeDecodeCQCode(code: String): List<Map<String, String>>
+    private external fun nativeEncodeCQCode(segment: List<Map<String, String>>): String
 
     external fun getChatType(msgId: Long): Int
 }

@@ -1,22 +1,12 @@
 package moe.fuqiuluo.http.action.handlers
 
-import com.tencent.common.app.AppInterface
-import com.tencent.mobileqq.data.troop.TroopMemberInfo
-import com.tencent.mobileqq.troop.api.ITroopMemberInfoService
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeoutOrNull
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
 import moe.fuqiuluo.http.action.data.SimpleTroopMemberInfo
-import moe.fuqiuluo.http.action.helper.TroopRequestHelper
+import moe.fuqiuluo.http.action.helper.TroopHelper
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
-import mqq.app.MobileQQ
 
 internal object GetTroopMemberInfo: IActionHandler() {
-    private val refreshLock = Mutex()
-
     override suspend fun handle(session: ActionSession): String {
         if (!session.has("user_id")) {
             return noParam("user_id")
@@ -28,19 +18,9 @@ internal object GetTroopMemberInfo: IActionHandler() {
         val groupId = session.getString("group_id")
         val refresh = session.getBooleanOrDefault("refresh", false)
 
-        val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
-        if (runtime !is AppInterface)
-            return logic("AppRuntime cannot cast to AppInterface")
+        val info = TroopHelper.getTroopMemberInfoByUin(groupId, uin, refresh)
+            ?: return logic("cannot get troop member info")
 
-        val service = runtime.getRuntimeService(ITroopMemberInfoService::class.java, "all")
-        var info = service.getTroopMember(groupId, uin)
-        if (refresh || !service.isMemberInCache(groupId, uin) || info == null || info.troopnick == null) {
-            info = requestTroopMemberInfo(service, groupId.toLong(), uin.toLong())
-        }
-
-        if (info == null) {
-            return logic("cannot get troop member info")
-        }
         return ok(SimpleTroopMemberInfo(
             uin = info.memberuin,
             name = info.friendnick.ifNullOrEmpty(info.autoremark) ?: "",
@@ -54,25 +34,6 @@ internal object GetTroopMemberInfo: IActionHandler() {
             lastActiveTime = info.last_active_time,
             uniqueName = info.mUniqueTitle
         ))
-    }
-
-    private suspend fun requestTroopMemberInfo(service: ITroopMemberInfoService, groupId: Long, memberUin: Long): TroopMemberInfo? {
-        return refreshLock.withLock {
-            val groupIdStr = groupId.toString()
-            val memberUinStr = memberUin.toString()
-
-            service.deleteTroopMember(groupIdStr, memberUinStr)
-
-            TroopRequestHelper.requestMemberInfoV2(groupId, memberUin)
-            TroopRequestHelper.requestMemberInfo(groupId, memberUin)
-
-            withTimeoutOrNull(10000) {
-                while (!service.isMemberInCache(groupIdStr, memberUinStr)) {
-                    delay(200)
-                }
-                return@withTimeoutOrNull service.getTroopMember(groupIdStr, memberUinStr)
-            }
-        }
     }
 
     override fun path(): String = "get_group_member_info"

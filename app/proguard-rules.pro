@@ -73,10 +73,6 @@
 # Make sure we keep annotations for CoordinatorLayout's DefaultBehavior
 -keepattributes RuntimeVisible*Annotation*
 
--if class androidx.appcompat.app.AppCompatViewInflater
--keep class com.google.android.material.theme.MaterialComponentsViewInflater {
-    <init>();
-}
 
 # Keep `Companion` object fields of serializable classes.
 # This avoids serializer lookup through `getDeclaredClasses` as done for named companion objects.
@@ -125,7 +121,7 @@
 # see https://github.com/Kotlin/kotlinx.serialization/issues/2050
 
 -if @kotlinx.serialization.Serializable class **
--keep, allowshrinking, allowoptimization, allowobfuscation, allowaccessmodification class <1>
+-keep, allowshrinking, allowoptimization, allowobfuscation class <1>
 
 # Entry point for retaining MainDispatcherLoader which uses a ServiceLoader.
 -keep class kotlinx.coroutines.Dispatchers {
@@ -217,7 +213,3 @@
     native <methods>;
 }
 -keep class io.netty.** { *; }
-
--keep class moe.fuqiuluo.** implements com.tencent.qqnt.kernel.nativeinterface.** {
-    *;
-}

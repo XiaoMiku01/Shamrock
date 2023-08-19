@@ -5,6 +5,7 @@ import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import kotlinx.coroutines.suspendCancellableCoroutine
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
+import moe.fuqiuluo.http.action.helper.ContactHelper
 import moe.fuqiuluo.http.action.helper.MessageHelper
 import moe.fuqiuluo.http.entries.EmptyObject
 import moe.fuqiuluo.xposed.helper.MMKVFetcher
@@ -46,7 +47,7 @@ internal object DeleteMessage: IActionHandler() {
             val key = "c2c$msgId"
             val friendId = mmkv.getLong(key, 0)
             mmkv.remove(key)
-            return MessageHelper.generateContact(chatType, friendId.toString())
+            return MessageHelper.generateContact(chatType, ContactHelper.getUidByUin(friendId))
         }
         kotlin.error("暂时不支持撤回该类型消息: $chatType")
     }
