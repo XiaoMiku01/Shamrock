@@ -11,6 +11,7 @@ var isSign = false
 
 android {
     namespace = "moe.fuqiuluo.shamrock"
+    ndkVersion = "25.1.8937393"
     compileSdk = 33
 
     defaultConfig {
@@ -113,6 +114,11 @@ android {
         }
     }
     configureAppSigningConfigsForRelease(project)
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 fun configureAppSigningConfigsForRelease(project: Project) {

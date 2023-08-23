@@ -10,7 +10,6 @@
 
     <application
         android:name=".app.MyApplication"
-        android:extractNativeLibs="true"
         android:zygotePreloadName="@string/app_name"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
