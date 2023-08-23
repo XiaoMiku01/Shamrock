@@ -42,7 +42,8 @@ internal object ActionManager {
         "delete_message" to DeleteMessage,
         "sanc_qrcode" to ScanQRCode,
         "set_qq_profile" to SetProfileCard,
-        "get_msg" to GetMsg
+        "get_msg" to GetMsg,
+        "get_forward_msg" to GetForwardMsg
     )
 
     operator fun get(action: String): IActionHandler? {

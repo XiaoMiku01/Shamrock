@@ -3,7 +3,6 @@ package moe.fuqiuluo.http.action.handlers
 import com.tencent.mobileqq.qroute.QRoute
 import com.tencent.qqnt.kernel.nativeinterface.MsgRecord
 import com.tencent.qqnt.msg.api.IMsgService
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import moe.fuqiuluo.http.action.ActionSession

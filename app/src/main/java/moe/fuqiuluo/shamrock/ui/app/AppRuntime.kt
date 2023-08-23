@@ -17,6 +17,7 @@ object AppRuntime {
     lateinit var state: RuntimeState
 
     lateinit var logger: Logger
+    internal var maxLogSize = Short.MAX_VALUE / 2
 
     lateinit var requestCount: MutableIntState
 
@@ -33,6 +34,11 @@ object AppRuntime {
             val builder = logger.logCache.value
             val start = builder.length
             val end = start + format.length
+
+            if (logger.logRanges.size >= maxLogSize) {
+                builder.clear()
+                logger.logRanges.clear()
+            }
 
             builder.append(format)
             logger.logRanges.add(Logger.LogRange(start, end, level))

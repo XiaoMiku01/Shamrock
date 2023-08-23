@@ -25,7 +25,8 @@ class HookWrapperCodec: IAction {
         "trpc.qqshop.qgghomepage.Config.SsoGetBottomTab",
         "ClubInfoSvc.queryPrivExt",
         "OidbSvc.0xcf8",
-        "LbsSvc.lbs_report"
+        "LbsSvc.lbs_report",
+        "OidbSvcTrpcTcp.0x88d_0"
     )
 
     override fun invoke(ctx: Context) {

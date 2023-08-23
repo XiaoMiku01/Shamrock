@@ -147,7 +147,7 @@ internal object MessageHelper {
         return MMKVFetcher.defaultMMKV().getLong(hashCode.toString(), 0)
     }
 
-    private external fun createMessageUniseq(chatType: Int, time: Long): Long
+    external fun createMessageUniseq(chatType: Int, time: Long): Long
 
     fun decodeCQCode(code: String): JsonArray {
         val arrayList = ArrayList<JsonElement>()

@@ -23,45 +23,57 @@ internal object MsgConvert {
     suspend fun convertMsgElementsToMsgSegment(chatType: Int, elements: List<MsgElement>): ArrayList<HashMap<String, JsonElement>> {
         val messageData = arrayListOf<HashMap<String, JsonElement>>()
         elements.forEach {
-            if (it.elementType == MsgConstant.KELEMTYPETEXT) {
-                val text = it.textElement
-                if (text.atType != MsgConstant.ATTYPEUNKNOWN) {
-                    messageData.add(hashMapOf(
+            val segment = covertMsgElementToMsgSegment(chatType, it)
+            if (segment != null) {
+                messageData.add(segment)
+            }
+        }
+        return messageData
+    }
+
+    suspend fun covertMsgElementToMsgSegment(chatType: Int, element: MsgElement): java.util.HashMap<String, JsonElement>? {
+        when (element.elementType) {
+            MsgConstant.KELEMTYPETEXT -> {
+                val text = element.textElement
+                return if (text.atType != MsgConstant.ATTYPEUNKNOWN) {
+                    hashMapOf(
                         "type" to "at".json,
                         "data" to JsonObject(mapOf(
                             "qq" to ContactHelper.getUinByUid(text.atNtUid).json,
                         ))
-                    ))
+                    )
                 } else {
-                    messageData.add(hashMapOf(
+                    hashMapOf(
                         "type" to "text".json,
                         "data" to JsonObject(mapOf(
                             "text" to text.content.json
                         ))
-                    ))
+                    )
                 }
-            } else if (it.elementType == MsgConstant.KELEMTYPEFACE) {
-                val face = it.faceElement
+            }
+            MsgConstant.KELEMTYPEFACE -> {
+                val face = element.faceElement
                 if (face.faceType == 5) {
-                    messageData.add(hashMapOf(
+                    return hashMapOf(
                         "type" to "poke".json,
                         "data" to JsonObject(mapOf(
                             "type" to face.pokeType.json,
                             "id" to face.vaspokeId.json,
                             "strength" to face.pokeStrength.json
                         ))
-                    ))
+                    )
                 }
-                messageData.add(hashMapOf(
+                return hashMapOf(
                     "type" to "face".json,
                     "data" to JsonObject(mapOf(
                         "id" to face.faceIndex.json
                     ))
-                ))
-            } else if (it.elementType == MsgConstant.KELEMTYPEPIC) {
-                val image = it.picElement
+                )
+            }
+            MsgConstant.KELEMTYPEPIC -> {
+                val image = element.picElement
                 val md5 = image.md5HexStr
-                messageData.add(hashMapOf(
+                return hashMapOf(
                     "type" to "image".json,
                     "data" to JsonObject(mapOf(
                         "file" to md5.json,
@@ -71,15 +83,16 @@ internal object MsgConvert {
                             else -> error("Not supported chat type: $chatType, convertMsgElementsToMsgSegment::Pic")
                         }.json
                     ))
-                ))
-            } else if (it.elementType == MsgConstant.KELEMTYPEPTT) {
-                val record = it.pttElement
+                )
+            }
+            MsgConstant.KELEMTYPEPTT -> {
+                val record = element.pttElement
 
                 val md5 = if (record.fileName.startsWith("silk"))
                     record.fileName.substring(5)
                 else record.md5HexStr
 
-                messageData.add(hashMapOf(
+                return hashMapOf(
                     "type" to "record".json,
                     "data" to JsonObject(mapOf(
                         "file" to md5.json,
@@ -90,10 +103,11 @@ internal object MsgConvert {
                             else -> error("Not supported chat type: $chatType, convertMsgElementsToMsgSegment::Pic")
                         }.json
                     ))
-                ))
-            } else if (it.elementType == MsgConstant.KELEMTYPEVIDEO) {
-                val video = it.videoElement
-                messageData.add(hashMapOf(
+                )
+            }
+            MsgConstant.KELEMTYPEVIDEO -> {
+                val video = element.videoElement
+                return hashMapOf(
                     "type" to "video".json,
                     "data" to JsonObject(mapOf(
                         "file" to video.fileName.json,
@@ -103,20 +117,22 @@ internal object MsgConvert {
                             else -> error("Not supported chat type: $chatType, convertMsgElementsToMsgSegment::Pic")
                         }.json
                     ))
-                ))
-            } else if (it.elementType == MsgConstant.KELEMTYPEMARKETFACE) {
-                val face = it.marketFaceElement
+                )
+            }
+            MsgConstant.KELEMTYPEMARKETFACE -> {
+                val face = element.marketFaceElement
                 when (face.emojiId.lowercase()) {
-                    "4823d3adb15df08014ce5d6796b76ee1" -> messageData.add(hashMapOf("type" to "dice".json))
-                    "83c8a293ae65ca140f348120a77448ee" -> messageData.add(hashMapOf("type" to "rps".json))
+                    "4823d3adb15df08014ce5d6796b76ee1" -> return hashMapOf("type" to "dice".json)
+                    "83c8a293ae65ca140f348120a77448ee" -> return hashMapOf("type" to "rps".json)
                 }
-            } else if (it.elementType == MsgConstant.KELEMTYPEARKSTRUCT) {
+            }
+            MsgConstant.KELEMTYPEARKSTRUCT -> {
                 kotlin.runCatching {
-                    val data = Json.parseToJsonElement(it.arkElement.bytesData).asJsonObject
+                    val data = Json.parseToJsonElement(element.arkElement.bytesData).asJsonObject
                     when (data["view"].asString) {
                         "news" -> {
                             val info = data["meta"].asJsonObject["news"].asJsonObject
-                            messageData.add(hashMapOf(
+                            return hashMapOf(
                                 "type" to "share".json,
                                 "data" to JsonObject(mapOf(
                                     "url" to info["jumpUrl"]!!,
@@ -124,11 +140,11 @@ internal object MsgConvert {
                                     "content" to info["desc"]!!,
                                     "image" to info["preview"]!!
                                 ))
-                            ))
+                            )
                         }
                         "LocationShare" -> {
                             val info = data["meta"].asJsonObject["Location.Search"].asJsonObject
-                            messageData.add(hashMapOf(
+                            return hashMapOf(
                                 "type" to "location".json,
                                 "data" to JsonObject(mapOf(
                                     "lat" to info["lat"]!!,
@@ -136,55 +152,67 @@ internal object MsgConvert {
                                     "content" to info["address"]!!,
                                     "title" to info["name"]!!
                                 ))
-                            ))
+                            )
                         }
                         "contact" -> {
                             val info = data["meta"].asJsonObject["contact"].asJsonObject
-                            if(data["app"].asString == "com.tencent.troopsharecard") {
-                                messageData.add(hashMapOf(
+                            val packageName = data["app"].asString
+                            if(packageName == "com.tencent.troopsharecard") {
+                                return hashMapOf(
                                     "type" to "contact".json,
                                     "data" to JsonObject(mapOf(
                                         "type" to "group".json,
                                         "id" to info["jumpUrl"].asString.split("group_code=")[1].json,
                                     ))
-                                ))
-                            } else {
-                                messageData.add(hashMapOf(
+                                )
+                            //} else if (packageName == "com.tencent.multimsg") {
+                            } else if (packageName == "com.tencent.contact.lua") {
+                                return hashMapOf(
                                     "type" to "contact".json,
                                     "data" to JsonObject(mapOf(
                                         "type" to "private".json,
                                         "id" to info["jumpUrl"].asString.split("uin=")[1].json,
                                     ))
-                                ))
+                                )
+                            } else {
+                                LogCenter.log("Not supported xml app: $packageName", Level.WARN)
+                                return hashMapOf(
+                                    "type" to "json".json,
+                                    "data" to JsonObject(mapOf(
+                                        "data" to element.arkElement.bytesData.json,
+                                    ))
+                                )
                             }
                         }
                         // "music" -> {}
                         else -> {
-                            messageData.add(hashMapOf(
+                            return hashMapOf(
                                 "type" to "json".json,
                                 "data" to JsonObject(mapOf(
-                                    "data" to it.arkElement.bytesData.json,
+                                    "data" to element.arkElement.bytesData.json,
                                 ))
-                            ))
+                            )
                         }
                     }
                 }.onFailure {
                     LogCenter.log(it.stackTraceToString(), Level.ERROR)
                 }
-            } else if(it.elementType == MsgConstant.KELEMTYPEREPLY) {
-                val reply = it.replyElement
+            }
+            MsgConstant.KELEMTYPEREPLY -> {
+                val reply = element.replyElement
                 val msgId = reply.replayMsgId
-                messageData.add(hashMapOf(
+                return hashMapOf(
                     "type" to "reply".json,
                     "data" to JsonObject(mapOf(
                         "id" to MessageHelper.generateMsgIdHash(chatType, msgId).json,
                     ))
-                ))
-            } else {
-                LogCenter.log("不支持的消息Elem转消息段: ${it.elementType}", Level.WARN)
+                )
+            }
+            else -> {
+                LogCenter.log("不支持的消息Elem转消息段: ${element.elementType}", Level.WARN)
             }
         }
-        return messageData
+        return null
     }
 
 }
