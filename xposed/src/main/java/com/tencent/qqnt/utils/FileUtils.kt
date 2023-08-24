@@ -132,7 +132,6 @@ internal object FileUtils {
         val md5Hex = QQNTWrapperUtil.CppProxy.genFileMd5Hex(tmpFile.absolutePath)
         val sourceFile = CacheDir.resolve(md5Hex)
         tmpFile.renameTo(sourceFile)
-        //input.close() 内存流，无需close
         return sourceFile
     }
 
@@ -143,6 +142,9 @@ internal object FileUtils {
         }
         val md5Hex = QQNTWrapperUtil.CppProxy.genFileMd5Hex(tmpFile.absolutePath)
         val sourceFile = CacheDir.resolve(md5Hex)
+        if (sourceFile.exists()) {
+            sourceFile.delete()
+        }
         tmpFile.renameTo(sourceFile)
         return sourceFile
     }

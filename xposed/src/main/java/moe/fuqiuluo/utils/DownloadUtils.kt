@@ -45,7 +45,7 @@ object DownloadUtils {
                     reallyDownload(url, start, end, dest, channel)
                 }
             }
-            withTimeoutOrNull(15000L) {
+            withTimeoutOrNull(60000L) {
                 while (progress.value < contentLength) {
                     if(progress.addAndGet(channel.receive()) >= contentLength) {
                         break
