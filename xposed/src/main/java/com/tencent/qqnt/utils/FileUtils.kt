@@ -4,13 +4,10 @@ import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.util.Base64
 import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsChannel
-import io.ktor.http.HttpStatusCode
 import io.ktor.util.cio.writeChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.copyTo
-import moe.fuqiuluo.xposed.tools.GlobalClient
+import moe.fuqiuluo.utils.DownloadUtils
 import mqq.app.MobileQQ
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -45,11 +42,13 @@ internal object FileUtils {
             }
         } else {
             kotlin.run {
-                val respond = GlobalClient.get(file)
-                if (respond.status != HttpStatusCode.OK) {
-                    error("download image failed: ${respond.status}")
+                val tmp = getTmpFile()
+                DownloadUtils.download(file, tmp)
+                tmp.inputStream().use {
+                    saveFileToCache(it).also {
+                        tmp.delete()
+                    }
                 }
-                saveFileToCache(respond.bodyAsChannel())
             }
         }
     }
@@ -145,7 +144,6 @@ internal object FileUtils {
         val md5Hex = QQNTWrapperUtil.CppProxy.genFileMd5Hex(tmpFile.absolutePath)
         val sourceFile = CacheDir.resolve(md5Hex)
         tmpFile.renameTo(sourceFile)
-        //input.close() 内存流，无需close
         return sourceFile
     }
 }

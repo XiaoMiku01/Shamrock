@@ -54,6 +54,7 @@ internal object MessageMaker {
         "face" to MessageMaker::createFaceElem,
         "pic" to MessageMaker::createImageElem,
         "image" to MessageMaker::createImageElem,
+        "voice" to MessageMaker::createRecordElem,
         "record" to MessageMaker::createRecordElem,
         "at" to MessageMaker::createAtElem,
         "video" to MessageMaker::createVideoElem,
