@@ -16,8 +16,8 @@ import kotlinx.serialization.Serializable
 import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
 import moe.fuqiuluo.xposed.helper.internal.IPCRequest
 import moe.fuqiuluo.xposed.tools.broadcast
-import moe.fuqiuluo.xposed.tools.fetchGet
-import moe.fuqiuluo.xposed.tools.fetchPost
+import moe.fuqiuluo.xposed.tools.fetchGetOrThrow
+import moe.fuqiuluo.xposed.tools.fetchPostOrThrow
 import moe.fuqiuluo.xposed.tools.hex2ByteArray
 import moe.fuqiuluo.xposed.tools.toHexString
 import mqq.app.MobileQQ
@@ -25,19 +25,19 @@ import kotlin.coroutines.resume
 
 fun Routing.sign() {
     get("/sign") {
-        val uin = fetchGet("uin")
-        val cmd = fetchGet("cmd")
-        val seq = fetchGet("seq").toInt()
-        val buffer = fetchGet("buffer").hex2ByteArray()
+        val uin = fetchGetOrThrow("uin")
+        val cmd = fetchGetOrThrow("cmd")
+        val seq = fetchGetOrThrow("seq").toInt()
+        val buffer = fetchGetOrThrow("buffer").hex2ByteArray()
 
         requestSign(cmd, uin, seq, buffer)
     }
 
     post("/sign") {
-        val uin = fetchPost("uin")
-        val cmd = fetchPost("cmd")
-        val seq = fetchPost("seq").toInt()
-        val buffer = fetchPost("buffer").hex2ByteArray()
+        val uin = fetchPostOrThrow("uin")
+        val cmd = fetchPostOrThrow("cmd")
+        val seq = fetchPostOrThrow("seq").toInt()
+        val buffer = fetchPostOrThrow("buffer").hex2ByteArray()
 
         requestSign(cmd, uin, seq, buffer)
     }
