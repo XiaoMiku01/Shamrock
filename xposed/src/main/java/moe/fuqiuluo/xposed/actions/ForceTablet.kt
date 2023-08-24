@@ -1,12 +1,11 @@
-package moe.fuqiuluo.xposed.actions.impl
+package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
 import com.tencent.common.config.pad.DeviceType
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
-import moe.fuqiuluo.xposed.actions.IAction
 import moe.fuqiuluo.xposed.helper.LogCenter
-import moe.fuqiuluo.xposed.helper.PlatformHelper
+import com.tencent.qqnt.utils.PlatformUtils
 import moe.fuqiuluo.xposed.loader.LuoClassloader
 import moe.fuqiuluo.xposed.tools.FuzzySearchClass
 
@@ -14,7 +13,7 @@ class ForceTablet: IAction {
     override fun invoke(ctx: Context) {
         val preferences = ctx.getSharedPreferences("shamrock_config", 0)
         if (preferences.getBoolean("tablet", true)) {
-            if (PlatformHelper.isMainProcess()) {
+            if (PlatformUtils.isMainProcess()) {
                 LogCenter.log("强制协议类型 (PAD)", toast = true)
             }
             FuzzySearchClass.findAllClassByMethod(

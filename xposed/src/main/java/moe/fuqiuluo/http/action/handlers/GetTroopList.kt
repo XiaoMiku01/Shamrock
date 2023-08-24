@@ -12,7 +12,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
 import com.tencent.mobileqq.data.SimpleTroopInfo
-import moe.fuqiuluo.http.action.helper.TroopRequestHelper
+import com.tencent.qqnt.protocol.GroupSvc
 import mqq.app.MobileQQ
 import kotlin.coroutines.resume
 
@@ -67,7 +67,7 @@ internal object GetTroopList: IActionHandler() {
         //    // 删除缓存 重新获取
         //    service.deleteTroopList(troopList.map { it.troopuin })
         //}
-        TroopRequestHelper.refreshTroopList()
+        GroupSvc.refreshTroopList()
 
         return suspendCancellableCoroutine { continuation ->
             val waiter = GlobalScope.launch {

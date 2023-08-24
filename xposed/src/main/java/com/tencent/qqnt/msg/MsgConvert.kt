@@ -1,14 +1,14 @@
-package moe.fuqiuluo.http.action.helper.msg
+package com.tencent.qqnt.msg
 
+import com.tencent.qqnt.helper.ContactHelper
+import com.tencent.qqnt.helper.MessageHelper
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import com.tencent.qqnt.kernel.nativeinterface.MsgElement
 import com.tencent.qqnt.kernel.nativeinterface.MsgRecord
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import moe.fuqiuluo.http.action.helper.ContactHelper
-import moe.fuqiuluo.http.action.helper.HighwayHelper
-import moe.fuqiuluo.http.action.helper.MessageHelper
+import com.tencent.qqnt.protocol.RichProtoSvc
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.tools.asJsonObject
@@ -39,7 +39,7 @@ internal object MsgConvert {
                     hashMapOf(
                         "type" to "at".json,
                         "data" to JsonObject(mapOf(
-                            "qq" to ContactHelper.getUinByUid(text.atNtUid).json,
+                            "qq" to ContactHelper.getUinByUidAsync(text.atNtUid).json,
                         ))
                     )
                 } else {
@@ -98,8 +98,8 @@ internal object MsgConvert {
                         "file" to md5.json,
                         "magic" to (if(record.voiceChangeType == MsgConstant.KPTTVOICECHANGETYPENONE) "0" else "1").json,
                         "url" to when(chatType) {
-                            MsgConstant.KCHATTYPEGROUP -> HighwayHelper.requestDownGroupPtt("0", record.md5HexStr, record.fileUuid)
-                            MsgConstant.KCHATTYPEC2C -> HighwayHelper.requestDownC2CPtt("0", record.fileUuid)
+                            MsgConstant.KCHATTYPEGROUP -> RichProtoSvc.getGroupPttDownUrl("0", record.md5HexStr, record.fileUuid)
+                            MsgConstant.KCHATTYPEC2C -> RichProtoSvc.getC2CPttDownUrl("0", record.fileUuid)
                             else -> error("Not supported chat type: $chatType, convertMsgElementsToMsgSegment::Pic")
                         }.json
                     ))
@@ -112,8 +112,8 @@ internal object MsgConvert {
                     "data" to JsonObject(mapOf(
                         "file" to video.fileName.json,
                         "url" to when(chatType) {
-                            MsgConstant.KCHATTYPEGROUP -> HighwayHelper.requestDownGroupVideo("0", video.fileName, video.fileUuid)
-                            MsgConstant.KCHATTYPEC2C -> HighwayHelper.requestDownC2CVideo("0", video.fileName, video.fileUuid)
+                            MsgConstant.KCHATTYPEGROUP -> RichProtoSvc.getGroupVideoDownUrl("0", video.fileName, video.fileUuid)
+                            MsgConstant.KCHATTYPEC2C -> RichProtoSvc.getC2CVideoDownUrl("0", video.fileName, video.fileUuid)
                             else -> error("Not supported chat type: $chatType, convertMsgElementsToMsgSegment::Pic")
                         }.json
                     ))

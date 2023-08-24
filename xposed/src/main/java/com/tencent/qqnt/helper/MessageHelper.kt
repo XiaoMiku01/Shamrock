@@ -1,4 +1,4 @@
-package moe.fuqiuluo.http.action.helper
+package com.tencent.qqnt.helper
 
 import com.tencent.mobileqq.qroute.QRoute
 import com.tencent.qqnt.kernel.nativeinterface.Contact
@@ -10,8 +10,8 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
-import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
-import moe.fuqiuluo.http.action.helper.msg.MessageMaker
+import com.tencent.qqnt.msg.InternalMessageMakerError
+import com.tencent.qqnt.msg.MessageMaker
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.MMKVFetcher
@@ -22,8 +22,6 @@ import moe.fuqiuluo.xposed.tools.json
 import moe.fuqiuluo.xposed.tools.jsonArray
 import oicq.wlogin_sdk.tools.MD5
 import kotlin.math.abs
-import kotlin.random.Random
-import kotlin.random.nextInt
 
 internal object MessageHelper {
     suspend fun sendMessageWithoutMsgId(chatType: Int, peerId: String, message: JsonArray, callback: IOperateCallback): Pair<Long, Int> {
@@ -52,7 +50,7 @@ internal object MessageHelper {
 
     suspend fun generateContact(chatType: Int, id: String, subId: String = ""): Contact {
         val peerId = if (MsgConstant.KCHATTYPEC2C == chatType) {
-           ContactHelper.getUidByUin(id.toLong())
+           ContactHelper.getUidByUinAsync(id.toLong())
         } else id
         return Contact(chatType, peerId, subId)
     }

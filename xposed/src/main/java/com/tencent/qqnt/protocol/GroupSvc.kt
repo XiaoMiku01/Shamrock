@@ -1,29 +1,51 @@
-package moe.fuqiuluo.http.action.helper
+package com.tencent.qqnt.protocol
 
+import android.util.LruCache
 import com.tencent.common.app.AppInterface
 import com.tencent.mobileqq.app.BusinessHandlerFactory
-import com.tencent.qphone.base.remote.ToServiceMsg
+import com.tencent.mobileqq.data.troop.TroopMemberInfo
+import com.tencent.mobileqq.troop.api.ITroopMemberInfoService
+import com.tencent.protofile.join_group_link.join_group_link
+import com.tencent.qqnt.kernel.nativeinterface.MemberInfo
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
+import moe.fuqiuluo.xposed.helper.NTServiceFetcher
+import moe.fuqiuluo.xposed.helper.PacketHandler
+import moe.fuqiuluo.xposed.tools.slice
 import mqq.app.MobileQQ
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import kotlin.coroutines.resume
 
-internal object TroopRequestHelper {
+internal object GroupSvc: BaseSvc() {
+    private val RefreshTroopMemberInfoLock = Mutex()
+    private val LruCacheTroop = LruCache<Long, String>(5)
+
     private lateinit var METHOD_REQ_MEMBER_INFO: Method
     private lateinit var METHOD_REQ_MEMBER_INFO_V2: Method
     private lateinit var METHOD_REQ_TROOP_LIST: Method
     private lateinit var METHOD_REQ_TROOP_MEM_LIST: Method
     private lateinit var METHOD_REQ_MODIFY_GROUP_NAME: Method
 
-    fun resignTroop(groupId: Long) {
-        val app = MobileQQ.getMobileQQ().waitAppRuntime()
-        if (app !is AppInterface)
-            throw RuntimeException("AppRuntime cannot cast to AppInterface")
+    init {
+        PacketHandler.register("GroupSvc.JoinGroupLink") {
+            val body = join_group_link.RspBody()
+            body.mergeFrom(it.slice(4))
+            val text = body.signed_ark.get().toStringUtf8()
+            val groupId = body.group_code.get()
+            LruCacheTroop.put(groupId, text)
+        }
+    }
 
-        val toServiceMsg = ToServiceMsg("mobileqq.service", app.currentAccountUin, "ProfileService.GroupMngReq")
-        toServiceMsg.extraData.putInt("groupreqtype", 2)
-        toServiceMsg.extraData.putString("troop_uin", groupId.toString())
-        toServiceMsg.extraData.putString("uin", app.currentAccountUin)
-        app.sendToService(toServiceMsg)
+    fun resignTroop(groupId: Long) {
+        sendExtra("ProfileService.GroupMngReq") {
+            it.putInt("groupreqtype", 2)
+            it.putString("troop_uin", groupId.toString())
+            it.putString("uin", currentUin)
+        }
     }
 
     fun modifyTroopName(groupId: String, name: String) {
@@ -140,5 +162,99 @@ internal object TroopRequestHelper {
             }
         }
         return calc * 1000000L + groupuin % 1000000L
+    }
+
+    suspend fun getShareTroopArkMsg(groupId: Long): String {
+        LruCacheTroop[groupId]?.let { return it }
+
+        val reqBody = join_group_link.ReqBody()
+        reqBody.get_ark.set(true)
+        reqBody.type.set(1)
+        reqBody.group_code.set(groupId)
+
+        sendPb("GroupSvc.JoinGroupLink", reqBody.toByteArray())
+
+        return withTimeoutOrNull(5000) {
+            var text: String? = null
+            while (text == null) {
+                delay(100)
+                LruCacheTroop[groupId]?.let { text = it }
+            }
+            return@withTimeoutOrNull text
+        } ?: error("unable to fetch contact ark_json_text")
+    }
+
+    suspend fun getTroopMemberInfoByUin(
+        groupId: String,
+        uin: String,
+        refresh: Boolean = false
+    ): TroopMemberInfo? {
+        val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
+        val service = runtime.getRuntimeService(ITroopMemberInfoService::class.java, "all")
+        var info = service.getTroopMember(groupId, uin)
+        if (refresh || !service.isMemberInCache(groupId, uin) || info == null || info.troopnick == null) {
+            info = requestTroopMemberInfo(service, groupId.toLong(), uin.toLong())
+        }
+        return info
+    }
+
+    suspend fun getTroopMemberInfoByUinViaNt(groupId: String, qq: Long): MemberInfo? {
+        val kernelService = NTServiceFetcher.kernelService
+        val sessionService = kernelService.wrapperSession
+        val groupService = sessionService.groupService
+        return suspendCancellableCoroutine {
+            groupService.getTransferableMemberInfo(groupId.toLong()) { code, _, data ->
+                if (code != 0) {
+                    it.resume(null)
+                    return@getTransferableMemberInfo
+                }
+                data.forEach { (_, info) ->
+                    if (info.uin == qq) {
+                        it.resume(info)
+                        return@forEach
+                    }
+                }
+                it.resume(null)
+            }
+        }
+    }
+
+    suspend fun getTroopMemberInfoByUid(groupId: String, uid: String): MemberInfo? {
+        val kernelService = NTServiceFetcher.kernelService
+        val sessionService = kernelService.wrapperSession
+        val groupService = sessionService.groupService
+        return suspendCancellableCoroutine {
+            groupService.getTransferableMemberInfo(groupId.toLong()) { code, _, data ->
+                if (code != 0) {
+                    it.resume(null)
+                    return@getTransferableMemberInfo
+                }
+                data.forEach { (tmpUid, info) ->
+                    if (tmpUid == uid) {
+                        it.resume(info)
+                        return@forEach
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun requestTroopMemberInfo(service: ITroopMemberInfoService, groupId: Long, memberUin: Long): TroopMemberInfo? {
+        return RefreshTroopMemberInfoLock.withLock {
+            val groupIdStr = groupId.toString()
+            val memberUinStr = memberUin.toString()
+
+            service.deleteTroopMember(groupIdStr, memberUinStr)
+
+            requestMemberInfoV2(groupId, memberUin)
+            requestMemberInfo(groupId, memberUin)
+
+            withTimeoutOrNull(10000) {
+                while (!service.isMemberInCache(groupIdStr, memberUinStr)) {
+                    delay(200)
+                }
+                return@withTimeoutOrNull service.getTroopMember(groupIdStr, memberUinStr)
+            }
+        }
     }
 }

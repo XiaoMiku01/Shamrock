@@ -25,7 +25,7 @@ Java_moe_fuqiuluo_xposed_actions_impl_PullConfig_testNativeLibrary(JNIEnv *env, 
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_moe_fuqiuluo_http_action_helper_codec_AudioUtils_pcmToSilk(JNIEnv *env, jobject thiz,
+Java_moe_fuqiuluo_utils_AudioUtils_pcmToSilk(JNIEnv *env, jobject thiz,
                                                                 jint rate,
                                                                 jbyte type,
                                                                 jstring pcm_file,
@@ -200,7 +200,7 @@ int silk_encode(int rate, char type, const char* inputFile, const char* outPutFi
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_moe_fuqiuluo_http_action_helper_MessageHelper_createMessageUniseq(JNIEnv *env, jobject thiz,
+Java_com_tencent_qqnt_helper_MessageHelper_createMessageUniseq(JNIEnv *env, jobject thiz,
                                                                        jint chat_type,
                                                                        jlong time) {
     static std::random_device rd;
@@ -215,7 +215,7 @@ Java_moe_fuqiuluo_http_action_helper_MessageHelper_createMessageUniseq(JNIEnv *e
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_moe_fuqiuluo_http_action_helper_MessageHelper_getChatType(JNIEnv *env, jobject thiz,
+Java_com_tencent_qqnt_helper_MessageHelper_getChatType(JNIEnv *env, jobject thiz,
                                                                jlong msg_id) {
     return (int32_t) ((int64_t) msg_id & 0xffL);
 }
@@ -223,7 +223,7 @@ Java_moe_fuqiuluo_http_action_helper_MessageHelper_getChatType(JNIEnv *env, jobj
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_moe_fuqiuluo_http_action_helper_MessageHelper_nativeDecodeCQCode(JNIEnv *env, jobject thiz,
+Java_com_tencent_qqnt_helper_MessageHelper_nativeDecodeCQCode(JNIEnv *env, jobject thiz,
                                                                 jstring code) {
     jclass ArrayList = env->FindClass("java/util/ArrayList");
     jmethodID NewArrayList = env->GetMethodID(ArrayList, "<init>", "()V");

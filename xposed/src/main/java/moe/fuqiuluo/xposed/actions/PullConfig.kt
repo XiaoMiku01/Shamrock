@@ -1,12 +1,11 @@
-package moe.fuqiuluo.xposed.actions.impl
+package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
 import androidx.core.content.edit
-import moe.fuqiuluo.xposed.actions.IAction
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
 
 import moe.fuqiuluo.http.HTTPServer
-import moe.fuqiuluo.xposed.helper.PlatformHelper
+import com.tencent.qqnt.utils.PlatformUtils
 import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
 import moe.fuqiuluo.xposed.helper.internal.IPCRequest
 import moe.fuqiuluo.xposed.loader.ActionLoader
@@ -23,7 +22,7 @@ class PullConfig: IAction {
     private external fun testNativeLibrary(): String
 
     override fun invoke(ctx: Context) {
-        if (!PlatformHelper.isMainProcess()) return
+        if (!PlatformUtils.isMainProcess()) return
 
         DynamicReceiver.register("fetchPort", IPCRequest {
             DataRequester.request("success", mapOf("port" to HTTPServer.PORT))

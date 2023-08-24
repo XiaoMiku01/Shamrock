@@ -1,5 +1,5 @@
 @file:OptIn(DelicateCoroutinesApi::class)
-package moe.fuqiuluo.xposed.actions.impl
+package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
 import com.tencent.mobileqq.service.PacketReceiver
@@ -7,7 +7,6 @@ import com.tencent.msf.service.protocol.pb.SSOLoginMerge
 import com.tencent.qphone.base.remote.FromServiceMsg
 import com.tencent.qphone.base.util.CodecWarpper
 import kotlinx.atomicfu.atomic
-import moe.fuqiuluo.xposed.actions.IAction
 import de.robv.android.xposed.XposedBridge.log
 import kotlinx.coroutines.DelicateCoroutinesApi
 import moe.fuqiuluo.xposed.tools.EMPTY_BYTE_ARRAY

@@ -1,7 +1,6 @@
 package moe.fuqiuluo.xposed.loader
 
 import android.annotation.SuppressLint
-import moe.fuqiuluo.xposed.actions.impl.toast
 import moe.fuqiuluo.xposed.helper.LogCenter
 import mqq.app.MobileQQ
 import java.io.File

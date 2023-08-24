@@ -1,4 +1,4 @@
-package moe.fuqiuluo.http.action.helper.codec
+package moe.fuqiuluo.utils
 
 import android.graphics.Bitmap
 import android.media.MediaExtractor
@@ -8,7 +8,7 @@ import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFprobeKit
 import com.arthenica.ffmpegkit.ReturnCode
 import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
-import moe.fuqiuluo.http.action.helper.FileHelper
+import com.tencent.qqnt.utils.FileUtils
 import oicq.wlogin_sdk.tools.MD5
 import java.io.File
 import java.io.FileOutputStream
@@ -24,7 +24,7 @@ enum class MediaType {
     Flac,
 }
 
-internal object AudioUtils {
+object AudioUtils {
     private val SampleRateMap = intArrayOf(8000, 12000, 16000, 24000, 36000, 44100, 48000)
     private val sampleRate: Int
         get() = SampleRateMap[3]
@@ -62,7 +62,7 @@ internal object AudioUtils {
 
     internal fun audioToSilk(audio: File): Pair<Int, File> {
         val md5 = MD5.getFileMD5(audio)
-        val silkFile = FileHelper.getFile("silk_$md5")
+        val silkFile = FileUtils.getFile("silk_$md5")
         if (silkFile.exists()) {
             return getDurationSec(audio) to silkFile
         }
@@ -80,7 +80,7 @@ internal object AudioUtils {
     }
 
     internal fun pcmToSilk(file: File): Pair<File, Int> {
-        val tmpFile = FileHelper.getTmpFile("silk", false)
+        val tmpFile = FileUtils.getTmpFile("silk", false)
         val time = pcmToSilk(sampleRate, 2, file.absolutePath, tmpFile.absolutePath)
         when (time) {
             -1 -> error("input pcm file not found")
@@ -92,7 +92,7 @@ internal object AudioUtils {
     }
 
     fun audioToPcm(audio: File): File {
-        val tmp = FileHelper.getTmpFile("pcm", false)
+        val tmp = FileUtils.getTmpFile("pcm", false)
         val ffmpegCommand = "-y -i $audio -f s16le -acodec pcm_s16le -ac 1 -ar $sampleRate $tmp"
         val session = FFmpegKit.execute(ffmpegCommand)
         if (!ReturnCode.isSuccess(session.returnCode)) {
@@ -117,25 +117,22 @@ internal object AudioUtils {
     }
 
     fun getMediaType(file: File): MediaType {
-        if(FileHelper.isSilk(file)) {
+        if(FileUtils.isSilk(file)) {
             return MediaType.Silk
         }
 
         kotlin.runCatching {
             val extractor = MediaExtractor()
             extractor.setDataSource(file.absolutePath)
-            var formatMime = ""
             for (i in 0 until extractor.trackCount) {
                 val format = extractor.getTrackFormat(i)
-                when(val mime = format.getString(MediaFormat.KEY_MIME)) {
+                when(format.getString(MediaFormat.KEY_MIME)) {
                     "audio/mp4a-latm" -> return MediaType.M4a
                     "audio/amr-wb", "audio/amr", "audio/3gpp" -> return MediaType.Amr
                     "audio/raw" , "audio/wav" -> return MediaType.Wav
                     "audio/mpeg_L2", "audio/mpeg_L1", "audio/mpeg", "audio/mpeg2" -> return MediaType.Mp3
                     "audio/flac" -> return MediaType.Flac
-                    else -> {
-                        if (mime?.startsWith("audio/") == true) formatMime = mime
-                    }
+                    else -> {}
                 }
             }
             extractor.release()

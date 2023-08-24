@@ -1,4 +1,4 @@
-package moe.fuqiuluo.http.action.helper
+package com.tencent.qqnt.utils
 
 import android.media.MediaExtractor
 import android.media.MediaFormat
@@ -18,8 +18,7 @@ import java.io.InputStream
 import java.util.UUID
 import kotlin.experimental.and
 
-
-object FileHelper {
+internal object FileUtils {
     private val CacheDir = MobileQQ.getContext().getExternalFilesDir(null)!!
         .parentFile!!.resolve("Tencent/Shamrock/tmpfiles").also {
             if (it.exists()) it.delete()

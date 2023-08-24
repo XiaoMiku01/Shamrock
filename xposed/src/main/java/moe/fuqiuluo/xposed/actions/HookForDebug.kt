@@ -1,7 +1,6 @@
-package moe.fuqiuluo.xposed.actions.impl
+package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
-import moe.fuqiuluo.http.action.helper.MessageHelper
 import moe.fuqiuluo.xposed.actions.IAction
 
 internal class HookForDebug: IAction {

@@ -16,6 +16,8 @@ import moe.fuqiuluo.xposed.tools.asJsonArray
 import moe.fuqiuluo.xposed.tools.asJsonArrayOrNull
 import moe.fuqiuluo.xposed.tools.asJsonObject
 import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
+import moe.fuqiuluo.xposed.tools.asLong
+import moe.fuqiuluo.xposed.tools.asLongOrNull
 import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.asStringOrNull
 import moe.fuqiuluo.xposed.tools.json
@@ -109,6 +111,14 @@ internal class ActionSession {
 
     constructor(params: JsonObject) {
         this.params = params
+    }
+
+    fun getLong(key: String): Long {
+        return params[key].asLong
+    }
+
+    fun getLongOrNull(key: String): Long? {
+        return params[key].asLongOrNull
     }
 
     fun getInt(key: String): Int {

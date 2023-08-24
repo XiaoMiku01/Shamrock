@@ -1,10 +1,10 @@
-package moe.fuqiuluo.xposed.helper
+package com.tencent.qqnt.utils
 
 import android.content.Context
 import android.content.pm.PackageInfo
 import mqq.app.MobileQQ
 
-internal object PlatformHelper {
+internal object PlatformUtils {
     fun getVersion(context: Context): String {
         val packageInfo: PackageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
         return packageInfo.versionName

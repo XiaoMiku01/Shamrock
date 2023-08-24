@@ -7,7 +7,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import moe.fuqiuluo.http.action.ActionManager
 import moe.fuqiuluo.http.action.ActionSession
-import moe.fuqiuluo.http.action.helper.msg.LogicException
+import com.tencent.qqnt.msg.LogicException
 import moe.fuqiuluo.xposed.tools.fetchGetOrNull
 import moe.fuqiuluo.xposed.tools.fetchGetOrThrow
 import moe.fuqiuluo.xposed.tools.fetchPostJsonArray
@@ -27,7 +27,8 @@ fun Routing.sendGroupMessage() {
             peerIdKey to fetchGetOrThrow(peerIdKey),
             "message" to message,
             "auto_escape" to autoEscape
-        ))) ?: throw LogicException("Unable to obtain send_message handler."))
+        ))) ?: throw LogicException("Unable to obtain send_message handler.")
+        )
     }
 
     post("/send_msg") {
@@ -41,7 +42,8 @@ fun Routing.sendGroupMessage() {
                 fetchPostJsonArray("message")
             } else fetchPostOrThrow("message"),
             "auto_escape" to autoEscape
-        ))) ?: throw LogicException("Unable to obtain send_message handler."))
+        ))) ?: throw LogicException("Unable to obtain send_message handler.")
+        )
     }
 
     get("/send_group_msg") {
@@ -54,7 +56,8 @@ fun Routing.sendGroupMessage() {
             "group_id" to groupId,
             "message" to message,
             "auto_escape" to autoEscape
-        ))) ?: throw LogicException("Unable to obtain send_message handler."))
+        ))) ?: throw LogicException("Unable to obtain send_message handler.")
+        )
     }
 
     post("/send_group_msg") {
@@ -67,7 +70,8 @@ fun Routing.sendGroupMessage() {
                 fetchPostJsonArray("message")
             } else fetchPostOrThrow("message"),
             "auto_escape" to autoEscape
-        ))) ?: throw LogicException("Unable to obtain send_message handler."))
+        ))) ?: throw LogicException("Unable to obtain send_message handler.")
+        )
     }
 
     get("/send_private_msg") {
@@ -80,7 +84,8 @@ fun Routing.sendGroupMessage() {
             "user_id" to userId,
             "message" to message,
             "auto_escape" to autoEscape
-        ))) ?: throw LogicException("Unable to obtain send_message handler."))
+        ))) ?: throw LogicException("Unable to obtain send_message handler.")
+        )
     }
 
     post("/send_private_msg") {
@@ -93,6 +98,7 @@ fun Routing.sendGroupMessage() {
                 fetchPostJsonArray("message")
             } else fetchPostOrThrow("message"),
             "auto_escape" to autoEscape
-        ))) ?: throw LogicException("Unable to obtain send_message handler."))
+        ))) ?: throw LogicException("Unable to obtain send_message handler.")
+        )
     }
 }

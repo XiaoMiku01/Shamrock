@@ -1,12 +1,7 @@
 package moe.fuqiuluo.http.action.handlers
 
-import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
-import com.tencent.qqnt.kernel.nativeinterface.MsgElement
-import com.tencent.qqnt.kernel.nativeinterface.MultiForwardMsgElement
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
-import moe.fuqiuluo.http.action.helper.MessageHelper
-import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 
 internal object GetForwardMsg: IActionHandler() {

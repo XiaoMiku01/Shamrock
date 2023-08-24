@@ -1,6 +1,6 @@
 package moe.fuqiuluo.xposed.helper
 
-import com.tencent.mobileqq.listener.AIOMSGListener
+import com.tencent.mobileqq.listener.AioListener
 import com.tencent.qqnt.kernel.api.IKernelService
 import de.robv.android.xposed.XposedBridge
 import kotlinx.atomicfu.atomic
@@ -29,7 +29,7 @@ internal object NTServiceFetcher {
             if (msgService != null) {
                 XposedBridge.log("Register MSG listener successfully.")
 
-                msgService.addMsgListener(AIOMSGListener) // 注册消息监听器
+                msgService.addMsgListener(AioListener) // 注册消息监听器
 
                 isRegisteredMSG.lazySet(true)
             }

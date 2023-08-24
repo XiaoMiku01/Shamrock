@@ -9,8 +9,8 @@ import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
 import com.tencent.mobileqq.data.MessageDetail
 import com.tencent.mobileqq.data.MessageSender
-import moe.fuqiuluo.http.action.helper.MessageHelper
-import moe.fuqiuluo.http.action.helper.msg.MsgConvert
+import com.tencent.qqnt.helper.MessageHelper
+import com.tencent.qqnt.msg.MsgConvert
 import kotlin.coroutines.resume
 
 internal object GetMsg: IActionHandler() {

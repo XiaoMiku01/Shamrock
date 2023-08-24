@@ -2,8 +2,8 @@ package moe.fuqiuluo.xposed.helper
 
 import android.annotation.SuppressLint
 import android.icu.text.SimpleDateFormat
-import moe.fuqiuluo.http.action.helper.FileHelper
-import moe.fuqiuluo.xposed.actions.impl.toast
+import com.tencent.qqnt.utils.FileUtils
+import moe.fuqiuluo.xposed.actions.toast
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
 import mqq.app.MobileQQ
 import java.util.Date
@@ -18,7 +18,7 @@ internal enum class Level(
 }
 
 internal object LogCenter {
-    private val LogFile = FileHelper.getFile(
+    private val LogFile = FileUtils.getFile(
         dir = "log",
         name = MobileQQ.getMobileQQ().qqProcessName.replace(":", ".") + ".log"
     )

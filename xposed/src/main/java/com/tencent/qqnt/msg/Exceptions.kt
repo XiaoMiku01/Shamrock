@@ -1,4 +1,4 @@
-package moe.fuqiuluo.http.action.helper.msg
+package com.tencent.qqnt.msg
 
 internal interface InternalMessageMakerError
 

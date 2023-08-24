@@ -1,5 +1,5 @@
 @file:Suppress("UNUSED_PARAMETER", "RedundantSuspendModifier")
-package moe.fuqiuluo.http.action.helper.msg
+package com.tencent.qqnt.msg
 
 import android.graphics.BitmapFactory
 import androidx.exifinterface.media.ExifInterface
@@ -10,15 +10,26 @@ import com.tencent.qphone.base.remote.ToServiceMsg
 import com.tencent.qqnt.kernel.nativeinterface.*
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import moe.fuqiuluo.http.action.helper.ContactHelper
-import moe.fuqiuluo.http.action.helper.FileHelper
-import moe.fuqiuluo.http.action.helper.HighwayHelper
-import moe.fuqiuluo.http.action.helper.LocationHelper
-import moe.fuqiuluo.http.action.helper.MusicHelper
-import moe.fuqiuluo.xposed.helper.PlatformHelper
-import moe.fuqiuluo.http.action.helper.TroopHelper
-import moe.fuqiuluo.http.action.helper.codec.AudioUtils
-import moe.fuqiuluo.http.action.helper.codec.MediaType
+import com.tencent.qqnt.helper.ContactHelper
+import com.tencent.qqnt.helper.MusicHelper
+import com.tencent.qqnt.protocol.ArkAppInfo
+import com.tencent.qqnt.protocol.ArkMsgSvc
+import com.tencent.qqnt.protocol.CardSvc
+import com.tencent.qqnt.protocol.GroupSvc
+import com.tencent.qqnt.protocol.LbsSvc
+import com.tencent.qqnt.transfile.FileTransfer
+import com.tencent.qqnt.transfile.Transfer
+import com.tencent.qqnt.utils.FileUtils
+import com.tencent.qqnt.transfile.PictureResource
+import com.tencent.qqnt.transfile.Private
+import com.tencent.qqnt.transfile.Troop
+import com.tencent.qqnt.transfile.VideoResource
+import com.tencent.qqnt.transfile.VoiceResource
+import com.tencent.qqnt.transfile.trans
+import com.tencent.qqnt.transfile.with
+import com.tencent.qqnt.utils.PlatformUtils
+import moe.fuqiuluo.utils.AudioUtils
+import moe.fuqiuluo.utils.MediaType
 import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import moe.fuqiuluo.xposed.helper.msgService
 import moe.fuqiuluo.xposed.tools.asBooleanOrNull
@@ -39,23 +50,23 @@ internal typealias IMaker = suspend (Int, Long, String, JsonObject) -> MsgElemen
 
 internal object MessageMaker {
     private val makerArray = mutableMapOf(
-        "text" to ::createTextElem,
-        "face" to ::createFaceElem,
-        "pic" to ::createImageElem,
-        "image" to ::createImageElem,
-        "record" to ::createRecordElem,
-        "at" to ::createAtElem,
-        "video" to ::createVideoElem,
-        "markdown" to ::createMarkdownElem,
-        "dice" to ::createDiceElem,
-        "rps" to ::createRpsElem,
-        "poke" to ::createPokeElem,
-        "anonymous" to ::createAnonymousElem,
-        "share" to ::createShareElem,
-        "contact" to ::createContactElem,
-        "location" to ::createLocationElem,
-        "music" to ::createMusicElem,
-        "reply" to ::createReplyElem,
+        "text" to MessageMaker::createTextElem,
+        "face" to MessageMaker::createFaceElem,
+        "pic" to MessageMaker::createImageElem,
+        "image" to MessageMaker::createImageElem,
+        "record" to MessageMaker::createRecordElem,
+        "at" to MessageMaker::createAtElem,
+        "video" to MessageMaker::createVideoElem,
+        "markdown" to MessageMaker::createMarkdownElem,
+        "dice" to MessageMaker::createDiceElem,
+        "rps" to MessageMaker::createRpsElem,
+        "poke" to MessageMaker::createPokeElem,
+        "anonymous" to MessageMaker::createAnonymousElem,
+        "share" to MessageMaker::createShareElem,
+        "contact" to MessageMaker::createContactElem,
+        "location" to MessageMaker::createLocationElem,
+        "music" to MessageMaker::createMusicElem,
+        "reply" to MessageMaker::createReplyElem,
     )
 
     private suspend fun createReplyElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
@@ -82,23 +93,24 @@ internal object MessageMaker {
             "qq" -> {
                 data.checkAndThrow("id")
                 val id = data["id"].asString
-                if(!MusicHelper.trySendQQMusicInfoById(chatType, peerId.toLong(), msgId, id)) {
+                if(!MusicHelper.tryShareQQMusicById(chatType, peerId.toLong(), msgId, id)) {
                     throw LogicException("无法发送QQ音乐分享")
                 }
             }
             "163" -> {
                 data.checkAndThrow("id")
                 val id = data["id"].asString
-                if(!MusicHelper.trySend163MusicInfoById(chatType, peerId.toLong(), msgId, id)) {
+                if(!MusicHelper.tryShare163MusicById(chatType, peerId.toLong(), msgId, id)) {
                     throw LogicException("无法发送网易云音乐分享")
                 }
             }
             "custom" -> {
                 data.checkAndThrow("url", "audio", "title")
-                MusicHelper.trySendMusicShareCustom(
+                ArkMsgSvc.tryShareMusic(
                     chatType,
                     peerId.toLong(),
                     msgId,
+                    ArkAppInfo.QQMusic,
                     data["title"].asString,
                     data["singer"].asStringOrNull ?: "",
                     data["url"].asString,
@@ -120,7 +132,7 @@ internal object MessageMaker {
         val lat = data["lat"].asString.toDouble()
         val lon = data["lon"].asString.toDouble()
 
-        LocationHelper.sendShareLocation(chatType, peerId.toLong(), lat, lon)
+        LbsSvc.tryShareLocation(chatType, peerId.toLong(), lat, lon)
 
         return MsgElement().also {
             it.elementType = -1
@@ -135,11 +147,11 @@ internal object MessageMaker {
 
         when (type) {
             "qq" -> {
-                val ark = ArkElement(ContactHelper.getSharePrivateContact(id.toLong()), null, null)
+                val ark = ArkElement(CardSvc.getSharePrivateArkMsg(id.toLong()), null, null)
                 elem.arkElement = ark
             }
             "group" -> {
-                val ark = ArkElement(ContactHelper.getShareTroopContact(id.toLong()), null, null)
+                val ark = ArkElement(GroupSvc.getShareTroopArkMsg(id.toLong()), null, null)
                 elem.arkElement = ark
             }
             else -> throw ParamsIllegalException("type")
@@ -208,7 +220,7 @@ internal object MessageMaker {
         oidb.uint32_command.set(0xdc2)
         oidb.uint32_service_type.set(34)
         oidb.bytes_bodybuffer.set(ByteStringMicro.copyFrom(reqBody.toByteArray()))
-        oidb.str_client_version.set(PlatformHelper.getClientVersion(MobileQQ.getContext()))
+        oidb.str_client_version.set(PlatformUtils.getClientVersion(MobileQQ.getContext()))
         to.putWupBuffer(oidb.toByteArray())
         to.addAttribute("req_pb_protocol_flag", true)
         app.sendToService(to)
@@ -316,9 +328,9 @@ internal object MessageMaker {
 
         val file = data["file"].asString.let {
             if (it.length == 32) {
-                FileHelper.getFile(it)
+                FileUtils.getFile(it)
             } else {
-                FileHelper.parseAndSave(it)
+                FileUtils.parseAndSave(it)
             }
         }
         if (!file.exists()) {
@@ -341,16 +353,16 @@ internal object MessageMaker {
             AudioUtils.obtainVideoCover(file.absolutePath, thumbPath!!)
         }
 
-        if (chatType == MsgConstant.KCHATTYPEGROUP) {
-            HighwayHelper.transTroopVideo(peerId, file, File(thumbPath!!))
-        } else if (chatType == MsgConstant.KCHATTYPEC2C) {
-            HighwayHelper.transC2CVideo(peerId, file, File(thumbPath!!))
-        }
+        Transfer with when (chatType) {
+            MsgConstant.KCHATTYPEGROUP -> Troop(peerId)
+            MsgConstant.KCHATTYPEC2C -> Private(peerId)
+            else -> error("Not supported chatType($chatType) for VideoMsg")
+        } trans VideoResource(file, File(thumbPath.toString()))
 
         video.fileTime = AudioUtils.getVideoTime(file)
         video.fileSize = file.length()
         video.fileName = file.name
-        video.fileFormat = HighwayHelper.VIDEO_FORMAT_MP4
+        video.fileFormat = FileTransfer.VIDEO_FORMAT_MP4
         video.thumbSize = QQNTWrapperUtil.CppProxy.getFileSize(thumbPath).toInt()
         val options = BitmapFactory.Options()
         BitmapFactory.decodeFile(thumbPath, options)
@@ -392,12 +404,12 @@ internal object MessageMaker {
                 at.atNtUid = "0"
             }
             else -> {
-                val info = TroopHelper.getTroopMemberInfoByUin(peerId, qq, true) ?: error("获取成员信息失败")
+                val info = GroupSvc.getTroopMemberInfoByUin(peerId, qq, true) ?: error("获取成员信息失败")
                 at.content = "@${info.troopnick
                     .ifNullOrEmpty(info.friendnick)
                     .ifNullOrEmpty(qq)}"
                 at.atType = MsgConstant.ATTYPEONE
-                at.atNtUid = ContactHelper.getUidByUin(qq.toLong())
+                at.atNtUid = ContactHelper.getUidByUinAsync(qq.toLong())
             }
         }
 
@@ -411,9 +423,9 @@ internal object MessageMaker {
 
         var file = data["file"].asString.let {
             if (it.length == 32) {
-                FileHelper.getFile(it)
+                FileUtils.getFile(it)
             } else {
-                FileHelper.parseAndSave(it)
+                FileUtils.parseAndSave(it)
             }
         }
         if (!file.exists()) {
@@ -453,11 +465,11 @@ internal object MessageMaker {
             QQNTWrapperUtil.CppProxy.copyFile(file.absolutePath, originalPath)
         }
 
-        if (chatType == MsgConstant.KCHATTYPEGROUP) {
-            HighwayHelper.transTroopVoice(peerId, file)
-        } else if (chatType == MsgConstant.KCHATTYPEC2C) {
-            HighwayHelper.transC2CVoice(peerId, file)
-        }
+        Transfer with when (chatType) {
+            MsgConstant.KCHATTYPEGROUP -> Troop(peerId)
+            MsgConstant.KCHATTYPEC2C -> Private(peerId)
+            else -> error("Not supported chatType($chatType) for RecordMsg")
+        } trans VoiceResource(file)
 
         val elem = MsgElement()
         elem.elementType = MsgConstant.KELEMTYPEPTT
@@ -491,20 +503,20 @@ internal object MessageMaker {
         val isFlash = data["flash"].asBooleanOrNull ?: false
         val file = data["file"].asString.let {
             if (it.length == 32) {
-                FileHelper.getFile(it)
+                FileUtils.getFile(it)
             } else {
-                FileHelper.parseAndSave(it)
+                FileUtils.parseAndSave(it)
             }
         }
         if (!file.exists()) {
             throw LogicException("Image file is not exists, please check your filename.")
         }
 
-        if (chatType == MsgConstant.KCHATTYPEGROUP) {
-            HighwayHelper.transTroopPic(peerId, file)
-        } else if (chatType == MsgConstant.KCHATTYPEC2C) {
-            HighwayHelper.transC2CPic(peerId, file)
-        }
+        Transfer with when (chatType) {
+            MsgConstant.KCHATTYPEGROUP -> Troop(peerId)
+            MsgConstant.KCHATTYPEC2C -> Private(peerId)
+            else -> error("Not supported chatType($chatType) for PictureMsg")
+        } trans PictureResource(file)
 
         val elem = MsgElement()
         elem.elementType = MsgConstant.KELEMTYPEPIC
@@ -538,7 +550,7 @@ internal object MessageMaker {
         pic.sourcePath = file.absolutePath
         pic.fileSize = QQNTWrapperUtil.CppProxy.getFileSize(file.absolutePath)
         pic.original = isOriginal
-        pic.picType = FileHelper.getPicType(file)
+        pic.picType = FileUtils.getPicType(file)
         // GO-CQHTTP扩展参数 支持
         pic.picSubType = data["subType"].asIntOrNull ?: 0
         pic.isFlashPic = isFlash

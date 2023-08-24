@@ -2,9 +2,9 @@ package moe.fuqiuluo.http.action.handlers
 
 import com.tencent.mobileqq.app.QQAppInterface
 import com.tencent.mobileqq.troop.api.ITroopInfoService
+import com.tencent.qqnt.protocol.GroupSvc
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
-import moe.fuqiuluo.http.action.helper.TroopRequestHelper
 import moe.fuqiuluo.http.entries.EmptyObject
 import mqq.app.MobileQQ
 
@@ -26,7 +26,7 @@ internal object ModifyTroopName: IActionHandler() {
             .getRuntimeService(ITroopInfoService::class.java, "all")
         val groupInfo = service.getTroopInfo(groupId)
         return if (groupInfo.isAdmin) {
-            TroopRequestHelper.modifyTroopName(groupId, groupName)
+            GroupSvc.modifyTroopName(groupId, groupName)
             ok(EmptyObject)
         } else {
             logic("You are not the administrator of the group")

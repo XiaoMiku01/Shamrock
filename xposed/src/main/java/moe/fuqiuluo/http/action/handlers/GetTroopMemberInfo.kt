@@ -3,7 +3,7 @@ package moe.fuqiuluo.http.action.handlers
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
 import com.tencent.mobileqq.data.SimpleTroopMemberInfo
-import moe.fuqiuluo.http.action.helper.TroopHelper
+import com.tencent.qqnt.protocol.GroupSvc
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
 
 internal object GetTroopMemberInfo: IActionHandler() {
@@ -18,7 +18,7 @@ internal object GetTroopMemberInfo: IActionHandler() {
         val groupId = session.getString("group_id")
         val refresh = session.getBooleanOrDefault("refresh", false)
 
-        val info = TroopHelper.getTroopMemberInfoByUin(groupId, uin, refresh)
+        val info = GroupSvc.getTroopMemberInfoByUin(groupId, uin, refresh)
             ?: return logic("cannot get troop member info")
 
         return ok(

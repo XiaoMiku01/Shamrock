@@ -42,13 +42,12 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.xposed.helper.LogCenter
-import moe.fuqiuluo.xposed.helper.internal.DataRequester
 import moe.fuqiuluo.xposed.tools.GlobalClient
 import mqq.app.MobileQQ
 import java.util.ArrayList
 import java.util.HashMap
 
-internal object AIOMSGListener: IKernelMsgListener {
+internal object AioListener: IKernelMsgListener {
     override fun onRecvMsg(msgList: ArrayList<MsgRecord>) {
         if (msgList.isEmpty()) return
 

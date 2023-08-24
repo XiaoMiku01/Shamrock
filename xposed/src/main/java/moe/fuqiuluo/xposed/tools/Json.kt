@@ -66,6 +66,9 @@ val JsonElement?.asInt: Int
 val JsonElement?.asLong: Long
     get() = this!!.jsonPrimitive.long
 
+val JsonElement?.asLongOrNull: Long?
+    get() = this?.jsonPrimitive?.long
+
 val JsonElement?.asIntOrNull: Int?
     get() = this?.jsonPrimitive?.int
 

@@ -1,17 +1,16 @@
-package moe.fuqiuluo.xposed.actions.impl
+package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
 import com.tencent.mobileqq.fe.FEKit
 import moe.fuqiuluo.xposed.actions.IAction
-import moe.fuqiuluo.xposed.helper.PlatformHelper
+import com.tencent.qqnt.utils.PlatformUtils
 import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
 import moe.fuqiuluo.xposed.helper.internal.IPCRequest
 import moe.fuqiuluo.xposed.tools.broadcast
-import mqq.app.MobileQQ
 
 internal class MsfSignService: IAction {
     override fun invoke(ctx: Context) {
-        if (!PlatformHelper.isMsfProcess()) return
+        if (!PlatformUtils.isMsfProcess()) return
 
         DynamicReceiver.register("sign", IPCRequest {
             val cmd = it.getStringExtra("wupCmd")

@@ -1,20 +1,17 @@
-package moe.fuqiuluo.http.action.helper
+package com.tencent.qqnt.protocol
 
 import android.util.LruCache
 import com.tencent.biz.map.trpcprotocol.LbsSendInfo
-import com.tencent.mobileqq.app.QQAppInterface
 import com.tencent.proto.lbsshare.LBSShare
-import com.tencent.qphone.base.remote.ToServiceMsg
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
-import moe.fuqiuluo.http.action.helper.msg.ParamsIllegalException
+import com.tencent.qqnt.msg.ParamsIllegalException
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.tools.slice
-import mqq.app.MobileQQ
 import kotlin.math.roundToInt
 
-internal object LocationHelper {
+internal object LbsSvc: BaseSvc() {
     private val LruCachePrivate = LruCache<String, String>(10)
 
     init {
@@ -29,7 +26,7 @@ internal object LocationHelper {
         }
     }
 
-    suspend fun sendShareLocation(chatType: Int, peerId: Long, lat: Double, lon: Double) {
+    suspend fun tryShareLocation(chatType: Int, peerId: Long, lat: Double, lon: Double) {
         val req = LbsSendInfo.SendMessageReq()
         req.uint64_peer_account.set(peerId)
         when (chatType) {
@@ -38,32 +35,23 @@ internal object LocationHelper {
             else -> error("Not supported chat type: $chatType")
         }
         req.str_name.set("位置分享")
-        req.str_address.set(getLocationWithLonLat(lat, lon))
+        req.str_address.set(getAddressWithLonLat(lat, lon))
         req.str_lat.set(lat.toString())
         req.str_lng.set(lon.toString())
-        val app = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
-        val toServiceMsg = ToServiceMsg("mobileqq.service", app.currentAccountUin, "trpc.qq_lbs.qq_lbs_ark.LocationArk.SsoSendMessage")
-        toServiceMsg.putWupBuffer(req.toByteArray())
-        toServiceMsg.addAttribute("req_pb_protocol_flag", true)
-        app.sendToService(toServiceMsg)
+        sendPb("trpc.qq_lbs.qq_lbs_ark.LocationArk.SsoSendMessage", req.toByteArray())
     }
 
-    suspend fun getLocationWithLonLat(lat: Double, lon: Double): String {
+    suspend fun getAddressWithLonLat(lat: Double, lon: Double): String {
         if (lat > 90 || lat < 0) {
             throw ParamsIllegalException("纬度大小错误")
         }
         if (lon > 180 || lon < 0) {
             throw ParamsIllegalException("经度大小错误")
         }
-
         val latO = (lat * 1000000).roundToInt()
         val lngO = (lon * 1000000).roundToInt()
         val cacheKey = "$latO|$lngO"
-
-        LruCachePrivate[cacheKey]?.let {
-            return it
-        }
-
+        LruCachePrivate[cacheKey]?.let { return it }
         val req = LBSShare.LocationReq()
         req.lat.set(latO)
         req.lng.set(lngO)
@@ -74,13 +62,8 @@ internal object LocationHelper {
         req.count.set(20)
         req.requireMyLbs.set(1)
         req.imei.set("")
-        val app = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
-        val toServiceMsg = ToServiceMsg("mobileqq.service", app.currentAccountUin, "LbsShareSvr.location")
-        toServiceMsg.putWupBuffer(req.toByteArray())
-        toServiceMsg.addAttribute("req_pb_protocol_flag", true)
-        app.sendToService(toServiceMsg)
-
-        return withTimeoutOrNull(10000) {
+        sendPb("LbsShareSvr.location", req.toByteArray())
+        return withTimeoutOrNull(5000) {
             var text: String? = null
             while (text == null) {
                 delay(100)

@@ -18,8 +18,8 @@ import moe.fuqiuluo.http.api.index
 import moe.fuqiuluo.http.entries.CommonResult
 import moe.fuqiuluo.http.entries.ErrorCatch
 import de.robv.android.xposed.XposedBridge.log
-import moe.fuqiuluo.http.action.helper.msg.LogicException
-import moe.fuqiuluo.http.action.helper.msg.ParamsException
+import com.tencent.qqnt.msg.LogicException
+import com.tencent.qqnt.msg.ParamsException
 import moe.fuqiuluo.http.api.energy
 import moe.fuqiuluo.http.api.getAccountInfo
 import moe.fuqiuluo.http.api.getMsfInfo

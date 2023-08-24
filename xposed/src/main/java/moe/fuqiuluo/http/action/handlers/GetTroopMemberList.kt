@@ -10,7 +10,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
 import com.tencent.mobileqq.data.SimpleTroopMemberInfo
-import moe.fuqiuluo.http.action.helper.TroopRequestHelper
+import com.tencent.qqnt.protocol.GroupSvc
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
 import mqq.app.MobileQQ
 
@@ -65,12 +65,12 @@ internal object GetTroopMemberList: IActionHandler() {
         return refreshLock.withLock {
             val groupIdStr = groupId.toString()
             service.deleteTroopMembers(groupIdStr)
-            TroopRequestHelper.refreshTroopMemberList(groupId)
+            GroupSvc.refreshTroopMemberList(groupId)
 
             withTimeoutOrNull(10000) {
                 var memberList: List<TroopMemberInfo>?
                 do {
-                    delay(500)
+                    delay(100)
                     memberList = service.getAllTroopMembers(groupIdStr)
                 } while (memberList.isNullOrEmpty())
                 return@withTimeoutOrNull memberList

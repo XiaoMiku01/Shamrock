@@ -6,9 +6,9 @@ import kotlinx.serialization.json.JsonArray
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
 import com.tencent.mobileqq.data.MessageResult
-import moe.fuqiuluo.http.action.helper.MessageHelper
-import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
-import moe.fuqiuluo.http.action.helper.msg.ParamsException
+import com.tencent.qqnt.helper.MessageHelper
+import com.tencent.qqnt.msg.InternalMessageMakerError
+import com.tencent.qqnt.msg.ParamsException
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.tools.json
 
