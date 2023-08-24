@@ -17,19 +17,7 @@ internal object GetForwardMsg: IActionHandler() {
         val sessionService = kernelService.wrapperSession
         val msgService = sessionService.msgService
 
-        val contact = MessageHelper.generateContact(MsgConstant.KCHATTYPEGROUP, "645830205")
-        val msgId = MessageHelper.createMessageUniseq(MsgConstant.KCHATTYPEGROUP, System.currentTimeMillis())
-        msgService.addLocalRecordMsg(contact, msgId, MsgElement().apply {
-            elementType = MsgConstant.KELEMTYPEMULTIFORWARD
-            multiForwardMsgElement = MultiForwardMsgElement("", id, "")
-        }, hashMapOf(), true) { code, why ->
-            LogCenter.log("GetForwardMsg addLocalRecordMsg code: $code, why: $why, $msgId")
-        }
-
-        msgService.fetchLongMsg(contact, msgId)
-
-
-        return ""
+        return error("不支持实现，请提交ISSUE！")
     }
     override fun path(): String  = "get_forward_msg"
 }

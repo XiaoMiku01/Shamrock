@@ -2,7 +2,7 @@ package moe.fuqiuluo.http.action.handlers
 
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
-import moe.fuqiuluo.http.action.data.SimpleTroopMemberInfo
+import com.tencent.mobileqq.data.SimpleTroopMemberInfo
 import moe.fuqiuluo.http.action.helper.TroopHelper
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
 
@@ -21,7 +21,8 @@ internal object GetTroopMemberInfo: IActionHandler() {
         val info = TroopHelper.getTroopMemberInfoByUin(groupId, uin, refresh)
             ?: return logic("cannot get troop member info")
 
-        return ok(SimpleTroopMemberInfo(
+        return ok(
+            SimpleTroopMemberInfo(
             uin = info.memberuin,
             name = info.friendnick.ifNullOrEmpty(info.autoremark) ?: "",
             showName = info.troopnick.ifNullOrEmpty(info.troopColorNick),
@@ -33,7 +34,8 @@ internal object GetTroopMemberInfo: IActionHandler() {
             joinTime = info.join_time,
             lastActiveTime = info.last_active_time,
             uniqueName = info.mUniqueTitle
-        ))
+        )
+        )
     }
 
     override fun path(): String = "get_group_member_info"

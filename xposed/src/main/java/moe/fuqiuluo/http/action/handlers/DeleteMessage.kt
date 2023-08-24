@@ -39,7 +39,7 @@ internal object DeleteMessage: IActionHandler() {
         val chatType = MessageHelper.getChatType(msgId)
         val mmkv = MMKVFetcher.defaultMMKV()
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
-            val key = "troop_$msgId"
+            val key = "troop$msgId"
             val groupId = mmkv.getLong(key, 0)
             mmkv.remove(key)
             return MessageHelper.generateContact(chatType, groupId.toString())

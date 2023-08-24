@@ -10,8 +10,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
-import moe.fuqiuluo.http.action.data.FriendEntry
-import moe.fuqiuluo.http.action.data.PlatformType
+import com.tencent.mobileqq.data.FriendEntry
+import com.tencent.mobileqq.data.PlatformType
 import mqq.app.AppRuntime
 import mqq.app.MobileQQ
 import kotlin.coroutines.resume

@@ -2,8 +2,8 @@ package moe.fuqiuluo.http.action.handlers
 
 import moe.fuqiuluo.http.action.IActionHandler
 import moe.fuqiuluo.http.action.ActionSession
-import moe.fuqiuluo.http.action.data.BotStatus
-import moe.fuqiuluo.http.action.data.Self
+import com.tencent.mobileqq.data.BotStatus
+import com.tencent.mobileqq.data.Self
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.http.entries.resultToString
 import mqq.app.MobileQQ

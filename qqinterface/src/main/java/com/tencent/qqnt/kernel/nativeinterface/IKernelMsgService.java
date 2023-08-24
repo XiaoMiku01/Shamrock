@@ -15,5 +15,6 @@ public interface IKernelMsgService {
     void recallMsg(Contact contact, ArrayList<Long> msgIdList, IOperateCallback callback);
 
     void addLocalRecordMsg(Contact contact, long msgId, MsgElement elem, HashMap<Integer, MsgAttributeInfo> hashMap, boolean z, IOperateCallback callback);
-    //void recallMsgs(Contact contact, ArrayList<GProRecallReqItem> arrayList, IGProRecallCallback iGProRecallCallback);
+
+    void getMultiMsg(Contact contact, long msgId, long uniseq, IGetMultiMsgCallback cb);
 }

@@ -5,7 +5,7 @@ import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import kotlinx.serialization.json.JsonArray
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
-import moe.fuqiuluo.http.action.data.MessageResult
+import com.tencent.mobileqq.data.MessageResult
 import moe.fuqiuluo.http.action.helper.MessageHelper
 import moe.fuqiuluo.http.action.helper.msg.InternalMessageMakerError
 import moe.fuqiuluo.http.action.helper.msg.ParamsException
@@ -28,10 +28,12 @@ internal object SendMessage: IActionHandler() {
                 val message = session.getString("message")
                 if (autoEscape) {
                     val result = sendToAIO(chatType, peerId, arrayListOf(message).json)
-                    return ok(MessageResult(
+                    return ok(
+                        MessageResult(
                         msgId = result.second,
                         time = result.first * 0.001
-                    ))
+                    )
+                    )
                 } else {
                     val msg = MessageHelper.decodeCQCode(message)
                     if (msg.isEmpty()) {
@@ -39,20 +41,24 @@ internal object SendMessage: IActionHandler() {
                     } else {
                         LogCenter.log(msg.toString())
                         val result = sendToAIO(chatType, peerId, MessageHelper.decodeCQCode(message))
-                        return ok(MessageResult(
+                        return ok(
+                            MessageResult(
                             msgId = result.second,
                             time = result.first * 0.001
-                        ))
+                        )
+                        )
                     }
                 }
             } else {
                 // 消息段
                 val message = session.getArrayOrNull("message") ?: return noParam("message")
                 val result = sendToAIO(chatType, peerId, message)
-                return ok(MessageResult(
+                return ok(
+                    MessageResult(
                     msgId = result.second,
                     time = result.first * 0.001
-                ))
+                )
+                )
             }
         }.onFailure {
             return if (it is InternalMessageMakerError) {

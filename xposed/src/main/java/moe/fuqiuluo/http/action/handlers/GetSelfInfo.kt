@@ -3,7 +3,7 @@ package moe.fuqiuluo.http.action.handlers
 import com.tencent.mobileqq.app.QQAppInterface
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
-import moe.fuqiuluo.http.action.data.UserDetail
+import com.tencent.mobileqq.data.UserDetail
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.http.entries.resultToString
 import mqq.app.MobileQQ
@@ -17,7 +17,8 @@ internal object GetSelfInfo: IActionHandler() {
 
         return resultToString(true, Status.Ok, UserDetail(
             curUin, runtime.currentNickname, runtime.currentNickname
-        ))
+        )
+        )
     }
 
     override fun path(): String = "get_self_info"

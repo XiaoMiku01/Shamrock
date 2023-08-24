@@ -1,4 +1,4 @@
-package moe.fuqiuluo.http.action.data
+package com.tencent.mobileqq.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

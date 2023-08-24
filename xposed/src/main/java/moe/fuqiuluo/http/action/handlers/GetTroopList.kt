@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
-import moe.fuqiuluo.http.action.data.SimpleTroopInfo
+import com.tencent.mobileqq.data.SimpleTroopInfo
 import moe.fuqiuluo.http.action.helper.TroopRequestHelper
 import mqq.app.MobileQQ
 import kotlin.coroutines.resume

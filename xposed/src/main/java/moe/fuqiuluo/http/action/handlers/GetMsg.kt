@@ -7,8 +7,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
-import moe.fuqiuluo.http.action.data.MessageDetail
-import moe.fuqiuluo.http.action.data.MessageSender
+import com.tencent.mobileqq.data.MessageDetail
+import com.tencent.mobileqq.data.MessageSender
 import moe.fuqiuluo.http.action.helper.MessageHelper
 import moe.fuqiuluo.http.action.helper.msg.MsgConvert
 import kotlin.coroutines.resume
@@ -36,7 +36,8 @@ internal object GetMsg: IActionHandler() {
             }
         } ?: return logic("Obtain msg failed, please check your msg_id.")
 
-        return ok(MessageDetail(
+        return ok(
+            MessageDetail(
             msg.msgTime.toInt(),
             MessageHelper.obtainDetailTypeByMsgType(chatType),
             hashCode,
@@ -45,7 +46,8 @@ internal object GetMsg: IActionHandler() {
                 msg.senderUin, msg.sendNickName, "unknown", 0, msg.senderUid
             ),
             MsgConvert.convertMsgRecordToMsgSegment(msg)
-        ))
+        )
+        )
     }
 
 

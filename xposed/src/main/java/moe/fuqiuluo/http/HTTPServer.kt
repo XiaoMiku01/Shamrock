@@ -36,33 +36,35 @@ import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
 import mqq.app.MobileQQ
 
+// 接口名称-------是否需要打开专业级开关
+private val API_LIST = arrayOf(
+    Routing::index to false,
+    Routing::getAccountInfo to false,
+    Routing::getMsfInfo to true,
+    Routing::getStartTime to false,
+    Routing::uploadGroupImage to true,
+    Routing::energy to true,
+    Routing::sign to true,
+    Routing::isBlackListUin to false,
+    Routing::setProfileCard to false,
+    Routing::shut to false,
+    Routing::sendGroupMessage to false,
+    Routing::getMsg to false,
+
+)
+
 object HTTPServer {
     @JvmStatic
     var isQueryServiceStarted = false
     internal var startTime = 0L
 
-    // 接口名称-------是否需要打开专业级开关
-    private val API_LIST = arrayOf(
-        Routing::index to false,
-        Routing::getAccountInfo to false,
-        Routing::getMsfInfo to true,
-        Routing::getStartTime to false,
-        Routing::uploadGroupImage to true,
-        Routing::energy to true,
-        Routing::sign to true,
-        Routing::isBlackListUin to false,
-        Routing::setProfileCard to false,
-        Routing::shut to false,
-        Routing::sendGroupMessage to false,
-        Routing::getMsg to false,
-    )
-    private val mutex = Mutex()
+    private val actionMutex = Mutex()
     private lateinit var server: ApplicationEngine
     internal var PORT: Int = 0
 
     suspend fun start(port: Int) {
         if (isQueryServiceStarted) return
-        mutex.withLock {
+        actionMutex.withLock {
             val ctx = MobileQQ.getContext()
             server = embeddedServer(Netty, port = port) {
                 install(ContentNegotiation) {
@@ -74,19 +76,11 @@ object HTTPServer {
                 }
                 install(StatusPages) {
                     exception<Throwable> { call, cause ->
-                        if (cause is ParamsException) {
-                            call.respond(CommonResult("failed", Status.BadParam.code, ErrorCatch(
-                                call.request.uri, cause.message ?: "")
-                            ))
-                        } else if (cause is LogicException) {
-                            call.respond(CommonResult("failed", Status.LogicError.code, ErrorCatch(
-                                call.request.uri, cause.message ?: "")
-                            ))
-                        } else {
-                            call.respond(CommonResult("failed", Status.InternalHandlerError.code, ErrorCatch(
-                                call.request.uri, cause.stackTraceToString())
-                            ))
-                        }
+                        call.respond(when (cause) {
+                            is ParamsException -> CommonResult("failed", Status.BadParam.code, ErrorCatch(call.request.uri, cause.message ?: ""))
+                            is LogicException -> CommonResult("failed", Status.LogicError.code, ErrorCatch(call.request.uri, cause.message ?: ""))
+                            else -> CommonResult("failed", Status.InternalHandlerError.code, ErrorCatch(call.request.uri, cause.stackTraceToString()))
+                        })
                     }
                 }
                 routing {
@@ -111,14 +105,14 @@ object HTTPServer {
         }
     }
 
-    suspend fun change(port: Int) {
+    suspend fun changePort(port: Int) {
         if (this.PORT == port && isQueryServiceStarted) return
         stop()
         start(port)
     }
 
     suspend fun stop() {
-        mutex.withLock {
+        actionMutex.withLock {
             server.stop()
             isQueryServiceStarted = false
         }

@@ -9,10 +9,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
-import moe.fuqiuluo.http.action.data.Location
-import moe.fuqiuluo.http.action.data.ProfileCard
-import moe.fuqiuluo.http.action.data.VipInfo
-import moe.fuqiuluo.http.action.data.VipType
+import com.tencent.mobileqq.data.Location
+import com.tencent.mobileqq.data.ProfileCard
+import com.tencent.mobileqq.data.VipInfo
+import com.tencent.mobileqq.data.VipType
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.http.entries.resultToString
 import mqq.app.MobileQQ
@@ -81,7 +81,8 @@ internal object GetProfileCard: IActionHandler() {
             location = Location(
                 card.strCity, card.strCompany, card.strCountry, card.strProvince, card.strHometownDesc, card.strSchool
             ),
-        ))
+        )
+        )
     }
 
     private suspend fun refreshProfileCard(uin: String, app: AppInterface, dataService: IProfileDataService): Card? {

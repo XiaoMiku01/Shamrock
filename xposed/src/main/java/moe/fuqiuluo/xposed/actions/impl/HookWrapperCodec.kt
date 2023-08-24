@@ -26,7 +26,9 @@ class HookWrapperCodec: IAction {
         "ClubInfoSvc.queryPrivExt",
         "OidbSvc.0xcf8",
         "LbsSvc.lbs_report",
-        "OidbSvcTrpcTcp.0x88d_0"
+        "OidbSvcTrpcTcp.0x88d_0",
+        "trpc.down.game_switch.GameSwitch.SsoGetDownloadConfig",
+        "trpc.zplan.aio_avatar.Mobile.SsoBatchGetSceneConfig"
     )
 
     override fun invoke(ctx: Context) {

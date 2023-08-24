@@ -8,7 +8,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
-import moe.fuqiuluo.http.action.data.SimpleTroopInfo
+import com.tencent.mobileqq.data.SimpleTroopInfo
 import mqq.app.MobileQQ
 
 internal object GetTroopInfo: IActionHandler() {
@@ -38,7 +38,8 @@ internal object GetTroopInfo: IActionHandler() {
         if (groupInfo == null || groupInfo.troopuin.isNullOrBlank()) {
             return logic("Unable to obtain group information")
         } else {
-            return ok(SimpleTroopInfo(
+            return ok(
+                SimpleTroopInfo(
                 groupId = groupInfo.troopuin,
                 groupUin = groupInfo.troopcode,
                 groupName = groupInfo.troopname ?: groupInfo.newTroopName ?: groupInfo.oldTroopName,
@@ -52,7 +53,8 @@ internal object GetTroopInfo: IActionHandler() {
                 //troopLevel = groupInfo.newTroopLevelMap,
                 maxMember = groupInfo.wMemberMax,
                 memNum = groupInfo.wMemberNum
-            ))
+            )
+            )
         }
     }
 

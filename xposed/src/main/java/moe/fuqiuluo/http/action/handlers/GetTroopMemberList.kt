@@ -9,7 +9,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
-import moe.fuqiuluo.http.action.data.SimpleTroopMemberInfo
+import com.tencent.mobileqq.data.SimpleTroopMemberInfo
 import moe.fuqiuluo.http.action.helper.TroopRequestHelper
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
 import mqq.app.MobileQQ
@@ -41,7 +41,8 @@ internal object GetTroopMemberList: IActionHandler() {
         return ok(arrayListOf<SimpleTroopMemberInfo>().apply {
             memberList.forEach {  info ->
                 if (info.memberuin != "0") {
-                    add(SimpleTroopMemberInfo(
+                    add(
+                        SimpleTroopMemberInfo(
                         uin = info.memberuin,
                         name = info.friendnick.ifNullOrEmpty(info.autoremark) ?: "",
                         showName = info.troopnick.ifNullOrEmpty(info.troopColorNick),
@@ -53,7 +54,8 @@ internal object GetTroopMemberList: IActionHandler() {
                         joinTime = info.join_time,
                         lastActiveTime = info.last_active_time,
                         uniqueName = info.mUniqueTitle
-                    ))
+                    )
+                    )
                 }
             }
         })

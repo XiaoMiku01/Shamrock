@@ -1,4 +1,4 @@
-package moe.fuqiuluo.http.action.data
+package com.tencent.mobileqq.data
 
 internal enum class PlatformType {
     ANDROID_PAD,
