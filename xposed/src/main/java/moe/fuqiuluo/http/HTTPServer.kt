@@ -1,5 +1,6 @@
 package moe.fuqiuluo.http
 
+import com.tencent.mobileqq.helper.ShamrockConfig
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
@@ -86,8 +87,7 @@ object HTTPServer {
                 }
                 routing {
                     kotlin.runCatching {
-                        val shamrockConfig = ctx.getSharedPreferences("shamrock_config", 0)
-                        val proApi = shamrockConfig.getBoolean("pro_api", false)
+                        val proApi = ShamrockConfig.isPro()
                         API_LIST.forEach {
                             if (!it.second || proApi) {
                                 it.first.invoke(this)

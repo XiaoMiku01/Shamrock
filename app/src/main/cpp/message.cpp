@@ -101,7 +101,7 @@ Java_com_tencent_qqnt_helper_MessageHelper_nativeEncodeCQCode(JNIEnv *env, jobje
         jobject segment = env->CallObjectMethod(segment_list, ListGet, i);
         jobject entrySet = env->CallObjectMethod(segment, entrySetMethod);
         jobject iterator = env->CallObjectMethod(entrySet, iteratorMethod);
-        auto type = (jstring) env->CallObjectMethod(segment, MapGet, env->NewStringUTF("type"));
+        auto type = (jstring) env->CallObjectMethod(segment, MapGet, env->NewStringUTF("_type"));
         auto typeString = env->GetStringUTFChars(type, nullptr);
         if (strcmp(typeString, "text") == 0) {
             auto text = (jstring) env->CallObjectMethod(segment, MapGet, env->NewStringUTF("text"));
@@ -117,7 +117,7 @@ Java_com_tencent_qqnt_helper_MessageHelper_nativeEncodeCQCode(JNIEnv *env, jobje
                 auto value = (jstring) env->CallObjectMethod(entry, getValueMethod);
                 auto keyString = env->GetStringUTFChars(key, nullptr);
                 auto valueString = env->GetStringUTFChars(value, nullptr);
-                if (strcmp(keyString, "type") != 0) {
+                if (strcmp(keyString, "_type") != 0) {
                     std::string tmpValue = valueString;
                     replace_string(tmpValue, "&", "&amp;");
                     replace_string(tmpValue, "[", "&#91;");

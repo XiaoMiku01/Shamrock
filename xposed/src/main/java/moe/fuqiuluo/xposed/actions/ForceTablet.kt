@@ -2,6 +2,7 @@ package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
 import com.tencent.common.config.pad.DeviceType
+import com.tencent.mobileqq.helper.ShamrockConfig
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import moe.fuqiuluo.xposed.helper.LogCenter
@@ -11,8 +12,7 @@ import moe.fuqiuluo.xposed.tools.FuzzySearchClass
 
 internal class ForceTablet: IAction {
     override fun invoke(ctx: Context) {
-        val preferences = ctx.getSharedPreferences("shamrock_config", 0)
-        if (preferences.getBoolean("tablet", true)) {
+        if (ShamrockConfig.forceTablet()) {
             if (PlatformUtils.isMainProcess()) {
                 LogCenter.log("强制协议类型 (PAD)", toast = true)
             }

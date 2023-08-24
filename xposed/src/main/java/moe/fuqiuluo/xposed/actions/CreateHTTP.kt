@@ -2,6 +2,7 @@
 package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
+import com.tencent.mobileqq.helper.ShamrockConfig
 import de.robv.android.xposed.XposedBridge
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -13,8 +14,7 @@ internal class CreateHTTP: IAction {
     override fun invoke(ctx: Context) {
         if (!PlatformUtils.isMainProcess()) return
 
-        val shamrockConfig = ctx.getSharedPreferences("shamrock_config", 0)
-        val port = shamrockConfig.getInt("port", 5700)
+        val port = ShamrockConfig.getPort()
 
         GlobalScope.launch {
             kotlin.runCatching {

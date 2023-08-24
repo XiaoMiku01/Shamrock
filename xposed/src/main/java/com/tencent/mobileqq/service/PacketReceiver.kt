@@ -13,10 +13,6 @@ import mqq.app.MobileQQ
 
 internal object PacketReceiver {
     private val allowCommandList: MutableSet<String> by lazy { mutableSetOf(
-        "SQQzoneSvc.getCover",
-        "SummaryCard.ReqSummaryCard", // 名片
-        "IncreaseURLSvr.QQHeadUrlReq", //  头像
-        "SummaryCard.ReqSearch",
     ) }
     private val HandlerByIpcSet = hashSetOf<String>()
 

@@ -1,9 +1,6 @@
 package com.tencent.qqnt.protocol
 
-import com.tencent.mobileqq.app.QQAppInterface
-import com.tencent.mobileqq.profilecard.api.IProfileProtocolConst
-import com.tencent.qphone.base.remote.ToServiceMsg
-import mqq.app.MobileQQ
+import com.tencent.mobileqq.data.ProfileProtocolConst
 
 internal object VisitorSvc: BaseSvc() {
     const val FROM_C2C_AIO = 2
@@ -83,8 +80,8 @@ internal object VisitorSvc: BaseSvc() {
         require(count in 1 .. 20)
         val card = CardSvc.getProfileCard(target.toString())
         sendExtra("VisitorSvc.ReqFavorite") {
-            it.putLong(IProfileProtocolConst.PARAM_SELF_UIN, currentUin.toLong())
-            it.putLong(IProfileProtocolConst.PARAM_TARGET_UIN, target)
+            it.putLong(ProfileProtocolConst.PARAM_SELF_UIN, currentUin.toLong())
+            it.putLong(ProfileProtocolConst.PARAM_TARGET_UIN, target)
             it.putByteArray("vCookies", card.vCookies)
             it.putBoolean("nearby_people", true)
             it.putInt("favoriteSource", SUB_FROM_SHARE_CARD_TROOP)

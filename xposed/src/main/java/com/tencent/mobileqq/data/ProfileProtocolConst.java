@@ -1,6 +1,6 @@
-package com.tencent.mobileqq.profilecard.api;
+package com.tencent.mobileqq.data;
 
-public interface IProfileProtocolConst {
+public interface ProfileProtocolConst {
     public static final String CMD_GET_PROFILE_DETAIL = "OidbSvc.0x480_9_IMCore";
     public static final String CMD_SET_PROFILE_DETAIL = "OidbSvc.0x4ff_9_IMCore";
     public static final String KET_INTERESTS = "interests";

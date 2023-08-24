@@ -267,6 +267,16 @@ private fun FunctionCard(
             }
 
             Function(
+                title = "消息格式为CQ码",
+                desc = "HTTPAPI回调的消息格式，关闭则为消息段。",
+                descColor = TabSelectedColor,
+                isSwitch = preferences.getBoolean("use_cqcode", false)
+            ) {
+                preferences.edit { putBoolean("use_cqcode", it) }
+                scope.toast(ctx, "重启QQ生效")
+            }
+
+            Function(
                 title = "主动WebSocket",
                 desc = "OneBot标准WebSocket，Shamrock作为Server。",
                 descColor = TabSelectedColor,

@@ -1,7 +1,6 @@
 package moe.fuqiuluo.xposed.loader
 
 import com.tencent.mobileqq.service.PacketReceiver
-import com.tencent.mobileqq.service.ProfileProcessor
 import kotlin.reflect.jvm.jvmName
 
 /**
@@ -10,7 +9,6 @@ import kotlin.reflect.jvm.jvmName
 object FixedLoader: ClassLoader() {
     private val allowLoadedClass = arrayOf(
         PacketReceiver::class,
-        ProfileProcessor::class
     )
 
     override fun loadClass(name: String?, resolve: Boolean): Class<*> {

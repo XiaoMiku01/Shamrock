@@ -22,7 +22,7 @@ void decode_cqcode(const std::string& code, std::vector<std::unordered_map<std::
             } else {
                 if (!cache.empty()) {
                     std::unordered_map<std::string, std::string> kv;
-                    kv.emplace("type", "text");
+                    kv.emplace("_type", "text");
                     kv.emplace("text", cache);
                     dest.push_back(kv);
                     cache.clear();
@@ -47,8 +47,8 @@ void decode_cqcode(const std::string& code, std::vector<std::unordered_map<std::
             }
         } else if (c == ',') {
             if (is_start) {
-                if (!kv.contains("type") && !cache.empty()) {
-                    kv.emplace("type", cache);
+                if (!kv.contains("_type") && !cache.empty()) {
+                    kv.emplace("_type", cache);
                     cache.clear();
                 } else {
                     if (!key_tmp.empty()) {
@@ -86,42 +86,8 @@ void decode_cqcode(const std::string& code, std::vector<std::unordered_map<std::
     }
     if (!cache.empty()) {
         std::unordered_map<std::string, std::string> kv;
-        kv.emplace("type", "text");
+        kv.emplace("_type", "text");
         kv.emplace("text", cache);
         dest.push_back(kv);
-    }
-}
-
-void encode_cqcode(const std::vector<std::unordered_map<std::string, std::string>> &segment, std::string &dest) {
-    for (auto &msg: segment) {
-        try {
-            auto type = msg.at("type");
-            if (type == "text") {
-                dest.append(msg.at("text"));
-            } else {
-                dest.append("[CQ:");
-                dest.append(type);
-                dest.append(",");
-                bool is_start = true;
-                for (const auto &msg_data: msg) {
-                    if (is_start) {
-                        is_start = false;
-                    } else {
-                        dest.append(",");
-                    }
-                    dest.append(msg_data.first);
-                    dest.append("=");
-                    auto value = msg_data.second;
-                    replace_string(value, "&", "&amp;");
-                    replace_string(value, "[", "&#91;");
-                    replace_string(value, "]", "&#93;");
-                    replace_string(value, ",", "&#44;");
-                    dest.append(value);
-                }
-                dest.append("]");
-            }
-        } catch (std::out_of_range& e) {
-            throw illegal_code();
-        }
     }
 }

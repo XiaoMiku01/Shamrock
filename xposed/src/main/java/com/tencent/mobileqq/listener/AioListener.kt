@@ -1,6 +1,7 @@
 @file:OptIn(DelicateCoroutinesApi::class)
 package com.tencent.mobileqq.listener
 
+import com.tencent.mobileqq.helper.ShamrockConfig
 import com.tencent.qqnt.kernel.nativeinterface.BroadcastHelperTransNotifyInfo
 import com.tencent.qqnt.kernel.nativeinterface.Contact
 import com.tencent.qqnt.kernel.nativeinterface.ContactMsgBoxInfo
@@ -48,7 +49,6 @@ internal object AioListener: IKernelMsgListener {
         GlobalScope.launch {
             val elements = ArrayList<MsgElement>()
             val ctx = MobileQQ.getContext()
-            val sharedPreferences = ctx.getSharedPreferences("shamrock_config", 0)
             lateinit var msg: MsgRecord
             msgList.forEachIndexed { index, msgRecord ->
                 if (index == 0) {
@@ -56,8 +56,13 @@ internal object AioListener: IKernelMsgListener {
                 }
                 elements.addAll(msgRecord.elements)
             }
+
             val rawMsg = elements.toCQCode(msg.chatType)
-            LogCenter.log("ReceiveMsg, type = ${msg.chatType}, uin = ${msg.senderUin}, msg = $rawMsg")
+            LogCenter.log("ReceiveMsg(type = ${msg.chatType}, uin = ${msg.senderUin}, msg = $rawMsg)")
+
+            if (ShamrockConfig.allowWebHook()) {
+
+            }
         }
 
         /*

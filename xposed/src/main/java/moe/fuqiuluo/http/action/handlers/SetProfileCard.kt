@@ -1,7 +1,7 @@
 package moe.fuqiuluo.http.action.handlers
 
 import android.os.Bundle
-import com.tencent.mobileqq.profilecard.api.IProfileProtocolConst
+import com.tencent.mobileqq.data.ProfileProtocolConst
 import com.tencent.mobileqq.profilecard.api.IProfileProtocolService
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
@@ -21,17 +21,17 @@ internal object SetProfileCard: IActionHandler() {
         val bundle = Bundle()
         val service = MobileQQ.getMobileQQ().waitAppRuntime()
             .getRuntimeService(IProfileProtocolService::class.java, "all")
-        bundle.putString(IProfileProtocolConst.KEY_NICK, nickName)
-        bundle.putString(IProfileProtocolConst.KEY_COMPANY, company)
-        bundle.putString(IProfileProtocolConst.KEY_EMAIL, email)
-        bundle.putString(IProfileProtocolConst.KEY_COLLEGE, college)
-        bundle.putString(IProfileProtocolConst.KEY_PERSONAL_NOTE, personalNote)
+        bundle.putString(ProfileProtocolConst.KEY_NICK, nickName)
+        bundle.putString(ProfileProtocolConst.KEY_COMPANY, company)
+        bundle.putString(ProfileProtocolConst.KEY_EMAIL, email)
+        bundle.putString(ProfileProtocolConst.KEY_COLLEGE, college)
+        bundle.putString(ProfileProtocolConst.KEY_PERSONAL_NOTE, personalNote)
 
         if (birthday != null) {
-            bundle.putInt(IProfileProtocolConst.KEY_BIRTHDAY, birthday.toInt())
+            bundle.putInt(ProfileProtocolConst.KEY_BIRTHDAY, birthday.toInt())
         }
         if (age != null) {
-            bundle.putInt(IProfileProtocolConst.KEY_AGE, age.toInt())
+            bundle.putInt(ProfileProtocolConst.KEY_AGE, age.toInt())
         }
 
         service.setProfileDetail(bundle)

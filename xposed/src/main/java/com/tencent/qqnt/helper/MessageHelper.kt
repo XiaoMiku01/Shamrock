@@ -154,12 +154,12 @@ internal object MessageHelper {
         msgList.forEach {
             val params = hashMapOf<String, JsonElement>()
             it.forEach { (key, value) ->
-                if (key != "type") {
+                if (key != "_type") {
                     params[key] = value.json
                 }
             }
             val data = hashMapOf(
-                "type" to it["type"]!!.json,
+                "type" to it["_type"]!!.json,
                 "data" to JsonObject(params)
             )
             arrayList.add(JsonObject(data))
@@ -176,7 +176,7 @@ internal object MessageHelper {
                         params[param] = element.asString
                     }
                 } else {
-                    params[key] = value.asString
+                    params["_type"] = value.asString
                 }
             }
             params

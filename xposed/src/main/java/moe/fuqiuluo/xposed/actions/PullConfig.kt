@@ -1,7 +1,7 @@
 package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
-import androidx.core.content.edit
+import com.tencent.mobileqq.helper.ShamrockConfig
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
 
 import moe.fuqiuluo.http.HTTPServer
@@ -28,10 +28,8 @@ class PullConfig: IAction {
             DataRequester.request("success", mapOf("port" to HTTPServer.PORT))
         })
 
-        val preferences = ctx.getSharedPreferences("shamrock_config", 0)
-
         DataRequester.request("init", onFailure = {
-            if (!preferences.getBoolean("isInit", false)) {
+            if (!ShamrockConfig.isInit(ctx)) {
                 ctx.toast("请启动Shamrock主进程以初始化服务，进程将退出。")
                 thread {
                     Thread.sleep(3000)
@@ -42,22 +40,9 @@ class PullConfig: IAction {
             }
         }, bodyBuilder = null) {
             isConfigOk = true
-            preferences.edit {
-                putBoolean(  "tablet",    it.getBooleanExtra("tablet", false)) // 强制平板模式
-                putInt(      "port",      it.getIntExtra("port", 5700)) // 主动HTTP端口
-                putBoolean(  "ws",        it.getBooleanExtra("ws", false)) // 主动WS开关
-                putInt(      "ws_port",   it.getIntExtra("port", 5700)) // 主动WS端口
-                putBoolean(  "http",      it.getBooleanExtra("http", false)) // HTTP回调开关
-                putString(   "http_addr", it.getStringExtra("http_addr")) // WebHook回调地址
-                putBoolean(  "ws_client", it.getBooleanExtra("ws_client", false)) // 被动WS开关
-                putString(   "ws_addr",   it.getStringExtra("ws_addr")) // 被动WS地址
-                putBoolean(  "pro_api",   it.getBooleanExtra("pro_api", false)) // 开发调试API开关
-                putBoolean("isInit", true)
-            }
-
+            ShamrockConfig.updateConfig(ctx, it)
             NativeLoader.load("shamrock")
             ctx.toast(testNativeLibrary())
-
             ActionLoader.runService(ctx)
         }
     }
