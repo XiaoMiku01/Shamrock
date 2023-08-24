@@ -1,7 +1,7 @@
 package com.tencent.mobileqq.pb;
 
 public class PBUInt32Field extends PBPrimitiveField<Integer> {
-    public static final PBUInt32Field __repeatHelper__ = new PBUInt32Field(0, false);
+    public static PBUInt32Field __repeatHelper__;
 
     public PBUInt32Field(int i2, boolean z) {
     }

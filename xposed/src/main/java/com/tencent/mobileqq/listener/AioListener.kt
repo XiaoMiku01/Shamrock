@@ -1,7 +1,6 @@
 @file:OptIn(DelicateCoroutinesApi::class)
 package com.tencent.mobileqq.listener
 
-import com.tencent.mobileqq.listener.helper.MsgRecordHelper
 import com.tencent.qqnt.kernel.nativeinterface.BroadcastHelperTransNotifyInfo
 import com.tencent.qqnt.kernel.nativeinterface.Contact
 import com.tencent.qqnt.kernel.nativeinterface.ContactMsgBoxInfo
@@ -23,7 +22,6 @@ import com.tencent.qqnt.kernel.nativeinterface.ImportOldDbMsgNotifyInfo
 import com.tencent.qqnt.kernel.nativeinterface.InputStatusInfo
 import com.tencent.qqnt.kernel.nativeinterface.KickedInfo
 import com.tencent.qqnt.kernel.nativeinterface.MsgAbstract
-import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import com.tencent.qqnt.kernel.nativeinterface.MsgElement
 import com.tencent.qqnt.kernel.nativeinterface.MsgRecord
 import com.tencent.qqnt.kernel.nativeinterface.MsgSetting
@@ -33,16 +31,12 @@ import com.tencent.qqnt.kernel.nativeinterface.SearchGroupFileResult
 import com.tencent.qqnt.kernel.nativeinterface.TabStatusInfo
 import com.tencent.qqnt.kernel.nativeinterface.TempChatInfo
 import com.tencent.qqnt.kernel.nativeinterface.UnreadCntInfo
+import com.tencent.qqnt.msg.toCQCode
 import de.robv.android.xposed.XposedBridge
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.xposed.helper.LogCenter
-import moe.fuqiuluo.xposed.tools.GlobalClient
 import mqq.app.MobileQQ
 import java.util.ArrayList
 import java.util.HashMap
@@ -51,21 +45,22 @@ internal object AioListener: IKernelMsgListener {
     override fun onRecvMsg(msgList: ArrayList<MsgRecord>) {
         if (msgList.isEmpty()) return
 
-        val ctx = MobileQQ.getContext()
-        val sharedPreferences = ctx.getSharedPreferences("shamrock_config", 0)
-        lateinit var msg: MsgRecord
-        msgList.forEachIndexed { index, msgRecord ->
-            if (index == 0) {
-                msg = msgRecord
-            } else {
-                msg.elements.addAll(msgRecord.elements)
+        GlobalScope.launch {
+            val elements = ArrayList<MsgElement>()
+            val ctx = MobileQQ.getContext()
+            val sharedPreferences = ctx.getSharedPreferences("shamrock_config", 0)
+            lateinit var msg: MsgRecord
+            msgList.forEachIndexed { index, msgRecord ->
+                if (index == 0) {
+                    msg = msgRecord
+                }
+                elements.addAll(msgRecord.elements)
             }
+            val rawMsg = elements.toCQCode(msg.chatType)
+            LogCenter.log("ReceiveMsg, type = ${msg.chatType}, uin = ${msg.senderUin}, msg = $rawMsg")
         }
 
-        LogCenter.log("ReceiveMsg: ${msg.chatType}, ${msg.senderUin}, ${msg.senderUid}, ${msg.elements.joinToString {
-            it.toString()
-        }}")
-
+        /*
         if (msg.chatType == MsgConstant.KCHATTYPEGROUP) {
             if (msg.senderUin == 0L) return
             GlobalScope.launch {
@@ -78,11 +73,13 @@ internal object AioListener: IKernelMsgListener {
                     }
                 }
             }
-        }
+        }*/
     }
 
     override fun onAddSendMsg(record: MsgRecord) {
-        LogCenter.log(record.toString())
+        GlobalScope.launch {
+            LogCenter.log(record.toCQCode())
+        }
     }
 
     override fun onRecvMsgSvrRspTransInfo(

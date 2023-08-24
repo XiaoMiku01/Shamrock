@@ -15,7 +15,31 @@ import moe.fuqiuluo.xposed.tools.asJsonObject
 import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.json
 
+internal suspend fun MsgRecord.toSegment(): ArrayList<HashMap<String, JsonElement>> {
+    return MsgConvert.convertMsgRecordToMsgSegment(this)
+}
+
+internal suspend fun MsgRecord.toCQCode(): String {
+    return MsgConvert.convertMsgRecordToCQCode(this)
+}
+
+internal suspend fun List<MsgElement>.toSegment(chatType: Int): ArrayList<HashMap<String, JsonElement>> {
+    return MsgConvert.convertMsgElementsToMsgSegment(chatType, this)
+}
+
+internal suspend fun List<MsgElement>.toCQCode(chatType: Int): String {
+    return MsgConvert.convertMsgElementsToCQCode(this, chatType)
+}
+
 internal object MsgConvert {
+    suspend fun convertMsgRecordToCQCode(record: MsgRecord, chatType: Int = record.chatType): String {
+        return MessageHelper.encodeCQCode(convertMsgElementsToMsgSegment(chatType, record.elements))
+    }
+
+    suspend fun convertMsgElementsToCQCode(elements: List<MsgElement>, chatType: Int): String {
+        return MessageHelper.encodeCQCode(convertMsgElementsToMsgSegment(chatType, elements))
+    }
+
     suspend fun convertMsgRecordToMsgSegment(record: MsgRecord, chatType: Int = record.chatType): ArrayList<HashMap<String, JsonElement>> {
         return convertMsgElementsToMsgSegment(chatType, record.elements)
     }
@@ -31,7 +55,7 @@ internal object MsgConvert {
         return messageData
     }
 
-    suspend fun covertMsgElementToMsgSegment(chatType: Int, element: MsgElement): java.util.HashMap<String, JsonElement>? {
+    suspend fun covertMsgElementToMsgSegment(chatType: Int, element: MsgElement): HashMap<String, JsonElement>? {
         when (element.elementType) {
             MsgConstant.KELEMTYPETEXT -> {
                 val text = element.textElement
@@ -78,8 +102,8 @@ internal object MsgConvert {
                     "data" to JsonObject(mapOf(
                         "file" to md5.json,
                         "url" to when(chatType) {
-                            MsgConstant.KCHATTYPEC2C -> "http://gchat.qpic.cn/gchatpic_new/0/0-0-${md5.uppercase()}/0?term=2"
-                            MsgConstant.KCHATTYPEGROUP -> "https://c2cpicdw.qpic.cn/offpic_new/0/${md5.uppercase()}/0?term=2"
+                            MsgConstant.KCHATTYPEGROUP -> "http://gchat.qpic.cn/gchatpic_new/0/0-0-${md5.uppercase()}/0?term=2"
+                            MsgConstant.KCHATTYPEC2C -> "https://c2cpicdw.qpic.cn/offpic_new/0/${md5.uppercase()}/0?term=2"
                             else -> error("Not supported chat type: $chatType, convertMsgElementsToMsgSegment::Pic")
                         }.json
                     ))
@@ -94,15 +118,18 @@ internal object MsgConvert {
 
                 return hashMapOf(
                     "type" to "record".json,
-                    "data" to JsonObject(mapOf(
+                    "data" to JsonObject(hashMapOf(
                         "file" to md5.json,
-                        "magic" to (if(record.voiceChangeType == MsgConstant.KPTTVOICECHANGETYPENONE) "0" else "1").json,
                         "url" to when(chatType) {
                             MsgConstant.KCHATTYPEGROUP -> RichProtoSvc.getGroupPttDownUrl("0", record.md5HexStr, record.fileUuid)
                             MsgConstant.KCHATTYPEC2C -> RichProtoSvc.getC2CPttDownUrl("0", record.fileUuid)
                             else -> error("Not supported chat type: $chatType, convertMsgElementsToMsgSegment::Pic")
                         }.json
-                    ))
+                    ).also {
+                        if(record.voiceChangeType != MsgConstant.KPTTVOICECHANGETYPENONE) {
+                            it["magic"] = "1".json
+                        }
+                    })
                 )
             }
             MsgConstant.KELEMTYPEVIDEO -> {

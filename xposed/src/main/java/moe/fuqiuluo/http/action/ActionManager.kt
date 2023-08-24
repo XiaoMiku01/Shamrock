@@ -8,19 +8,7 @@ import moe.fuqiuluo.http.action.handlers.*
 import moe.fuqiuluo.http.entries.EmptyObject
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.http.entries.resultToString
-import moe.fuqiuluo.xposed.tools.asBoolean
-import moe.fuqiuluo.xposed.tools.asBooleanOrNull
-import moe.fuqiuluo.xposed.tools.asInt
-import moe.fuqiuluo.xposed.tools.asIntOrNull
-import moe.fuqiuluo.xposed.tools.asJsonArray
-import moe.fuqiuluo.xposed.tools.asJsonArrayOrNull
-import moe.fuqiuluo.xposed.tools.asJsonObject
-import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
-import moe.fuqiuluo.xposed.tools.asLong
-import moe.fuqiuluo.xposed.tools.asLongOrNull
-import moe.fuqiuluo.xposed.tools.asString
-import moe.fuqiuluo.xposed.tools.asStringOrNull
-import moe.fuqiuluo.xposed.tools.json
+import moe.fuqiuluo.xposed.tools.*
 
 internal object ActionManager {
     val actionMap = mutableMapOf(
@@ -46,7 +34,9 @@ internal object ActionManager {
         "set_qq_profile" to SetProfileCard,
         "get_msg" to GetMsg,
         "get_forward_msg" to GetForwardMsg,
-        "send_like" to SendLike
+        "send_like" to SendLike,
+        "set_group_kick" to KickTroopMember,
+
     )
 
     operator fun get(action: String): IActionHandler? {

@@ -16,6 +16,7 @@ import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.MMKVFetcher
 import moe.fuqiuluo.xposed.tools.EmptyJsonObject
+import moe.fuqiuluo.xposed.tools.asJsonObject
 import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
 import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.json
@@ -164,6 +165,22 @@ internal object MessageHelper {
             arrayList.add(JsonObject(data))
         }
         return arrayList.jsonArray
+    }
+
+    fun encodeCQCode(msg: ArrayList<HashMap<String, JsonElement>>): String {
+        return nativeEncodeCQCode(msg.map {
+            val params = hashMapOf<String, String>()
+            it.forEach { (key, value) ->
+                if (key != "type") {
+                    value.asJsonObject.forEach { param, element ->
+                        params[param] = element.asString
+                    }
+                } else {
+                    params[key] = value.asString
+                }
+            }
+            params
+        })
     }
 
     fun getPeerIdByMsgId(msgId: Long): Long {

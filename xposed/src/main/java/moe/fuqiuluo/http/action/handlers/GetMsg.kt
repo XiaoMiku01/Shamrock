@@ -36,8 +36,7 @@ internal object GetMsg: IActionHandler() {
             }
         } ?: return logic("Obtain msg failed, please check your msg_id.")
 
-        return ok(
-            MessageDetail(
+        return ok(MessageDetail(
             msg.msgTime.toInt(),
             MessageHelper.obtainDetailTypeByMsgType(chatType),
             hashCode,
@@ -46,8 +45,7 @@ internal object GetMsg: IActionHandler() {
                 msg.senderUin, msg.sendNickName, "unknown", 0, msg.senderUid
             ),
             MsgConvert.convertMsgRecordToMsgSegment(msg)
-        )
-        )
+        ))
     }
 
 
