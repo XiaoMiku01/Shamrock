@@ -13,7 +13,7 @@ import moe.fuqiuluo.xposed.tools.EMPTY_BYTE_ARRAY
 import moe.fuqiuluo.xposed.tools.hookMethod
 import moe.fuqiuluo.xposed.tools.slice
 
-class HookWrapperCodec: IAction {
+internal class HookWrapperCodec: IAction {
     private val IgnoredCmd = arrayOf(
         "trpc.sq_adv.official_account_adv_push.OfficialAccountAdvPush.AdvPush",
         "LightAppSvc.mini_app_report_transfer.DataReport",
@@ -27,7 +27,8 @@ class HookWrapperCodec: IAction {
         "LbsSvc.lbs_report",
         "OidbSvcTrpcTcp.0x88d_0",
         "trpc.down.game_switch.GameSwitch.SsoGetDownloadConfig",
-        "trpc.zplan.aio_avatar.Mobile.SsoBatchGetSceneConfig"
+        "trpc.zplan.aio_avatar.Mobile.SsoBatchGetSceneConfig",
+        "OidbSvcTrpcTcp.0x1127_5"
     )
 
     override fun invoke(ctx: Context) {

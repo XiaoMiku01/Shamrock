@@ -1,22 +1,16 @@
 package moe.fuqiuluo.http.action.handlers
 
-import com.tencent.common.app.AppInterface
 import com.tencent.mobileqq.data.Card
-import com.tencent.mobileqq.profilecard.api.IProfileDataService
-import com.tencent.mobileqq.profilecard.api.IProfileProtocolService
-import com.tencent.mobileqq.profilecard.observer.ProfileCardObserver
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import moe.fuqiuluo.http.action.ActionSession
 import moe.fuqiuluo.http.action.IActionHandler
 import com.tencent.mobileqq.data.Location
 import com.tencent.mobileqq.data.ProfileCard
 import com.tencent.mobileqq.data.VipInfo
 import com.tencent.mobileqq.data.VipType
+import com.tencent.qqnt.protocol.CardSvc
 import moe.fuqiuluo.http.entries.Status
 import moe.fuqiuluo.http.entries.resultToString
-import mqq.app.MobileQQ
-import java.util.concurrent.ArrayBlockingQueue
 
 internal object GetProfileCard: IActionHandler() {
     private val refreshLock = Mutex() // 防止重复注册监视器导致错误
@@ -27,15 +21,10 @@ internal object GetProfileCard: IActionHandler() {
         }
         val uin = session.getString("user_id")
         val refresh = session.getBooleanOrDefault("refresh", false)
-        val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
-        if (runtime !is AppInterface)
-            return logic("AppRuntime cannot cast to AppInterface")
 
-        val profileDataService = runtime
-            .getRuntimeService(IProfileDataService::class.java, "all")
-        var card: Card? = profileDataService.getProfileCard(uin, true)
+        var card: Card? = CardSvc.getProfileCard(uin)
         if (refresh || !card.ok()) {
-            card = refreshProfileCard(uin, runtime, profileDataService)
+            card = CardSvc.refreshAndGetProfileCard(uin)
         }
         if (!card.ok()) {
             return logic("get profilecard error, please check your user_id or network")
@@ -81,28 +70,8 @@ internal object GetProfileCard: IActionHandler() {
             location = Location(
                 card.strCity, card.strCompany, card.strCountry, card.strProvince, card.strHometownDesc, card.strSchool
             ),
-        )
-        )
-    }
-
-    private suspend fun refreshProfileCard(uin: String, app: AppInterface, dataService: IProfileDataService): Card? {
-        refreshLock.withLock {
-            val queue = ArrayBlockingQueue<Card?>(1)
-            app.addObserver(object: ProfileCardObserver() {
-                override fun onGetProfileCard(success: Boolean, obj: Any) {
-                    if (!success || obj !is Card) {
-                        queue.put(null)
-                    } else {
-                        queue.put(obj)
-                        dataService.saveProfileCard(obj)
-                    }
-                    app.removeObserver(this)
-                }
-            })
-            app.getRuntimeService(IProfileProtocolService::class.java, "all")
-                .requestProfileCard(app.currentUin, uin, 12, 0L, 0.toByte(), 0L, 0L, null, "", 0L, 10004, null, 0.toByte())
-            return queue.take()
-        }
+            cookie = card.vCookies
+        ))
     }
 
     private fun Card?.ok(): Boolean {

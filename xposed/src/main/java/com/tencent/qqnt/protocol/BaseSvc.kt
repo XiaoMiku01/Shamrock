@@ -10,10 +10,13 @@ import tencent.im.oidb.oidb_sso
 
 abstract class BaseSvc {
     protected val currentUin: String
-        get() = (MobileQQ.getMobileQQ() as QQAppInterface).currentAccountUin
+        get() = (MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface).currentAccountUin
 
     protected fun sendExtra(cmd: String, builder: (Bundle) -> Unit) {
-        val app = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
+        val app = MobileQQ.getMobileQQ().waitAppRuntime()
+        if (app !is QQAppInterface) {
+            error("app is not QQAppInterface")
+        }
         val toServiceMsg = ToServiceMsg("mobileqq.service", app.currentAccountUin, cmd)
         builder(toServiceMsg.extraData)
         app.sendToService(toServiceMsg)

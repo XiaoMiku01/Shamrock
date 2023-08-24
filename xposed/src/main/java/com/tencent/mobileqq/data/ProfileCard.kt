@@ -9,26 +9,20 @@ data class ProfileCard(
     @SerialName("user_name") val name: String,
     @SerialName("user_displayname") val displayName: String?,
     @SerialName("user_remark") val remark: String?,
-    val mail: String?,
+    @SerialName("mail") val mail: String?,
     @SerialName("find_method") val findMethod: String?,
-
     @SerialName("max_vote_cnt") val maxVoteCnt: Short,
     @SerialName("have_vote_cnt") val haveVoteCnt: Short,
-
     @SerialName("vip_list") val vipList: List<VipInfo>,
-
     @SerialName("hobby_entry") val hobbyEntry: String?,
-
-    val level: Int,
-    val birthday: Long,
+    @SerialName("level") val level: Int,
+    @SerialName("birthday") val birthday: Long,
     @SerialName("login_day") val loginDay: Long,
-
     @SerialName("vote_cnt") val voteCnt: Long,
-
-    val qid: String,
+    @SerialName("qid") val qid: String,
     @SerialName("is_school_verified") val schoolVerified: Boolean,
-
-    val location: Location,
+    @SerialName("location") val location: Location,
+    @SerialName("cookie") val cookie: ByteArray,
 )
 
 @Serializable

@@ -19,6 +19,8 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import com.tencent.qqnt.msg.ParamsException
+import io.ktor.http.HttpMethod
+import io.ktor.server.request.httpMethod
 import moe.fuqiuluo.http.entries.CommonResult
 import moe.fuqiuluo.http.entries.EmptyObject
 import moe.fuqiuluo.http.entries.Status
@@ -28,6 +30,32 @@ import moe.fuqiuluo.http.entries.Status
 @Retention(AnnotationRetention.BINARY)
 @MustBeDocumented
 annotation class ShamrockDsl
+
+suspend fun PipelineContext<Unit, ApplicationCall>.fetch(key: String): String {
+    val isPost = call.request.httpMethod == HttpMethod.Post
+    return if (isPost) {
+        fetchPost(key)
+    } else {
+        fetchGet(key)
+    }
+}
+suspend fun PipelineContext<Unit, ApplicationCall>.fetchOrNull(key: String): String? {
+    val isPost = call.request.httpMethod == HttpMethod.Post
+    return if (isPost) {
+        fetchPostOrNull(key)
+    } else {
+        fetchGetOrNull(key)
+    }
+}
+
+suspend fun PipelineContext<Unit, ApplicationCall>.fetchOrThrow(key: String): String {
+    val isPost = call.request.httpMethod == HttpMethod.Post
+    return if (isPost) {
+        fetchPostOrThrow(key)
+    } else {
+        fetchGetOrThrow(key)
+    }
+}
 
 fun PipelineContext<Unit, ApplicationCall>.fetchGet(key: String): String {
     return call.parameters[key]!!

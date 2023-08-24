@@ -2,6 +2,7 @@ package moe.fuqiuluo.http.api
 
 import io.ktor.http.ContentType
 import io.ktor.server.application.call
+import io.ktor.server.request.httpVersion
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing
@@ -35,7 +36,7 @@ fun Routing.index() {
         respond(
             isOk = true,
             code = Status.Ok,
-            data = IndexData(MobileQQ.getMobileQQ().qqProcessName, HTTPServer.startTime)
+            data = IndexData(MobileQQ.getMobileQQ().qqProcessName, HTTPServer.startTime, call.request.httpVersion)
         )
     }
 

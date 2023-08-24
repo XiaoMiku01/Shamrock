@@ -9,7 +9,7 @@ import com.tencent.qqnt.utils.PlatformUtils
 import moe.fuqiuluo.xposed.loader.LuoClassloader
 import moe.fuqiuluo.xposed.tools.FuzzySearchClass
 
-class ForceTablet: IAction {
+internal class ForceTablet: IAction {
     override fun invoke(ctx: Context) {
         val preferences = ctx.getSharedPreferences("shamrock_config", 0)
         if (preferences.getBoolean("tablet", true)) {

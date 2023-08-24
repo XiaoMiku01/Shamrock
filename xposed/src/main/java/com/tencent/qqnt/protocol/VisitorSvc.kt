@@ -79,16 +79,17 @@ internal object VisitorSvc: BaseSvc() {
     const val SUB_FROM_SHARE_CARD_TROOP = 102
     const val SUB_FROM_TYPE_DEFAULT = 0
 
-    fun vote(target: Long, count: Int) {
+    suspend fun vote(target: Long, count: Int) {
         require(count in 1 .. 20)
+        val card = CardSvc.getProfileCard(target.toString())
         sendExtra("VisitorSvc.ReqFavorite") {
             it.putLong(IProfileProtocolConst.PARAM_SELF_UIN, currentUin.toLong())
             it.putLong(IProfileProtocolConst.PARAM_TARGET_UIN, target)
-            it.putByteArray("vCookies", null)
+            it.putByteArray("vCookies", card.vCookies)
             it.putBoolean("nearby_people", true)
-            it.putInt("favoriteSource", SUB_FROM_SEARCH_FIND_PROFILE_TAB)
+            it.putInt("favoriteSource", SUB_FROM_SHARE_CARD_TROOP)
             it.putInt("iCount", count)
-            it.putInt("from", FROM_SEARCH)
+            it.putInt("from", FROM_SHARE_CARD)
         }
     }
 }

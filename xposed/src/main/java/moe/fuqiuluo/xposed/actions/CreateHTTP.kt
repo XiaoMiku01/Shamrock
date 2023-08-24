@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import moe.fuqiuluo.http.HTTPServer
 import com.tencent.qqnt.utils.PlatformUtils
 
-class CreateHTTP: IAction {
+internal class CreateHTTP: IAction {
     override fun invoke(ctx: Context) {
         if (!PlatformUtils.isMainProcess()) return
 

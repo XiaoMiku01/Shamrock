@@ -27,6 +27,7 @@ import moe.fuqiuluo.http.api.getMsg
 import moe.fuqiuluo.http.api.getStartTime
 import moe.fuqiuluo.http.api.isBlackListUin
 import moe.fuqiuluo.http.api.sendGroupMessage
+import moe.fuqiuluo.http.api.sendLike
 import moe.fuqiuluo.http.api.setProfileCard
 import moe.fuqiuluo.http.api.shut
 import moe.fuqiuluo.http.api.sign
@@ -50,7 +51,7 @@ private val API_LIST = arrayOf(
     Routing::shut to false,
     Routing::sendGroupMessage to false,
     Routing::getMsg to false,
-
+    Routing::sendLike to false
 )
 
 object HTTPServer {
@@ -99,6 +100,7 @@ object HTTPServer {
             startTime = System.currentTimeMillis()
             isQueryServiceStarted = true
             this.PORT = port
+
             LogCenter.log("Start HTTP Server: http://0.0.0.0:$PORT/")
 
             DataRequester.request("success", mapOf("port" to PORT))

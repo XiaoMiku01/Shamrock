@@ -12,7 +12,7 @@ import mqq.app.AppRuntime
 import mqq.app.MobileQQ
 import mqq.app.api.IRuntimeService
 
-class FetchService: IAction {
+internal class FetchService: IAction {
     override fun invoke(ctx: Context) {
         // 在非主进程载入可能会导致很多问题
         if (MobileQQ.getMobileQQ().qqProcessName != "com.tencent.mobileqq") return

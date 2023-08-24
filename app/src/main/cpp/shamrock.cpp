@@ -19,7 +19,7 @@ int silk_encode(int rate, char type, const char* inputFile, const char* outPutFi
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_moe_fuqiuluo_xposed_actions_impl_PullConfig_testNativeLibrary(JNIEnv *env, jobject thiz) {
+Java_moe_fuqiuluo_xposed_actions_PullConfig_testNativeLibrary(JNIEnv *env, jobject thiz) {
     return env->NewStringUTF("加载Shamrock库成功~");
 }
 
