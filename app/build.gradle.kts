@@ -18,7 +18,7 @@ android {
         applicationId = "moe.fuqiuluo.shamrock"
         minSdk = 24
         targetSdk = 33
-        versionCode = 4
+        versionCode = 5
         versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -86,6 +86,9 @@ android {
         kotlinCompilerExtensionVersion = "1.4.3"
     }
     packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
         resources {
             excludes +=  "/META-INF/{AL2.0,LGPL2.1}"
             excludes +=  "/META-INF/*"
@@ -113,12 +116,8 @@ android {
             version = "3.22.1"
         }
     }
+
     configureAppSigningConfigsForRelease(project)
-    packagingOptions {
-        jniLibs {
-            useLegacyPackaging = true
-        }
-    }
 }
 
 fun configureAppSigningConfigsForRelease(project: Project) {
@@ -135,9 +134,7 @@ fun configureAppSigningConfigsForRelease(project: Project) {
                 storePassword = System.getenv("KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("KEY_ALIAS")
                 keyPassword = System.getenv("KEY_PASSWORD")
-                enableV1Signing = true
                 enableV2Signing = true
-                enableV3Signing = true
             }
         }
         buildTypes {
