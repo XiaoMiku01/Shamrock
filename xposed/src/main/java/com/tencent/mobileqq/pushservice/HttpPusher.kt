@@ -38,6 +38,9 @@ import moe.fuqiuluo.xposed.tools.jsonArray
 import mqq.app.MobileQQ
 
 internal object HttpPusher {
+    private val actionMsgTypes = arrayOf(
+        "record", "voice", "video", "markdown"
+    )
 
     fun pushGroupMsg(record: MsgRecord, elements: List<MsgElement>, raw: String, msgHash: Int) {
         if (!ShamrockConfig.allowWebHook()) {
@@ -87,6 +90,7 @@ internal object HttpPusher {
             val data = Json.parseToJsonElement(jsonText).asJsonObject
             if (data.containsKey("reply")) {
                 val autoEscape = data["auto_escape"].asBooleanOrNull ?: false
+                val atSender = data["at_sender"].asBooleanOrNull ?: false
                 val message = data["reply"]
                 if (message is JsonPrimitive) {
                     if (autoEscape) {
@@ -97,13 +101,13 @@ internal object HttpPusher {
                                 "text" to message.asString
                             )
                         ).json)
-                        quicklyReply(record, msgList.jsonArray)
+                        quicklyReply(record, msgList.jsonArray, atSender)
                     } else {
                         val messageArray = MessageHelper.decodeCQCode(message.asString)
-                        quicklyReply(record, messageArray)
+                        quicklyReply(record, messageArray, atSender)
                     }
                 } else if (message is JsonArray) {
-                    quicklyReply(record, message)
+                    quicklyReply(record, message, atSender)
                 }
             }
             if (data.containsKey("delete")) {
@@ -124,11 +128,12 @@ internal object HttpPusher {
 
     private suspend fun quicklyReply(
         record: MsgRecord,
-        message: JsonArray
+        message: JsonArray,
+        atSender: Boolean,
     ) {
         val msgList = mutableSetOf<JsonElement>()
         message.filter {
-            it.asJsonObject["type"]?.asString == "record" || it.asJsonObject["type"]?.asString == "video"
+            it.asJsonObject["type"]?.asString in actionMsgTypes
         }.let {
             if (it.isNotEmpty()) {
                 it.map { listOf(it) }.forEach {
@@ -138,13 +143,20 @@ internal object HttpPusher {
             }
         }
 
-
         msgList.add(mapOf(
             "type" to "reply",
             "data" to mapOf(
                 "id" to record.msgId
             )
         ).json) // 添加回复
+        if (atSender) {
+            msgList.add(mapOf(
+                "type" to "at",
+                "data" to mapOf(
+                    "qq" to record.senderUin
+                )
+            ).json) // 添加@发送者
+        }
         msgList.addAll(message)
         MsgSvc.sendToAIO(record.chatType, record.peerUin.toString(), when {
             else -> msgList

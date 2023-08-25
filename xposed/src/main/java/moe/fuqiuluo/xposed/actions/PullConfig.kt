@@ -37,13 +37,18 @@ class PullConfig: IAction {
                 }
             } else {
                 ctx.toast("Shamrock进程未启动，不会推送配置文件。。")
+                initHttp(ctx)
             }
         }, bodyBuilder = null) {
             isConfigOk = true
             ShamrockConfig.updateConfig(ctx, it)
-            NativeLoader.load("shamrock")
-            ctx.toast(testNativeLibrary())
-            ActionLoader.runService(ctx)
+            initHttp(ctx)
         }
+    }
+
+    private fun initHttp(ctx: Context) {
+        NativeLoader.load("shamrock")
+        ctx.toast(testNativeLibrary())
+        ActionLoader.runService(ctx)
     }
 }
