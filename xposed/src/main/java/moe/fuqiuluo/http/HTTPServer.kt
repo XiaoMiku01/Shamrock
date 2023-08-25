@@ -21,6 +21,7 @@ import moe.fuqiuluo.http.entries.ErrorCatch
 import de.robv.android.xposed.XposedBridge.log
 import com.tencent.qqnt.msg.LogicException
 import com.tencent.qqnt.msg.ParamsException
+import moe.fuqiuluo.http.api.banTroopMember
 import moe.fuqiuluo.http.api.energy
 import moe.fuqiuluo.http.api.getAccountInfo
 import moe.fuqiuluo.http.api.getMsfInfo
@@ -54,7 +55,8 @@ private val API_LIST = arrayOf(
     Routing::sendGroupMessage to false,
     Routing::getMsg to false,
     Routing::sendLike to false,
-    Routing::kickTroopMember to false
+    Routing::kickTroopMember to false,
+    Routing::banTroopMember to false
 )
 
 object HTTPServer {
@@ -69,7 +71,6 @@ object HTTPServer {
     suspend fun start(port: Int) {
         if (isQueryServiceStarted) return
         actionMutex.withLock {
-            val ctx = MobileQQ.getContext()
             server = embeddedServer(Netty, port = port) {
                 install(ContentNegotiation) {
                     json(Json {

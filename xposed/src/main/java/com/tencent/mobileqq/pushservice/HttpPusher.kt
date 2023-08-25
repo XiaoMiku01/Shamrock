@@ -118,9 +118,9 @@ internal object HttpPusher {
                 GroupSvc.kickMember(record.peerUin, false, record.senderUin)
             }
             if (data.containsKey("ban") && data["ban"].asBoolean) {
-                val banTime = data["ban_duration"].asIntOrNull ?: 0
+                val banTime = data["ban_duration"].asIntOrNull ?: (30 * 60)
                 if (banTime <= 0) return
-                TODO("快速操作: 群聊禁言")
+                GroupSvc.banMember(record.peerUin, record.senderUin, banTime)
             }
         } catch (e: Throwable) {
             LogCenter.log("处理快速回复错: $e", Level.WARN)

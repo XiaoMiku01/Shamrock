@@ -36,7 +36,7 @@ internal object ActionManager {
         "get_forward_msg" to GetForwardMsg,
         "send_like" to SendLike,
         "set_group_kick" to KickTroopMember,
-
+        "set_group_ban" to BanTroopMember
     )
 
     operator fun get(action: String): IActionHandler? {
