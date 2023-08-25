@@ -1,44 +1,15 @@
 @file:OptIn(DelicateCoroutinesApi::class)
 package com.tencent.mobileqq.listener
 
-import com.tencent.mobileqq.helper.ShamrockConfig
-import com.tencent.qqnt.kernel.nativeinterface.BroadcastHelperTransNotifyInfo
-import com.tencent.qqnt.kernel.nativeinterface.Contact
-import com.tencent.qqnt.kernel.nativeinterface.ContactMsgBoxInfo
-import com.tencent.qqnt.kernel.nativeinterface.CustomWithdrawConfig
-import com.tencent.qqnt.kernel.nativeinterface.DevInfo
-import com.tencent.qqnt.kernel.nativeinterface.DownloadRelateEmojiResultInfo
-import com.tencent.qqnt.kernel.nativeinterface.EmojiNotifyInfo
-import com.tencent.qqnt.kernel.nativeinterface.EmojiResourceInfo
-import com.tencent.qqnt.kernel.nativeinterface.FileTransNotifyInfo
-import com.tencent.qqnt.kernel.nativeinterface.FirstViewDirectMsgNotifyInfo
-import com.tencent.qqnt.kernel.nativeinterface.FirstViewGroupGuildInfo
-import com.tencent.qqnt.kernel.nativeinterface.FreqLimitInfo
-import com.tencent.qqnt.kernel.nativeinterface.GroupFileListResult
-import com.tencent.qqnt.kernel.nativeinterface.GroupGuildNotifyInfo
-import com.tencent.qqnt.kernel.nativeinterface.GroupItem
-import com.tencent.qqnt.kernel.nativeinterface.HitRelatedEmojiWordsResult
-import com.tencent.qqnt.kernel.nativeinterface.IKernelMsgListener
-import com.tencent.qqnt.kernel.nativeinterface.ImportOldDbMsgNotifyInfo
-import com.tencent.qqnt.kernel.nativeinterface.InputStatusInfo
-import com.tencent.qqnt.kernel.nativeinterface.KickedInfo
-import com.tencent.qqnt.kernel.nativeinterface.MsgAbstract
-import com.tencent.qqnt.kernel.nativeinterface.MsgElement
-import com.tencent.qqnt.kernel.nativeinterface.MsgRecord
-import com.tencent.qqnt.kernel.nativeinterface.MsgSetting
-import com.tencent.qqnt.kernel.nativeinterface.RecvdOrder
-import com.tencent.qqnt.kernel.nativeinterface.RelatedWordEmojiInfo
-import com.tencent.qqnt.kernel.nativeinterface.SearchGroupFileResult
-import com.tencent.qqnt.kernel.nativeinterface.TabStatusInfo
-import com.tencent.qqnt.kernel.nativeinterface.TempChatInfo
-import com.tencent.qqnt.kernel.nativeinterface.UnreadCntInfo
+import com.tencent.mobileqq.pushservice.HttpPusher
+import com.tencent.qqnt.helper.MessageHelper
+import com.tencent.qqnt.kernel.nativeinterface.*
 import com.tencent.qqnt.msg.toCQCode
 import de.robv.android.xposed.XposedBridge
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.xposed.helper.LogCenter
-import mqq.app.MobileQQ
 import java.util.ArrayList
 import java.util.HashMap
 
@@ -47,38 +18,17 @@ internal object AioListener: IKernelMsgListener {
         if (msgList.isEmpty()) return
 
         GlobalScope.launch {
-            val elements = ArrayList<MsgElement>()
-            val ctx = MobileQQ.getContext()
-            lateinit var msg: MsgRecord
-            msgList.forEachIndexed { index, msgRecord ->
-                if (index == 0) {
-                    msg = msgRecord
+            msgList.forEach {
+                val rawMsg = it.elements.toCQCode(it.chatType)
+                if (it.chatType == MsgConstant.KCHATTYPEGROUP) {
+                    LogCenter.log("群消息(group = ${it.peerName}(${it.peerUin}), uin = ${it.senderUin}, msg = $rawMsg)")
+                    val msgHash = MessageHelper.convertMsgIdToMsgHash(it.chatType, it.msgId, it.peerUin)
+                    HttpPusher.pushGroupMsg(it, it.elements, rawMsg, msgHash)
+                } else {
+                    LogCenter.log("不支持PUSH事件: ${it.chatType}")
                 }
-                elements.addAll(msgRecord.elements)
-            }
-
-            val rawMsg = elements.toCQCode(msg.chatType)
-            LogCenter.log("ReceiveMsg(type = ${msg.chatType}, uin = ${msg.senderUin}, msg = $rawMsg)")
-
-            if (ShamrockConfig.allowWebHook()) {
-
             }
         }
-
-        /*
-        if (msg.chatType == MsgConstant.KCHATTYPEGROUP) {
-            if (msg.senderUin == 0L) return
-            GlobalScope.launch {
-                if(sharedPreferences.getBoolean("http", false)) sharedPreferences.getString("http_addr", null)?.let { url ->
-                    kotlin.runCatching {
-                        GlobalClient.post("http://$url") {
-                            contentType(ContentType.Application.Json)
-                            setBody(MsgRecordHelper.messageToJsonString(MsgRecordHelper.makeMessage(msg)))
-                        }
-                    }
-                }
-            }
-        }*/
     }
 
     override fun onAddSendMsg(record: MsgRecord) {

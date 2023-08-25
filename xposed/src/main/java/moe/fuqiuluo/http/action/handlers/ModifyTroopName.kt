@@ -25,7 +25,7 @@ internal object ModifyTroopName: IActionHandler() {
         val service = runtime
             .getRuntimeService(ITroopInfoService::class.java, "all")
         val groupInfo = service.getTroopInfo(groupId)
-        return if (groupInfo.isAdmin) {
+        return if (groupInfo.isAdmin || groupInfo.troopowneruin == runtime.account) {
             GroupSvc.modifyTroopName(groupId, groupName)
             ok(EmptyObject)
         } else {

@@ -9,7 +9,7 @@ internal data class SimpleTroopInfo(
     @SerialName("group_name") val groupName: String?,
     @SerialName("group_remark") val groupRemark: String?,
     @SerialName("group_uin") val groupUin: String,
-    @SerialName("admins") val adminList: List<String>,
+    @SerialName("admins") val adminList: List<Long>,
     @SerialName("class_text") val classText: String?,
     @SerialName("is_frozen") val isFrozen: Boolean,
     //@SerialName("troop_level") val troopLevel: String?,

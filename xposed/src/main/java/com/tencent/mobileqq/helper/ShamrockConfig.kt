@@ -32,6 +32,10 @@ internal object ShamrockConfig {
         }
     }
 
+    fun useCQ(): Boolean {
+        return preferences.getBoolean("use_cqcode", false)
+    }
+
     fun allowWebHook(): Boolean {
         return preferences.getBoolean("http", false)
     }

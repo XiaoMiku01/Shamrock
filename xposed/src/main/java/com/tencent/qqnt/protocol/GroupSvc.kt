@@ -3,7 +3,10 @@ package com.tencent.qqnt.protocol
 import android.util.LruCache
 import com.tencent.common.app.AppInterface
 import com.tencent.mobileqq.app.BusinessHandlerFactory
+import com.tencent.mobileqq.app.QQAppInterface
+import com.tencent.mobileqq.data.troop.TroopInfo
 import com.tencent.mobileqq.data.troop.TroopMemberInfo
+import com.tencent.mobileqq.troop.api.ITroopInfoService
 import com.tencent.mobileqq.troop.api.ITroopMemberInfoService
 import com.tencent.protofile.join_group_link.join_group_link
 import com.tencent.qqnt.kernel.nativeinterface.MemberInfo
@@ -40,6 +43,51 @@ internal object GroupSvc: BaseSvc() {
         }
     }
 
+    fun getGroupInfo(groupId: String): TroopInfo {
+        val runtime = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
+
+        val service = runtime
+            .getRuntimeService(ITroopInfoService::class.java, "all")
+
+        return service.getTroopInfo(groupId)
+    }
+
+    fun getAdminList(
+        groupId: String,
+        withOwner: Boolean = false
+    ): List<Long> {
+        val groupInfo = getGroupInfo(groupId)
+        return groupInfo.Administrator
+            .split("|", ",")
+            .also {
+                if (withOwner && it is ArrayList<String>) {
+                    it.add(groupInfo.troopowneruin)
+                }
+            }
+            .map { it.ifBlank { "0" }.toLong() }
+            .filter { it != 0L }
+    }
+
+    fun getOwner(groupId: String): Long {
+        val groupInfo = getGroupInfo(groupId)
+        return groupInfo.troopowneruin.toLong()
+    }
+
+    fun isOwner(groupId: String): Boolean {
+        val runtime = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
+        val groupInfo = getGroupInfo(groupId)
+        return groupInfo.troopowneruin == runtime.account
+    }
+
+    fun isAdmin(groupId: String): Boolean {
+        val runtime = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
+
+        val service = runtime
+            .getRuntimeService(ITroopInfoService::class.java, "all")
+        val groupInfo = service.getTroopInfo(groupId)
+        return groupInfo.isAdmin || groupInfo.troopowneruin == runtime.account
+    }
+
     fun resignTroop(groupId: Long) {
         sendExtra("ProfileService.GroupMngReq") {
             it.putInt("groupreqtype", 2)
@@ -66,78 +114,6 @@ internal object GroupSvc: BaseSvc() {
         }
 
         METHOD_REQ_MODIFY_GROUP_NAME.invoke(businessHandler, groupId, name, false)
-    }
-
-    fun refreshTroopMemberList(groupId: Long) {
-        val app = MobileQQ.getMobileQQ().waitAppRuntime()
-        if (app !is AppInterface)
-            throw RuntimeException("AppRuntime cannot cast to AppInterface")
-        val businessHandler = app.getBusinessHandler(BusinessHandlerFactory.TROOP_MEMBER_LIST_HANDLER)
-
-        // void C(boolean foreRefresh, String groupId, String troopcode, int reqType); // RequestedTroopList/refreshMemberListFromServer
-        if (!::METHOD_REQ_TROOP_MEM_LIST.isInitialized) {
-            METHOD_REQ_TROOP_MEM_LIST = businessHandler.javaClass.declaredMethods.first {
-                it.parameterCount == 4
-                        && it.parameterTypes[0] == Boolean::class.java
-                        && it.parameterTypes[1] == String::class.java
-                        && it.parameterTypes[2] == String::class.java
-                        && it.parameterTypes[3] == Int::class.java
-                        && !Modifier.isPrivate(it.modifiers)
-            }
-        }
-
-        METHOD_REQ_TROOP_MEM_LIST.invoke(businessHandler, true, groupId.toString(), groupUin2GroupCode(groupId).toString(), 5)
-    }
-
-    fun refreshTroopList() {
-        val app = MobileQQ.getMobileQQ().waitAppRuntime()
-        if (app !is AppInterface)
-            throw RuntimeException("AppRuntime cannot cast to AppInterface")
-        val businessHandler = app.getBusinessHandler(BusinessHandlerFactory.TROOP_LIST_HANDLER)
-
-        if (!::METHOD_REQ_TROOP_LIST.isInitialized) {
-            METHOD_REQ_TROOP_LIST = businessHandler.javaClass.declaredMethods.first {
-                it.parameterCount == 0 && !Modifier.isPrivate(it.modifiers) && it.returnType == Void.TYPE
-            }
-        }
-
-        METHOD_REQ_TROOP_LIST.invoke(businessHandler)
-    }
-
-    fun requestMemberInfo(groupId: Long, memberUin: Long) {
-        val app = MobileQQ.getMobileQQ().waitAppRuntime()
-        if (app !is AppInterface)
-            throw RuntimeException("AppRuntime cannot cast to AppInterface")
-        val businessHandler = app.getBusinessHandler(BusinessHandlerFactory.TROOP_MEMBER_CARD_HANDLER)
-
-        if (!::METHOD_REQ_MEMBER_INFO.isInitialized) {
-            METHOD_REQ_MEMBER_INFO = businessHandler.javaClass.declaredMethods.first {
-                it.parameterCount == 2 &&
-                        it.parameterTypes[0] == Long::class.java &&
-                        it.parameterTypes[1] == Long::class.java &&
-                        !Modifier.isPrivate(it.modifiers)
-            }
-        }
-
-        METHOD_REQ_MEMBER_INFO.invoke(businessHandler, groupId, memberUin)
-    }
-
-    fun requestMemberInfoV2(groupId: Long, memberUin: Long) {
-        val app = MobileQQ.getMobileQQ().waitAppRuntime()
-        if (app !is AppInterface)
-            throw RuntimeException("AppRuntime cannot cast to AppInterface")
-        val businessHandler = app.getBusinessHandler(BusinessHandlerFactory.TROOP_MEMBER_CARD_HANDLER)
-
-        if (!::METHOD_REQ_MEMBER_INFO_V2.isInitialized) {
-            METHOD_REQ_MEMBER_INFO_V2 = businessHandler.javaClass.declaredMethods.first {
-                it.parameterCount == 3 &&
-                        it.parameterTypes[0] == String::class.java &&
-                        it.parameterTypes[1] == String::class.java &&
-                        !Modifier.isPrivate(it.modifiers)
-            }
-        }
-
-        METHOD_REQ_MEMBER_INFO_V2.invoke(businessHandler, groupId.toString(), groupUin2GroupCode(groupId).toString(), arrayListOf(memberUin.toString()))
     }
 
     fun groupUin2GroupCode(groupuin: Long): Long {
@@ -236,6 +212,90 @@ internal object GroupSvc: BaseSvc() {
                     }
                 }
             }
+        }
+    }
+
+    fun refreshTroopMemberList(groupId: Long) {
+        val app = MobileQQ.getMobileQQ().waitAppRuntime()
+        if (app !is AppInterface)
+            throw RuntimeException("AppRuntime cannot cast to AppInterface")
+        val businessHandler = app.getBusinessHandler(BusinessHandlerFactory.TROOP_MEMBER_LIST_HANDLER)
+
+        // void C(boolean foreRefresh, String groupId, String troopcode, int reqType); // RequestedTroopList/refreshMemberListFromServer
+        if (!::METHOD_REQ_TROOP_MEM_LIST.isInitialized) {
+            METHOD_REQ_TROOP_MEM_LIST = businessHandler.javaClass.declaredMethods.first {
+                it.parameterCount == 4
+                        && it.parameterTypes[0] == Boolean::class.java
+                        && it.parameterTypes[1] == String::class.java
+                        && it.parameterTypes[2] == String::class.java
+                        && it.parameterTypes[3] == Int::class.java
+                        && !Modifier.isPrivate(it.modifiers)
+            }
+        }
+
+        METHOD_REQ_TROOP_MEM_LIST.invoke(businessHandler, true, groupId.toString(), groupUin2GroupCode(groupId).toString(), 5)
+    }
+
+    fun refreshTroopList() {
+        val app = MobileQQ.getMobileQQ().waitAppRuntime()
+        if (app !is AppInterface)
+            throw RuntimeException("AppRuntime cannot cast to AppInterface")
+        val businessHandler = app.getBusinessHandler(BusinessHandlerFactory.TROOP_LIST_HANDLER)
+
+        if (!::METHOD_REQ_TROOP_LIST.isInitialized) {
+            METHOD_REQ_TROOP_LIST = businessHandler.javaClass.declaredMethods.first {
+                it.parameterCount == 0 && !Modifier.isPrivate(it.modifiers) && it.returnType == Void.TYPE
+            }
+        }
+
+        METHOD_REQ_TROOP_LIST.invoke(businessHandler)
+    }
+
+    fun requestMemberInfo(groupId: Long, memberUin: Long) {
+        val app = MobileQQ.getMobileQQ().waitAppRuntime()
+        if (app !is AppInterface)
+            throw RuntimeException("AppRuntime cannot cast to AppInterface")
+        val businessHandler = app.getBusinessHandler(BusinessHandlerFactory.TROOP_MEMBER_CARD_HANDLER)
+
+        if (!::METHOD_REQ_MEMBER_INFO.isInitialized) {
+            METHOD_REQ_MEMBER_INFO = businessHandler.javaClass.declaredMethods.first {
+                it.parameterCount == 2 &&
+                        it.parameterTypes[0] == Long::class.java &&
+                        it.parameterTypes[1] == Long::class.java &&
+                        !Modifier.isPrivate(it.modifiers)
+            }
+        }
+
+        METHOD_REQ_MEMBER_INFO.invoke(businessHandler, groupId, memberUin)
+    }
+
+    fun requestMemberInfoV2(groupId: Long, memberUin: Long) {
+        val app = MobileQQ.getMobileQQ().waitAppRuntime()
+        if (app !is AppInterface)
+            throw RuntimeException("AppRuntime cannot cast to AppInterface")
+        val businessHandler = app.getBusinessHandler(BusinessHandlerFactory.TROOP_MEMBER_CARD_HANDLER)
+
+        if (!::METHOD_REQ_MEMBER_INFO_V2.isInitialized) {
+            METHOD_REQ_MEMBER_INFO_V2 = businessHandler.javaClass.declaredMethods.first {
+                it.parameterCount == 3 &&
+                        it.parameterTypes[0] == String::class.java &&
+                        it.parameterTypes[1] == String::class.java &&
+                        !Modifier.isPrivate(it.modifiers)
+            }
+        }
+
+        METHOD_REQ_MEMBER_INFO_V2.invoke(businessHandler, groupId.toString(), groupUin2GroupCode(groupId).toString(), arrayListOf(memberUin.toString()))
+    }
+
+    suspend fun requestGroupList(dataService: ITroopInfoService, uin: Long): TroopInfo? {
+        val strUin = uin.toString()
+        return withTimeoutOrNull(5000) {
+            var troopInfo: TroopInfo?
+            do {
+                troopInfo = dataService.getTroopInfo(strUin)
+                delay(100)
+            } while (troopInfo == null || troopInfo.troopuin.isNullOrBlank())
+            return@withTimeoutOrNull troopInfo
         }
     }
 

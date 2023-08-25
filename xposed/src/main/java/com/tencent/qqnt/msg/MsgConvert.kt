@@ -47,9 +47,13 @@ internal object MsgConvert {
     suspend fun convertMsgElementsToMsgSegment(chatType: Int, elements: List<MsgElement>): ArrayList<HashMap<String, JsonElement>> {
         val messageData = arrayListOf<HashMap<String, JsonElement>>()
         elements.forEach {
-            val segment = covertMsgElementToMsgSegment(chatType, it)
-            if (segment != null) {
-                messageData.add(segment)
+            try {
+                val segment = covertMsgElementToMsgSegment(chatType, it)
+                if (segment != null) {
+                    messageData.add(segment)
+                }
+            } catch (e: Throwable) {
+                LogCenter.log("消息element转换错误：$e", Level.WARN)
             }
         }
         return messageData

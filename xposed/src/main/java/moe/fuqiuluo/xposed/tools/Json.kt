@@ -23,24 +23,33 @@ val Collection<Any>.json: JsonArray
                 is Number -> arrayList.add(it.json)
                 is String -> arrayList.add(it.json)
                 is Boolean -> arrayList.add(it.json)
-                is Map<*, *> -> {
-                    val map = hashMapOf<String, JsonElement>()
-                    it.forEach { (key, value) ->
-                        when(value) {
-                            is Number -> map[key.toString()] = value.json
-                            is String -> map[key.toString()] = value.json
-                            is Boolean -> map[key.toString()] = value.json
-                            is JsonElement -> map[key.toString()] = value
-                            else -> error("unknown object type: ${it::class.java}")
-                        }
-                    }
-                    arrayList.add(JsonObject(map))
-                }
+                is Map<*, *> -> arrayList.add((it as Map<String, Any>).json)
+                is Collection<*> -> arrayList.add((it as Collection<Any>).json)
                 else -> error("unknown array type: ${it::class.java}")
             }
         }
         return arrayList.jsonArray
     }
+
+val Map<String, Any>.json: JsonObject
+    get() {
+        val map = hashMapOf<String, JsonElement>()
+        forEach { (key, any) ->
+            when(any) {
+                is JsonElement -> map[key] = any
+                is Number -> map[key] = any.json
+                is String -> map[key] = any.json
+                is Boolean -> map[key] = any.json
+                is Map<*, *> -> map[key] = (any as Map<String, Any>).json
+                is Collection<*> -> map[key] = (any as Collection<Any>).json
+                else -> error("unknown object type: ${any::class.java}")
+            }
+        }
+        return map.jsonObject
+    }
+
+val Map<String, JsonElement>.jsonObject: JsonObject
+    get() = JsonObject(this)
 
 val Collection<JsonElement>.jsonArray: JsonArray
     get() = JsonArray(this.toList())
@@ -78,14 +87,14 @@ val JsonElement?.asBoolean: Boolean
 val JsonElement?.asBooleanOrNull: Boolean?
     get() = this?.jsonPrimitive?.booleanOrNull
 
-val JsonElement?.asJsonObject: JsonObject
+inline val JsonElement?.asJsonObject: JsonObject
     get() = this!!.jsonObject
 
-val JsonElement?.asJsonObjectOrNull: JsonObject?
+inline val JsonElement?.asJsonObjectOrNull: JsonObject?
     get() = this?.jsonObject
 
-val JsonElement?.asJsonArray: JsonArray
+inline val JsonElement?.asJsonArray: JsonArray
     get() = this!!.jsonArray
 
-val JsonElement?.asJsonArrayOrNull: JsonArray?
+inline val JsonElement?.asJsonArrayOrNull: JsonArray?
     get() = this?.jsonArray

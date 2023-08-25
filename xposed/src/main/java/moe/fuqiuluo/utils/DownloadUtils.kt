@@ -31,11 +31,15 @@ object DownloadUtils {
                 raf.setLength(contentLength.toLong())
                 raf.close()
             }
-            val blockSize = contentLength / MAX_THREAD
+            var threadCnt = MAX_THREAD
+            if (contentLength <= 1024 * 1024) {
+                threadCnt = 1
+            }
+            val blockSize = contentLength / threadCnt
             connection.disconnect()
             val progress = atomic(0)
             val channel = Channel<Int>()
-            for (i in 0 until MAX_THREAD) {
+            for (i in 0 until threadCnt) {
                 val start = i * blockSize
                 var end = (i + 1) * blockSize - 1
                 if (i == 3 - 1) {

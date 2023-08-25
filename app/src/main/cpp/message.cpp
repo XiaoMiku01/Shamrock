@@ -106,7 +106,12 @@ Java_com_tencent_qqnt_helper_MessageHelper_nativeEncodeCQCode(JNIEnv *env, jobje
         if (strcmp(typeString, "text") == 0) {
             auto text = (jstring) env->CallObjectMethod(segment, MapGet, env->NewStringUTF("text"));
             auto textString = env->GetStringUTFChars(text, nullptr);
-            result.append(textString);
+            std::string tmpValue = textString;
+            replace_string(tmpValue, "&", "&amp;");
+            replace_string(tmpValue, "[", "&#91;");
+            replace_string(tmpValue, "]", "&#93;");
+            replace_string(tmpValue, ",", "&#44;");
+            result.append(tmpValue);
             env->ReleaseStringUTFChars(text, textString);
         } else {
             result.append("[CQ:");

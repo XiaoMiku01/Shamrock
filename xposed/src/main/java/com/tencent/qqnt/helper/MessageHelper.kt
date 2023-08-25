@@ -112,6 +112,11 @@ internal object MessageHelper {
 
     fun generateMsgId(chatType: Int, peerId: Long): Pair<Int, Long> {
         val msgId = createMessageUniseq(chatType, System.currentTimeMillis())
+        val hashCode: Int = convertMsgIdToMsgHash(chatType, msgId, peerId)
+        return hashCode to msgId
+    }
+
+    fun convertMsgIdToMsgHash(chatType: Int, msgId: Long, peerId: Long): Int {
         val hashCode: Int = generateMsgIdHash(chatType, msgId)
         val mmkv = MMKVFetcher.defaultMMKV()
         when (chatType) {
@@ -127,7 +132,7 @@ internal object MessageHelper {
                 error("不支持的消息来源类型: $chatType, $peerId")
             }
         }
-        return hashCode to msgId
+        return hashCode
     }
 
     fun removeMsgByHashCode(hashCode: Int) {

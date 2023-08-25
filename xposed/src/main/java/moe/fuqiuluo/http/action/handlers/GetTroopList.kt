@@ -43,15 +43,9 @@ internal object GetTroopList: IActionHandler() {
                     groupUin = groupInfo.troopcode,
                     groupName = groupInfo.troopname ?: groupInfo.newTroopName ?: groupInfo.oldTroopName,
                     groupRemark = groupInfo.troopRemark,
-                    adminList = groupInfo.Administrator
-                        .split("|", ",")
-                        .map { it }
-                        .apply { (this as ArrayList<String>).add(0, groupInfo.troopowneruin ?: "0") }
-                        .filter { it.isNotBlank() && it != "0" }
-                    ,
+                    adminList = GroupSvc.getAdminList(groupInfo.troopuin, true),
                     classText = groupInfo.mGroupClassExtText,
                     isFrozen = groupInfo.mIsFreezed != 0,
-                    //troopLevel = groupInfo.newTroopLevelMap,
                     maxMember = groupInfo.wMemberMax,
                     memNum = groupInfo.wMemberNum
                 ))

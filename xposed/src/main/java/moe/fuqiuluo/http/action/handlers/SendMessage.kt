@@ -9,6 +9,7 @@ import com.tencent.mobileqq.data.MessageResult
 import com.tencent.qqnt.helper.MessageHelper
 import com.tencent.qqnt.msg.InternalMessageMakerError
 import com.tencent.qqnt.msg.ParamsException
+import com.tencent.qqnt.protocol.MsgSvc
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.tools.json
 
@@ -27,7 +28,7 @@ internal object SendMessage: IActionHandler() {
                 val autoEscape = session.getBooleanOrDefault("auto_escape", false)
                 val message = session.getString("message")
                 if (autoEscape) {
-                    val result = sendToAIO(chatType, peerId, arrayListOf(message).json)
+                    val result = MsgSvc.sendToAIO(chatType, peerId, arrayListOf(message).json)
                     return ok(
                         MessageResult(
                         msgId = result.second,
@@ -40,7 +41,7 @@ internal object SendMessage: IActionHandler() {
                         LogCenter.log("CQ码解码失败，CQ码不合法")
                     } else {
                         LogCenter.log(msg.toString())
-                        val result = sendToAIO(chatType, peerId, MessageHelper.decodeCQCode(message))
+                        val result = MsgSvc.sendToAIO(chatType, peerId, MessageHelper.decodeCQCode(message))
                         return ok(
                             MessageResult(
                             msgId = result.second,
@@ -52,7 +53,7 @@ internal object SendMessage: IActionHandler() {
             } else {
                 // 消息段
                 val message = session.getArrayOrNull("message") ?: return noParam("message")
-                val result = sendToAIO(chatType, peerId, message)
+                val result = MsgSvc.sendToAIO(chatType, peerId, message)
                 return ok(
                     MessageResult(
                     msgId = result.second,
@@ -72,25 +73,6 @@ internal object SendMessage: IActionHandler() {
             }
         }
         return logic("unable to send message: not support $detailType")
-    }
-
-    private suspend fun sendToAIO(chatType: Int, peedId: String, message: JsonArray): Pair<Long, Int> {
-        val callback = MessageCallback(peedId, 0)
-        val result = MessageHelper.sendMessageWithoutMsgId(chatType, peedId, message, callback)
-        callback.hashCode = result.second
-        return result
-    }
-
-    class MessageCallback(
-        private val peerId: String,
-        var hashCode: Int
-    ): IOperateCallback {
-        override fun onResult(code: Int, reason: String?) {
-            if (code != 0 && hashCode != 0) {
-                MessageHelper.removeMsgByHashCode(hashCode)
-            }
-            LogCenter.log("消息发送: $peerId, code: $code $reason")
-        }
     }
 
     override fun path(): String = "send_message"
