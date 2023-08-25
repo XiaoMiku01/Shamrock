@@ -29,6 +29,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.tools.GlobalClient
+import moe.fuqiuluo.xposed.tools.asBoolean
 import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asIntOrNull
 import moe.fuqiuluo.xposed.tools.asJsonObject
@@ -110,13 +111,13 @@ internal object HttpPusher {
                     quicklyReply(record, message, atSender)
                 }
             }
-            if (data.containsKey("delete")) {
-                TODO("快速操作: 撤回消息")
+            if (data.containsKey("delete") && data["delete"].asBoolean) {
+                MsgSvc.deleteMsg(record.msgId)
             }
-            if (data.containsKey("kick")) {
-                TODO("快速操作: 移出群聊")
+            if (data.containsKey("kick") && data["kick"].asBoolean) {
+                GroupSvc.kickMember(record.peerUin, false, record.senderUin)
             }
-            if (data.containsKey("ban")) {
+            if (data.containsKey("ban") && data["ban"].asBoolean) {
                 val banTime = data["ban_duration"].asIntOrNull ?: 0
                 if (banTime <= 0) return
                 TODO("快速操作: 群聊禁言")

@@ -19,8 +19,10 @@ import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.tools.slice
 import mqq.app.MobileQQ
+import tencent.im.oidb.cmd0x8a0.oidb_0x8a0
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.nio.ByteBuffer
 import kotlin.coroutines.resume
 
 internal object GroupSvc: BaseSvc() {
@@ -41,6 +43,32 @@ internal object GroupSvc: BaseSvc() {
             val groupId = body.group_code.get()
             LruCacheTroop.put(groupId, text)
         }
+    }
+
+    fun banMember(groupId: Long, memberUin: Long, time: Int) {
+        val buffer = ByteBuffer.allocate(1 * 8 + 7)
+        buffer.putInt(groupId.toInt())
+        buffer.put(32.toByte())
+        buffer.putShort(1)
+        buffer.putInt(memberUin.toInt())
+        buffer.putInt(time)
+        val array = buffer.array()
+        sendOidb("OidbSvc.0x570_8", 1392, 8, array)
+    }
+
+    fun kickMember(groupId: Long, rejectAddRequest: Boolean, vararg memberUin: Long) {
+        val reqBody = oidb_0x8a0.ReqBody()
+        reqBody.opt_uint64_group_code.set(groupId)
+
+        memberUin.forEach {
+            val memberInfo = oidb_0x8a0.KickMemberInfo()
+            memberInfo.opt_uint32_operate.set(5)
+            memberInfo.opt_uint64_member_uin.set(it)
+            memberInfo.opt_uint32_flag.set(if (rejectAddRequest) 1 else 0)
+            reqBody.rpt_msg_kick_list.add(memberInfo)
+        }
+
+        sendOidb("OidbSvc.0x8a0_0", 2208, 0, reqBody.toByteArray())
     }
 
     fun getGroupInfo(groupId: String): TroopInfo {

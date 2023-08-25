@@ -27,6 +27,7 @@ import moe.fuqiuluo.http.api.getMsfInfo
 import moe.fuqiuluo.http.api.getMsg
 import moe.fuqiuluo.http.api.getStartTime
 import moe.fuqiuluo.http.api.isBlackListUin
+import moe.fuqiuluo.http.api.kickTroopMember
 import moe.fuqiuluo.http.api.sendGroupMessage
 import moe.fuqiuluo.http.api.sendLike
 import moe.fuqiuluo.http.api.setProfileCard
@@ -52,7 +53,8 @@ private val API_LIST = arrayOf(
     Routing::shut to false,
     Routing::sendGroupMessage to false,
     Routing::getMsg to false,
-    Routing::sendLike to false
+    Routing::sendLike to false,
+    Routing::kickTroopMember to false
 )
 
 object HTTPServer {

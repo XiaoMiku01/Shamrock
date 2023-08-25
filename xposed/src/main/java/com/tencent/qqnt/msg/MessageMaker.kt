@@ -313,9 +313,6 @@ internal object MessageMaker {
     }
 
     private suspend fun createMarkdownElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
-        if (chatType != MsgConstant.KCHATTYPEGUILD) {
-            return createTextElem(chatType, msgId, peerId, data)
-        }
         data.checkAndThrow("text")
         val elem = MsgElement()
         elem.elementType = MsgConstant.KELEMTYPEMARKDOWN
