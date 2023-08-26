@@ -108,7 +108,7 @@ internal object FileUtils {
         file.inputStream().use {
             it.read(bytes)
         }
-        return when ("${(bytes[0] and 255.toByte())}${(bytes[1] and 255.toByte())}".toInt()) {
+        return when ("${bytes[0].toUByte()}${bytes[1].toUByte()}".toInt()) {
             6677 -> "bmp"
             7173 -> "gif"
             7784 -> "midi"

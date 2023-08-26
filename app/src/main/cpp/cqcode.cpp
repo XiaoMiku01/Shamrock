@@ -41,8 +41,12 @@ void decode_cqcode(const std::string& code, std::vector<std::unordered_map<std::
                 if (cache.empty()) {
                     throw illegal_code();
                 } else {
-                    key_tmp.append(cache);
-                    cache.clear();
+                    if (key_tmp.empty()) {
+                        key_tmp.append(cache);
+                        cache.clear();
+                    } else {
+                        cache += c;
+                    }
                 }
             }
         } else if (c == ',') {

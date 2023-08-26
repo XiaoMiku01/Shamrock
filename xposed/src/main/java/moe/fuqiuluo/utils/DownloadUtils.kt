@@ -14,9 +14,10 @@ import java.io.File
 import java.io.RandomAccessFile
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.math.roundToInt
 
 object DownloadUtils {
-    private val MAX_THREAD = Runtime.getRuntime().availableProcessors() / 2
+    private const val MAX_THREAD = 4
 
     suspend fun download(urlAdr: String, dest: File) {
         val url = URL(urlAdr)
@@ -35,11 +36,15 @@ object DownloadUtils {
             if (contentLength <= 1024 * 1024) {
                 threadCnt = 1
             }
-            val blockSize = contentLength / threadCnt
+            var blockSize = (contentLength * (1.0 / threadCnt)).roundToInt()
             connection.disconnect()
             val progress = atomic(0)
             val channel = Channel<Int>()
+            var processed = 0
             for (i in 0 until threadCnt) {
+                if (processed + blockSize != contentLength && i == threadCnt - 1) {
+                    blockSize = contentLength - processed
+                }
                 val start = i * blockSize
                 var end = (i + 1) * blockSize - 1
                 if (i == 3 - 1) {
@@ -48,6 +53,7 @@ object DownloadUtils {
                 GlobalScope.launch(Dispatchers.IO) {
                     reallyDownload(url, start, end, dest, channel)
                 }
+                processed += blockSize
             }
             withTimeoutOrNull(60000L) {
                 while (progress.value < contentLength) {

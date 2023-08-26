@@ -325,7 +325,7 @@ internal object MessageMaker {
         data.checkAndThrow("file")
 
         val file = data["file"].asString.let {
-            val md5 = it.replace(regex = "\\{|\\}|\\-".toRegex(), replacement = "").split(".")[0]
+            val md5 = it.replace(regex = "\\{|\\}|\\-".toRegex(), replacement = "").split(".")[0].lowercase()
             var file = if (md5.length == 32) {
                 FileUtils.getFile(it)
             } else {
@@ -337,7 +337,7 @@ internal object MessageMaker {
             return@let file
         }
         if (!file.exists()) {
-            throw LogicException("Video file is not exists, please check your filename.")
+            throw LogicException("Video(${file.name}) file is not exists, please check your filename.")
         }
         val elem = MsgElement()
         val video = VideoElement()
@@ -425,7 +425,7 @@ internal object MessageMaker {
         data.checkAndThrow("file")
 
         var file = data["file"].asString.let {
-            val md5 = it.replace(regex = "\\{|\\}|\\-".toRegex(), replacement = "").split(".")[0]
+            val md5 = it.replace(regex = "\\{|\\}|\\-".toRegex(), replacement = "").split(".")[0].lowercase()
             var file = if (md5.length == 32) {
                 FileUtils.getFile(it)
             } else {
@@ -437,7 +437,7 @@ internal object MessageMaker {
             return@let file
         }
         if (!file.exists()) {
-            throw LogicException("Voice file is not exists, please check your filename.")
+            throw LogicException("Voice(${file.name}) file is not exists, please check your filename.")
         }
         val isMagic = data["magic"].asStringOrNull == "1"
 
@@ -506,23 +506,22 @@ internal object MessageMaker {
 
     private suspend fun createImageElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("file")
-
         val isOriginal = data["original"].asBooleanOrNull ?: true
         val isFlash = data["flash"].asBooleanOrNull ?: false
         val file = data["file"].asString.let {
-            val md5 = it.replace(regex = "\\{|\\}|\\-".toRegex(), replacement = "").split(".")[0]
-            var file = if (md5.length == 32) {
-                FileUtils.getFile(it)
+            val md5 = it.replace(regex = "\\{|\\}|\\-".toRegex(), replacement = "").split(".")[0].lowercase()
+            var tmpPicFile = if (md5.length == 32) {
+                FileUtils.getFile(md5)
             } else {
                 FileUtils.parseAndSave(it)
             }
-            if (!file.exists() && data.containsKey("url")) {
-                file = FileUtils.parseAndSave(data["url"].asString)
+            if (!tmpPicFile.exists() && data.containsKey("url")) {
+                tmpPicFile = FileUtils.parseAndSave(data["url"].asString)
             }
-            return@let file
+            return@let tmpPicFile
         }
         if (!file.exists()) {
-            throw LogicException("Image file is not exists, please check your filename.")
+            throw LogicException("Image(${file.name}) file is not exists, please check your filename.")
         }
 
         Transfer with when (chatType) {
