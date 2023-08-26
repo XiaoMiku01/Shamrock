@@ -14,6 +14,7 @@ import com.tencent.qqnt.kernel.nativeinterface.MsgRecord
 import com.tencent.qqnt.msg.toSegment
 import com.tencent.qqnt.protocol.GroupSvc
 import com.tencent.qqnt.protocol.MsgSvc
+import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -80,6 +81,8 @@ internal object HttpPusher {
                     ))
                 }.bodyAsText()
                 handleQuicklyReply(record, msgHash, respond)
+            } catch (e: ConnectTimeoutException) {
+                LogCenter.log("消息推送失败: ${e.message}", Level.ERROR)
             } catch (e: Throwable) {
                 LogCenter.log("消息推送失败: ${e.stackTraceToString()}", Level.ERROR)
             }

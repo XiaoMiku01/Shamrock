@@ -10,20 +10,18 @@ import tencent.im.oidb.oidb_sso
 
 abstract class BaseSvc {
     protected val currentUin: String
-        get() = (MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface).currentAccountUin
+        get() = app.currentAccountUin
+
+    protected val app: QQAppInterface
+        get() = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
 
     protected fun sendExtra(cmd: String, builder: (Bundle) -> Unit) {
-        val app = MobileQQ.getMobileQQ().waitAppRuntime()
-        if (app !is QQAppInterface) {
-            error("app is not QQAppInterface")
-        }
         val toServiceMsg = ToServiceMsg("mobileqq.service", app.currentAccountUin, cmd)
         builder(toServiceMsg.extraData)
         app.sendToService(toServiceMsg)
     }
 
     protected fun sendPb(cmd: String, buffer: ByteArray) {
-        val app = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
         val toServiceMsg = ToServiceMsg("mobileqq.service", app.currentAccountUin, cmd)
         toServiceMsg.putWupBuffer(buffer)
         toServiceMsg.addAttribute("req_pb_protocol_flag", true)
@@ -31,7 +29,6 @@ abstract class BaseSvc {
     }
 
     protected fun sendOidb(cmd: String, cmdId: Int, serviceId: Int, buffer: ByteArray) {
-        val app = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
         val to = ToServiceMsg("mobileqq.service", app.currentAccountUin, cmd)
         val oidb = oidb_sso.OIDBSSOPkg()
         oidb.uint32_command.set(cmdId)

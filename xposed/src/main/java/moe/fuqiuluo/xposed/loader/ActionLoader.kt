@@ -9,7 +9,7 @@ import moe.fuqiuluo.xposed.actions.ForceTablet
 import moe.fuqiuluo.xposed.actions.HookForDebug
 import moe.fuqiuluo.xposed.actions.HookWrapperCodec
 import moe.fuqiuluo.xposed.actions.IAction
-import moe.fuqiuluo.xposed.actions.MsfSignService
+import moe.fuqiuluo.xposed.actions.IpcService
 import moe.fuqiuluo.xposed.actions.PullConfig
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -21,7 +21,7 @@ object ActionLoader {
         ForceTablet::class, // 强制平板模式
         HookWrapperCodec::class, // 注册服务处理器
         HookForDebug::class,
-        MsfSignService::class,
+        IpcService::class,
         FixLibraryLoad::class
     )
 

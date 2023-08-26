@@ -21,9 +21,10 @@ import kotlinx.serialization.json.jsonObject
 import com.tencent.qqnt.msg.ParamsException
 import io.ktor.http.HttpMethod
 import io.ktor.server.request.httpMethod
-import moe.fuqiuluo.http.entries.CommonResult
-import moe.fuqiuluo.http.entries.EmptyObject
-import moe.fuqiuluo.http.entries.Status
+import io.ktor.server.routing.route
+import moe.fuqiuluo.remote.entries.CommonResult
+import moe.fuqiuluo.remote.entries.EmptyObject
+import moe.fuqiuluo.remote.entries.Status
 
 @DslMarker
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS, AnnotationTarget.TYPEALIAS, AnnotationTarget.TYPE)
@@ -145,8 +146,10 @@ suspend fun PipelineContext<Unit, ApplicationCall>.fetchPostOrNull(key: String):
 
 @io.ktor.util.KtorDsl
 fun Routing.getOrPost(path: String, body: suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit) {
-    get(path, body)
-    post(path, body)
+    route(path) {
+        get(body)
+        post(body)
+    }
 }
 
 @ShamrockDsl

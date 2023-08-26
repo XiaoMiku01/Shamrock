@@ -7,7 +7,7 @@ import de.robv.android.xposed.XposedBridge
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import moe.fuqiuluo.http.HTTPServer
+import moe.fuqiuluo.remote.HTTPServer
 import com.tencent.qqnt.utils.PlatformUtils
 
 internal class CreateHTTP: IAction {

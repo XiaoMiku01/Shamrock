@@ -8,8 +8,8 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import moe.fuqiuluo.http.entries.CommonResult
-import moe.fuqiuluo.http.entries.CurrentAccount
+import moe.fuqiuluo.remote.entries.CommonResult
+import moe.fuqiuluo.remote.entries.CurrentAccount
 import moe.fuqiuluo.shamrock.ui.app.AppRuntime
 import moe.fuqiuluo.shamrock.ui.app.Level
 import moe.fuqiuluo.xposed.tools.GlobalClient
