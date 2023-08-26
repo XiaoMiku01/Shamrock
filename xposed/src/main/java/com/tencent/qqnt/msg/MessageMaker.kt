@@ -325,11 +325,16 @@ internal object MessageMaker {
         data.checkAndThrow("file")
 
         val file = data["file"].asString.let {
-            if (it.length == 32) {
+            val md5 = it.replace(regex = "\\{|\\}|\\-".toRegex(), replacement = "").split(".")[0]
+            var file = if (md5.length == 32) {
                 FileUtils.getFile(it)
             } else {
                 FileUtils.parseAndSave(it)
             }
+            if (!file.exists() && data.containsKey("url")) {
+                file = FileUtils.parseAndSave(data["url"].asString)
+            }
+            return@let file
         }
         if (!file.exists()) {
             throw LogicException("Video file is not exists, please check your filename.")
@@ -420,11 +425,16 @@ internal object MessageMaker {
         data.checkAndThrow("file")
 
         var file = data["file"].asString.let {
-            if (it.length == 32) {
+            val md5 = it.replace(regex = "\\{|\\}|\\-".toRegex(), replacement = "").split(".")[0]
+            var file = if (md5.length == 32) {
                 FileUtils.getFile(it)
             } else {
                 FileUtils.parseAndSave(it)
             }
+            if (!file.exists() && data.containsKey("url")) {
+                file = FileUtils.parseAndSave(data["url"].asString)
+            }
+            return@let file
         }
         if (!file.exists()) {
             throw LogicException("Voice file is not exists, please check your filename.")
@@ -500,11 +510,16 @@ internal object MessageMaker {
         val isOriginal = data["original"].asBooleanOrNull ?: true
         val isFlash = data["flash"].asBooleanOrNull ?: false
         val file = data["file"].asString.let {
-            if (it.length == 32) {
+            val md5 = it.replace(regex = "\\{|\\}|\\-".toRegex(), replacement = "").split(".")[0]
+            var file = if (md5.length == 32) {
                 FileUtils.getFile(it)
             } else {
                 FileUtils.parseAndSave(it)
             }
+            if (!file.exists() && data.containsKey("url")) {
+                file = FileUtils.parseAndSave(data["url"].asString)
+            }
+            return@let file
         }
         if (!file.exists()) {
             throw LogicException("Image file is not exists, please check your filename.")

@@ -133,6 +133,9 @@ internal object MsgConvert {
                         if(record.voiceChangeType != MsgConstant.KPTTVOICECHANGETYPENONE) {
                             it["magic"] = "1".json
                         }
+                        if (it["url"].asString.isBlank()) {
+                            it.remove("url")
+                        }
                     })
                 )
             }
@@ -140,14 +143,18 @@ internal object MsgConvert {
                 val video = element.videoElement
                 return hashMapOf(
                     "type" to "video".json,
-                    "data" to JsonObject(mapOf(
+                    "data" to JsonObject(hashMapOf(
                         "file" to video.fileName.json,
                         "url" to when(chatType) {
                             MsgConstant.KCHATTYPEGROUP -> RichProtoSvc.getGroupVideoDownUrl("0", video.fileName, video.fileUuid)
                             MsgConstant.KCHATTYPEC2C -> RichProtoSvc.getC2CVideoDownUrl("0", video.fileName, video.fileUuid)
                             else -> error("Not supported chat type: $chatType, convertMsgElementsToMsgSegment::Pic")
                         }.json
-                    ))
+                    ).also {
+                        if (it["url"].asString.isBlank()) {
+                            it.remove("url")
+                        }
+                    })
                 )
             }
             MsgConstant.KELEMTYPEMARKETFACE -> {
