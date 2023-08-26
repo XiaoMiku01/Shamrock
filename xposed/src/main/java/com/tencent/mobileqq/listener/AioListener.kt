@@ -20,12 +20,19 @@ internal object AioListener: IKernelMsgListener {
         GlobalScope.launch {
             msgList.forEach {
                 val rawMsg = it.elements.toCQCode(it.chatType)
-                if (it.chatType == MsgConstant.KCHATTYPEGROUP) {
-                    LogCenter.log("群消息(group = ${it.peerName}(${it.peerUin}), uin = ${it.senderUin}, msg = $rawMsg)")
-                    val msgHash = MessageHelper.convertMsgIdToMsgHash(it.chatType, it.msgId, it.peerUin)
-                    HttpPusher.pushGroupMsg(it, it.elements, rawMsg, msgHash)
-                } else {
-                    LogCenter.log("不支持PUSH事件: ${it.chatType}")
+                val msgHash = MessageHelper.convertMsgIdToMsgHash(it.chatType, it.msgId, it.peerUin)
+                when (it.chatType) {
+                    MsgConstant.KCHATTYPEGROUP -> {
+                        LogCenter.log("群消息(group = ${it.peerName}(${it.peerUin}), uin = ${it.senderUin}, msg = $rawMsg)")
+                        HttpPusher.pushGroupMsg(it, it.elements, rawMsg, msgHash)
+                    }
+                    MsgConstant.KCHATTYPEC2C -> {
+                        LogCenter.log("私聊消息(private = ${it.senderUin}, msg = $rawMsg)")
+                        HttpPusher.pushPrivateMsg(it, it.elements, rawMsg, msgHash)
+                    }
+                    else -> {
+                        LogCenter.log("不支持PUSH事件: ${it.chatType}")
+                    }
                 }
             }
         }

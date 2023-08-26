@@ -37,7 +37,7 @@ internal data class PushMessage (
     @SerialName("message_type") val messageType: MsgType,
     @SerialName("sub_type") val subType: MsgSubType,
     @SerialName("message_id") val messageId: Int,
-    @SerialName("group_id") val groupId: Long,
+    @SerialName("group_id") val groupId: Long = 0,
     @SerialName("user_id") val userId: Long,
     @SerialName("anonymous") val anonymous: Anonymous? = null,
     @SerialName("message") val message: JsonElement,

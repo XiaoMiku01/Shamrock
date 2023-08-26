@@ -44,7 +44,42 @@ internal object HttpPusher {
         "record", "voice", "video", "markdown"
     )
 
-    fun pushGroupMsg(record: MsgRecord, elements: List<MsgElement>, raw: String, msgHash: Int) {
+    fun pushPrivateMsg(
+        record: MsgRecord,
+        elements: List<MsgElement>,
+        raw: String,
+        msgHash: Int
+    ) {
+        pushMsg(
+            record, elements, raw, msgHash, MsgType.Private, MsgSubType.Friend
+        )
+    }
+
+    fun pushGroupMsg(
+        record: MsgRecord,
+        elements: List<MsgElement>,
+        raw: String,
+        msgHash: Int
+    ) {
+        pushMsg(
+            record, elements, raw, msgHash, MsgType.Group, MsgSubType.NORMAL,
+            role = when (record.senderUin) {
+                GroupSvc.getOwner(record.peerUin.toString()) -> MemberRole.Owner
+                in GroupSvc.getAdminList(record.peerUin.toString()) -> MemberRole.Admin
+                else -> MemberRole.Member
+            }
+        )
+    }
+
+    fun pushMsg(
+        record: MsgRecord,
+        elements: List<MsgElement>,
+        raw: String,
+        msgHash: Int,
+        msgType: MsgType,
+        subType: MsgSubType,
+        role: MemberRole = MemberRole.Member
+    ) {
         if (!ShamrockConfig.allowWebHook()) {
             return
         }
@@ -58,8 +93,8 @@ internal object HttpPusher {
                         time = record.msgTime,
                         selfId = app.longAccountUin,
                         postType = "message",
-                        messageType = MsgType.Group,
-                        subType = MsgSubType.NORMAL,
+                        messageType = msgType,
+                        subType = subType,
                         messageId = msgHash,
                         groupId = record.peerUin,
                         userId = record.senderUin,
@@ -70,11 +105,7 @@ internal object HttpPusher {
                             userId = record.senderUin,
                             nickname = record.sendNickName,
                             card = record.sendMemberName,
-                            role = when (record.senderUin) {
-                                GroupSvc.getOwner(record.peerUin.toString()) -> MemberRole.Owner
-                                in GroupSvc.getAdminList(record.peerUin.toString()) -> MemberRole.Admin
-                                else -> MemberRole.Member
-                            },
+                            role = role,
                             title = "",
                             level = "",
                         )
