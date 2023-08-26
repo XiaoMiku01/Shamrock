@@ -14,23 +14,6 @@ import moe.fuqiuluo.remote.config.statusPages
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
 
-// 接口名称-------是否需要打开专业级开关
-private val API_LIST = arrayOf(
-    Routing::getAccountInfo to false,
-    Routing::getMsfInfo to true,
-    Routing::getStartTime to false,
-    Routing::uploadGroupImage to true,
-    Routing::energy to true,
-    Routing::isBlackListUin to false,
-    Routing::setProfileCard to false,
-    Routing::shut to false,
-    Routing::sendGroupMessage to false,
-    Routing::getMsg to false,
-    Routing::sendLike to false,
-    Routing::kickTroopMember to false,
-    Routing::banTroopMember to false
-)
-
 object HTTPServer {
     @JvmStatic
     var isQueryServiceStarted = false

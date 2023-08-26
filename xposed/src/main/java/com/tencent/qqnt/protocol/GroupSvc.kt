@@ -89,7 +89,7 @@ internal object GroupSvc: BaseSvc() {
             .split("|", ",")
             .also {
                 if (withOwner && it is ArrayList<String>) {
-                    it.add(groupInfo.troopowneruin)
+                    it.add(0, groupInfo.troopowneruin)
                 }
             }
             .map { it.ifBlank { "0" }.toLong() }

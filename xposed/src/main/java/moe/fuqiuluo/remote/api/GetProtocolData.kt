@@ -1,6 +1,8 @@
 package moe.fuqiuluo.remote.api
 
+import com.tencent.mobileqq.app.QQAppInterface
 import com.tencent.mobileqq.dt.model.FEBound
+import com.tencent.qphone.base.remote.ToServiceMsg
 import com.tencent.qqnt.protocol.TicketSvc
 import io.ktor.server.routing.Routing
 import moe.fuqiuluo.remote.entries.Protocol
@@ -8,6 +10,7 @@ import moe.fuqiuluo.remote.entries.QSignDtConfig
 import moe.fuqiuluo.remote.entries.Status
 import moe.fuqiuluo.xposed.tools.fetchOrThrow
 import moe.fuqiuluo.xposed.tools.getOrPost
+import moe.fuqiuluo.xposed.tools.hex2ByteArray
 import moe.fuqiuluo.xposed.tools.respond
 import moe.fuqiuluo.xposed.tools.toHexString
 import mqq.app.MobileQQ
@@ -17,6 +20,19 @@ import oicq.wlogin_sdk.tlv_type.tlv_t18
 import oicq.wlogin_sdk.tools.util
 
 fun Routing.obtainProtocolData() {
+    getOrPost("/send_packet") {
+        val uin = fetchOrThrow("uin")
+        val cmd = fetchOrThrow("cmd")
+        val isPb = fetchOrThrow("proto").toBoolean()
+        val buffer = fetchOrThrow("buffer").hex2ByteArray()
+        val app = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
+        val toServiceMsg = ToServiceMsg("mobileqq.service", uin, cmd)
+        toServiceMsg.putWupBuffer(buffer)
+        toServiceMsg.addAttribute("req_pb_protocol_flag", isPb)
+        app.sendToService(toServiceMsg)
+        respond(true, Status.Ok)
+    }
+
     getOrPost("/get_ticket") {
         val uin = fetchOrThrow("uin")
         val ticket = when(fetchOrThrow("id").toInt()) {
