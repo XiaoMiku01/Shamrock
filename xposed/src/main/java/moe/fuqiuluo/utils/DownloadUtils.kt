@@ -45,11 +45,8 @@ object DownloadUtils {
                 if (processed + blockSize != contentLength && i == threadCnt - 1) {
                     blockSize = contentLength - processed
                 }
-                val start = i * blockSize
-                var end = (i + 1) * blockSize - 1
-                if (i == 3 - 1) {
-                    end = contentLength - 1
-                }
+                val start = processed
+                val end = processed + blockSize - 1
                 GlobalScope.launch(Dispatchers.IO) {
                     reallyDownload(url, start, end, dest, channel)
                 }
@@ -90,8 +87,8 @@ object DownloadUtils {
                     withContext(Dispatchers.IO) {
                         raf.write(buf, 0, len)
                     }
+                    channel.send(len)
                 }
-                channel.send(len)
             }
             withContext(Dispatchers.IO) {
                 inputStream.close()
