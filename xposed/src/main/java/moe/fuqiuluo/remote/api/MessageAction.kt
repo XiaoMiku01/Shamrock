@@ -36,7 +36,7 @@ fun Routing.messageAction() {
         get {
             val msgType = fetchGetOrThrow("message_type")
             val message = fetchGetOrThrow("message")
-            val autoEscape = fetchGetOrNull("auto_escape")?.toBoolean() ?: false
+            val autoEscape = fetchGetOrNull("auto_escape")?.toBooleanStrict() ?: false
             val peerIdKey = if(msgType == "group") "group_id" else "user_id"
             val chatType = MessageHelper.obtainMessageTypeByDetailType(msgType)
             call.respondText(SendMessage(chatType, fetchGetOrThrow(peerIdKey), message, autoEscape))
@@ -48,7 +48,7 @@ fun Routing.messageAction() {
             call.respondText(if (isJsonData() && !isString("message")) {
                 SendMessage(chatType, fetchPostOrThrow(peerIdKey), fetchPostJsonArray("message"))
             } else {
-                val autoEscape = fetchPostOrNull("auto_escape")?.toBoolean() ?: false
+                val autoEscape = fetchPostOrNull("auto_escape")?.toBooleanStrict() ?: false
                 SendMessage(chatType, fetchPostOrThrow(peerIdKey), fetchPostOrThrow("message"), autoEscape)
             })
         }
@@ -58,7 +58,7 @@ fun Routing.messageAction() {
         get {
             val groupId = fetchGetOrThrow("group_id")
             val message = fetchGetOrThrow("message")
-            val autoEscape = fetchGetOrNull("auto_escape")?.toBoolean() ?: false
+            val autoEscape = fetchGetOrNull("auto_escape")?.toBooleanStrict() ?: false
             call.respondText(SendMessage(MsgConstant.KCHATTYPEGROUP, groupId, message, autoEscape))
         }
         post {
@@ -66,7 +66,7 @@ fun Routing.messageAction() {
             call.respondText(if (isJsonData() && !isString("message")) {
                 SendMessage(MsgConstant.KCHATTYPEGROUP, groupId, fetchPostJsonArray("message"))
             } else {
-                val autoEscape = fetchPostOrNull("auto_escape")?.toBoolean() ?: false
+                val autoEscape = fetchPostOrNull("auto_escape")?.toBooleanStrict() ?: false
                 SendMessage(MsgConstant.KCHATTYPEGROUP, groupId, fetchPostOrThrow("message"), autoEscape)
             })
         }
@@ -76,7 +76,7 @@ fun Routing.messageAction() {
         get {
             val userId = fetchGetOrThrow("user_id")
             val message = fetchGetOrThrow("message")
-            val autoEscape = fetchGetOrNull("auto_escape")?.toBoolean() ?: false
+            val autoEscape = fetchGetOrNull("auto_escape")?.toBooleanStrict() ?: false
             call.respondText(SendMessage(MsgConstant.KCHATTYPEC2C, userId, message, autoEscape))
         }
         post {
@@ -84,7 +84,7 @@ fun Routing.messageAction() {
             call.respondText(if (isJsonData() && !isString("message")) {
                 SendMessage(MsgConstant.KCHATTYPEC2C, userId, fetchPostJsonArray("message"))
             } else {
-                val autoEscape = fetchPostOrNull("auto_escape")?.toBoolean() ?: false
+                val autoEscape = fetchPostOrNull("auto_escape")?.toBooleanStrict() ?: false
                 SendMessage(MsgConstant.KCHATTYPEC2C, userId, fetchPostOrThrow("message"), autoEscape)
             })
         }

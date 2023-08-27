@@ -23,7 +23,7 @@ fun Routing.obtainProtocolData() {
     getOrPost("/send_packet") {
         val uin = fetchOrThrow("uin")
         val cmd = fetchOrThrow("cmd")
-        val isPb = fetchOrThrow("proto").toBoolean()
+        val isPb = fetchOrThrow("proto").toBooleanStrict()
         val buffer = fetchOrThrow("buffer").hex2ByteArray()
         val app = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
         val toServiceMsg = ToServiceMsg("mobileqq.service", uin, cmd)

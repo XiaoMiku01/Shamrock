@@ -8,7 +8,7 @@ internal object SetGroupWholeBan: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
         val groupId = session.getLong("group_id")
         val enable = session.getBoolean("enable")
-        return ""
+        return invoke(groupId, enable)
     }
 
     operator fun invoke(groupId: Long, enable: Boolean): String {

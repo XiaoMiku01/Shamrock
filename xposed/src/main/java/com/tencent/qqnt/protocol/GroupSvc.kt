@@ -19,6 +19,7 @@ import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.tools.slice
 import mqq.app.MobileQQ
+import tencent.im.oidb.cmd0x89a.oidb_0x89a
 import tencent.im.oidb.cmd0x8a0.oidb_0x8a0
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -46,7 +47,12 @@ internal object GroupSvc: BaseSvc() {
     }
 
     fun setGroupWholeBan(groupId: Long, enable: Boolean) {
-
+        val reqBody = oidb_0x89a.ReqBody()
+        reqBody.uint64_group_code.set(groupId)
+        reqBody.st_group_info.set(oidb_0x89a.groupinfo().apply {
+            uint32_shutup_time.set(if (enable) 268435455 else 0)
+        })
+        sendOidb("OidbSvc.0x89a_0", 2202, 0, reqBody.toByteArray())
     }
 
     fun banMember(groupId: Long, memberUin: Long, time: Int) {
