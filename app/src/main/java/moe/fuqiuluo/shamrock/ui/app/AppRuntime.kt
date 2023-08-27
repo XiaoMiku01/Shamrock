@@ -32,13 +32,14 @@ object AppRuntime {
             val format = "%s%s %s".format(format.format(Date()), level.name, msg)
 
             val builder = logger.logCache.value
-            val start = builder.length
-            val end = start + format.length
 
-            if (logger.logRanges.size >= maxLogSize) {
+            if (logger.logRanges.size >= maxLogSize || builder.length > 30000) {
                 builder.clear()
                 logger.logRanges.clear()
             }
+
+            val start = builder.length
+            val end = start + format.length
 
             builder.append(format)
             logger.logRanges.add(Logger.LogRange(start, end, level))

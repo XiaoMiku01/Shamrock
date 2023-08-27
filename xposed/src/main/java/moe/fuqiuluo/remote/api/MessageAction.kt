@@ -8,6 +8,7 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import moe.fuqiuluo.remote.action.handlers.DeleteMessage
 import moe.fuqiuluo.remote.action.handlers.GetMsg
 import moe.fuqiuluo.remote.action.handlers.SendMessage
 import moe.fuqiuluo.xposed.tools.fetchGetOrNull
@@ -21,6 +22,11 @@ import moe.fuqiuluo.xposed.tools.isJsonData
 import moe.fuqiuluo.xposed.tools.isString
 
 fun Routing.messageAction() {
+    getOrPost("/delete_msg") {
+        val msgHash = fetchOrThrow("message_id").toInt()
+        call.respondText(DeleteMessage(msgHash))
+    }
+
     getOrPost("/get_msg") {
         val msgHash = fetchOrThrow("message_id").toInt()
         call.respondText(GetMsg(msgHash))

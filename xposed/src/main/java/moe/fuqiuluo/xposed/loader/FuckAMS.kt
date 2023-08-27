@@ -17,7 +17,7 @@ internal object FuckAMS {
     private val KeepRecords = arrayListOf<Any>()
     private lateinit var KeepThread: Thread
     @SuppressLint("SdCardPath")
-    private val noDied = File("/data/user/0/moe.fuqiuluo.shamrock/files/no_died")
+    private val noDied = File("/mnt/sdcard/Android/data/com.tencent.mobileqq/Tencent/Shamrock/no_died")
 
     private lateinit var METHOD_IS_KILLED: Method
 
@@ -83,6 +83,7 @@ internal object FuckAMS {
             KeepRecords.add(record)
             keepByAdj(record)
             if (noDied.exists()) {
+                XposedBridge.log("Open NoDied Mode!!!")
                 keepByPersistent(record)
             }
             checkThread()
