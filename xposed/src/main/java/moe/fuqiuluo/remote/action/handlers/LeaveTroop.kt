@@ -8,10 +8,7 @@ import moe.fuqiuluo.remote.entries.EmptyObject
 import mqq.app.MobileQQ
 
 internal object LeaveTroop: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
-        if (!session.has("group_id")) {
-            return noParam("group_id")
-        }
+    override suspend fun internalHandle(session: ActionSession): String {
         val groupId = session.getString("group_id")
         val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
         if (runtime !is AppInterface)
@@ -21,6 +18,8 @@ internal object LeaveTroop: IActionHandler() {
 
         return ok(EmptyObject, "请求已提交")
     }
+
+    override val requiredParams: Array<String> = arrayOf("group_id")
 
     override fun path(): String = "leave_group"
 }

@@ -8,12 +8,12 @@ import moe.fuqiuluo.remote.action.IActionHandler
 import mqq.app.MobileQQ
 
 internal object SetProfileCard: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
-        val nickName = session.getStringOrNull("nickname") ?: return noParam("nickname")
-        val company = session.getStringOrNull("company") ?: return noParam("company")
-        val email = session.getStringOrNull("email") ?: return noParam("email")
-        val college = session.getStringOrNull("college") ?: return noParam("college")
-        val personalNote = session.getStringOrNull("personal_note") ?: return noParam("personal_note")
+    override suspend fun internalHandle(session: ActionSession): String {
+        val nickName = session.getString("nickname")
+        val company = session.getString("company")
+        val email = session.getString("email")
+        val college = session.getString("college")
+        val personalNote = session.getString("personal_note")
 
         val birthday = session.getIntOrNull("birthday")
         val age = session.getIntOrNull("age")
@@ -37,6 +37,8 @@ internal object SetProfileCard: IActionHandler() {
         service.setProfileDetail(bundle)
         return ok("设置成功")
     }
+
+    override val requiredParams: Array<String> = arrayOf("nickname", "company", "email", "college", "personal_note")
 
     override fun path(): String = "set_qq_profile"
 }

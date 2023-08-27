@@ -146,7 +146,7 @@ internal object HttpPusher {
                 }
             }
             if (data.containsKey("delete") && data["delete"].asBoolean) {
-                MsgSvc.deleteMsg(record.msgId)
+                MsgSvc.recallMsg(record.msgId)
             }
             if (data.containsKey("kick") && data["kick"].asBoolean) {
                 GroupSvc.kickMember(record.peerUin, false, record.senderUin)

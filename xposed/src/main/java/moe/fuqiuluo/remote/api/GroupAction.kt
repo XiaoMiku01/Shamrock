@@ -6,6 +6,7 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing
 import moe.fuqiuluo.remote.action.ActionManager
 import moe.fuqiuluo.remote.action.ActionSession
+import moe.fuqiuluo.remote.action.handlers.BanTroopMember
 import moe.fuqiuluo.xposed.tools.fetchOrNull
 import moe.fuqiuluo.xposed.tools.fetchOrThrow
 import moe.fuqiuluo.xposed.tools.getOrPost
@@ -16,11 +17,7 @@ fun Routing.troopAction() {
         val userId = fetchOrThrow("user_id") .toLong()
         val duration = fetchOrNull("duration")?.toInt() ?: (30 * 60)
 
-        call.respondText(ActionManager["set_group_ban"]?.handle(ActionSession(mapOf(
-            "user_id" to userId,
-            "group_id" to groupId,
-            "duration" to duration,
-        ))) ?: throw LogicException("Unable to obtain set_group_ban handler."))
+        call.respondText(BanTroopMember(groupId, userId, duration))
     }
 
     getOrPost("/set_group_kick") {

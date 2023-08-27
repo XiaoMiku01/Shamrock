@@ -1,11 +1,13 @@
 @file:Suppress("UNUSED_VARIABLE", "LocalVariableName")
 package moe.fuqiuluo.xposed.loader
 
+import android.annotation.SuppressLint
 import android.content.pm.ApplicationInfo
 import android.os.Build
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import moe.fuqiuluo.xposed.tools.hookMethod
+import java.io.File
 import java.lang.reflect.Method
 
 internal object FuckAMS {
@@ -14,6 +16,8 @@ internal object FuckAMS {
     )
     private val KeepRecords = arrayListOf<Any>()
     private lateinit var KeepThread: Thread
+    @SuppressLint("SdCardPath")
+    private val noDied = File("/data/user/0/moe.fuqiuluo.shamrock/files/no_died")
 
     private lateinit var METHOD_IS_KILLED: Method
 
@@ -78,7 +82,9 @@ internal object FuckAMS {
             XposedBridge.log("Process is keeping: $record")
             KeepRecords.add(record)
             keepByAdj(record)
-            //keepByPersistent(record) 过于逆天
+            if (noDied.exists()) {
+                keepByPersistent(record)
+            }
             checkThread()
         }
     }
@@ -98,11 +104,11 @@ internal object FuckAMS {
             }.get(record)
             val MethodSetMaxAdj = newState.javaClass.getDeclaredMethod("setMaxAdj", Int::class.java).also {
                 if (!it.isAccessible) it.isAccessible = true
-            }.invoke(newState, 2)
+            }.invoke(newState, 1)
         }.onFailure {
             clazz.getDeclaredField("maxAdj").also {
                 if (!it.isAccessible) it.isAccessible = true
-            }.set(record, 2)
+            }.set(record, 1)
         }
     }
 

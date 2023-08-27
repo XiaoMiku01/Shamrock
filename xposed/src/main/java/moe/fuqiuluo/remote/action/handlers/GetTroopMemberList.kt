@@ -17,10 +17,7 @@ import mqq.app.MobileQQ
 internal object GetTroopMemberList: IActionHandler() {
     private val refreshLock = Mutex()
 
-    override suspend fun handle(session: ActionSession): String {
-        if (!session.has("group_id")) {
-            return noParam("group_id")
-        }
+    override suspend fun internalHandle(session: ActionSession): String {
         val groupId = session.getString("group_id")
         val refresh = session.getBooleanOrDefault("refresh", false)
 
@@ -60,6 +57,8 @@ internal object GetTroopMemberList: IActionHandler() {
             }
         })
     }
+
+    override val requiredParams: Array<String> = arrayOf("group_id")
 
     private suspend fun requestTroopMemberInfo(service: ITroopMemberInfoService, groupId: Long): List<TroopMemberInfo>? {
         return refreshLock.withLock {

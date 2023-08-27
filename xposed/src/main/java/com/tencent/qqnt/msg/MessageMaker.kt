@@ -273,7 +273,7 @@ internal object MessageMaker {
         // 4 is market face
         // 5 is vas poke
         face.faceType = 0
-        val serverId =  data["id"].asInt
+        val serverId = data["id"].asInt
         val localId = QQSysFaceUtil.convertToLocal(serverId)
         face.faceIndex = serverId
         face.faceText = QQSysFaceUtil.getFaceDescription(localId)

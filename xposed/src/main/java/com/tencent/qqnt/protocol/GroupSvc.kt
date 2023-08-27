@@ -45,6 +45,10 @@ internal object GroupSvc: BaseSvc() {
         }
     }
 
+    fun setGroupWholeBan(groupId: Long, enable: Boolean) {
+
+    }
+
     fun banMember(groupId: Long, memberUin: Long, time: Int) {
         val buffer = ByteBuffer.allocate(1 * 8 + 7)
         buffer.putInt(groupId.toInt())
@@ -112,7 +116,9 @@ internal object GroupSvc: BaseSvc() {
 
         val service = runtime
             .getRuntimeService(ITroopInfoService::class.java, "all")
+
         val groupInfo = service.getTroopInfo(groupId)
+
         return groupInfo.isAdmin || groupInfo.troopowneruin == runtime.account
     }
 

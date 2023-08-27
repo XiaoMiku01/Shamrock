@@ -7,15 +7,18 @@ import com.tencent.qqnt.protocol.MsgSvc
 import moe.fuqiuluo.remote.entries.EmptyObject
 
 internal object DeleteMessage: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
-        val hashCode = (session.getStringOrNull("message_id")
-            ?: return noParam("message_id")).toInt()
-        val msgId = MessageHelper.getMsgIdByHashCode(hashCode)
+    override suspend fun internalHandle(session: ActionSession): String {
+        val hashCode = session.getString("message_id").toInt()
+        return invoke(hashCode)
+    }
 
-        MsgSvc.deleteMsg(msgId)
-
+    suspend operator fun invoke(msgHash: Int): String {
+        val msgId = MessageHelper.getMsgIdByHashCode(msgHash)
+        MsgSvc.recallMsg(msgId)
         return ok(EmptyObject)
     }
 
     override fun path(): String = "delete_message"
+
+    override val requiredParams: Array<String> = arrayOf("message_id")
 }

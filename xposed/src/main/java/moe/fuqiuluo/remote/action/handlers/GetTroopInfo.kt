@@ -9,10 +9,7 @@ import com.tencent.qqnt.protocol.GroupSvc
 import mqq.app.MobileQQ
 
 internal object GetTroopInfo: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
-        if (!session.has("group_id")) {
-            return noParam("group_id")
-        }
+    override suspend fun internalHandle(session: ActionSession): String {
         val groupId = session.getString("group_id")
         val refresh = session.getBooleanOrDefault("refresh", false)
         val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
@@ -49,6 +46,8 @@ internal object GetTroopInfo: IActionHandler() {
             ))
         }
     }
+
+    override val requiredParams: Array<String> = arrayOf("group_id")
 
     override fun path(): String = "get_group_info"
 }

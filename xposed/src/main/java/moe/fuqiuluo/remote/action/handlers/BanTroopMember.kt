@@ -5,17 +5,23 @@ import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
 
 internal object BanTroopMember: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
-        val groupId = session.getLongOrNull("group_id")
-            ?: return noParam("group_id")
-        val userId = session.getLongOrNull("user_id")
-            ?: return noParam("user_id")
+    override suspend fun internalHandle(session: ActionSession): String {
+        val groupId = session.getLong("group_id")
+        val userId = session.getLong("user_id")
         val duration = session.getIntOrNull("duration") ?: (30 * 60)
 
-        GroupSvc.banMember(groupId, userId, duration)
+        return invoke(groupId, userId, duration)
+    }
 
+    operator fun invoke(groupId: Long, userId: Long, duration: Int = 30 * 60): String {
+        if (!GroupSvc.isAdmin(groupId.toString())) {
+            return logic("You are not the administrator of the group.")
+        }
+        GroupSvc.banMember(groupId, userId, duration)
         return ok("成功")
     }
+
+    override val requiredParams: Array<String> = arrayOf("group_id", "user_id")
 
     override fun path(): String = "set_group_ban"
 }

@@ -13,12 +13,7 @@ import moe.fuqiuluo.remote.entries.Status
 import moe.fuqiuluo.remote.entries.resultToString
 
 internal object GetProfileCard: IActionHandler() {
-    private val refreshLock = Mutex() // 防止重复注册监视器导致错误
-
-    override suspend fun handle(session: ActionSession): String {
-        if (!session.has("user_id")) {
-            return noParam("user_id")
-        }
+    override suspend fun internalHandle(session: ActionSession): String {
         val uin = session.getString("user_id")
         val refresh = session.getBooleanOrDefault("refresh", false)
 
@@ -73,6 +68,8 @@ internal object GetProfileCard: IActionHandler() {
             cookie = card.vCookies
         ))
     }
+
+    override val requiredParams: Array<String> = arrayOf("user_id")
 
     private fun Card?.ok(): Boolean {
         return this != null && !strNick.isNullOrBlank()

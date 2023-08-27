@@ -8,7 +8,7 @@ import moe.fuqiuluo.remote.entries.resultToString
 import de.robv.android.xposed.XposedBridge.log
 
 internal object TestHandler: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
+    override suspend fun internalHandle(session: ActionSession): String {
         kotlin.runCatching {
             val msg = StringBuffer()
 

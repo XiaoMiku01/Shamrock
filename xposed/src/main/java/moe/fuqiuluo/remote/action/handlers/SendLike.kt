@@ -6,12 +6,14 @@ import moe.fuqiuluo.remote.action.IActionHandler
 import moe.fuqiuluo.remote.entries.EmptyObject
 
 internal object SendLike: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
-        val times = session.getIntOrNull("times") ?: return noParam("times")
-        val uin = session.getLongOrNull("user_id") ?: return noParam("user_id")
+    override suspend fun internalHandle(session: ActionSession): String {
+        val times = session.getInt("times")
+        val uin = session.getLong("user_id")
         VisitorSvc.vote(uin, times)
         return ok(EmptyObject)
     }
+
+    override val requiredParams: Array<String> = arrayOf("times", "user_id")
 
     override fun path(): String = "send_like"
 }

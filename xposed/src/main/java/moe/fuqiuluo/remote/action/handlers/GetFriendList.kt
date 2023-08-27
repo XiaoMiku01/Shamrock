@@ -17,7 +17,7 @@ import mqq.app.MobileQQ
 import kotlin.coroutines.resume
 
 internal object GetFriendList: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
+    override suspend fun internalHandle(session: ActionSession): String {
         val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
         val refresh = session.getBooleanOrDefault("refresh", false)
         val service = runtime.getRuntimeService(IFriendDataService::class.java, "all")

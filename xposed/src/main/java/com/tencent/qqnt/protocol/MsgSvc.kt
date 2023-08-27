@@ -1,11 +1,15 @@
 package com.tencent.qqnt.protocol
 
+import com.tencent.mobileqq.qroute.QRoute
 import com.tencent.qqnt.helper.ContactHelper
 import com.tencent.qqnt.helper.MessageHelper
 import com.tencent.qqnt.kernel.nativeinterface.Contact
 import com.tencent.qqnt.kernel.nativeinterface.IOperateCallback
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
+import com.tencent.qqnt.kernel.nativeinterface.MsgRecord
+import com.tencent.qqnt.msg.api.IMsgService
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonArray
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.MMKVFetcher
@@ -13,6 +17,27 @@ import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import kotlin.coroutines.resume
 
 internal object MsgSvc: BaseSvc() {
+    suspend fun getMsg(msgId: Long): MsgRecord? {
+        val chatType = MessageHelper.getChatType(msgId)
+        val peerId = MessageHelper.getPeerIdByMsgId(msgId)
+        val contact = MessageHelper.generateContact(chatType, peerId.toString())
+        return withTimeout(5000) {
+            val service = QRoute.api(IMsgService::class.java)
+            suspendCancellableCoroutine { continuation ->
+                service.getMsgsByMsgId(contact, arrayListOf(msgId)) { code, _, msgRecords ->
+                    if (code == 0 && msgRecords.isNotEmpty()) {
+                        continuation.resume(msgRecords.first())
+                    } else {
+                        continuation.resume(null)
+                    }
+                }
+                continuation.invokeOnCancellation {
+                    continuation.resume(null)
+                }
+            }
+        }
+    }
+
     suspend fun deleteMsgASync(msgId: Long) {
         val kernelService = NTServiceFetcher.kernelService
         val sessionService = kernelService.wrapperSession
@@ -24,7 +49,7 @@ internal object MsgSvc: BaseSvc() {
         }
     }
 
-    suspend fun deleteMsg(msgId: Long): Pair<Int, String> {
+    suspend fun recallMsg(msgId: Long): Pair<Int, String> {
         val kernelService = NTServiceFetcher.kernelService
         val sessionService = kernelService.wrapperSession
         val msgService = sessionService.msgService

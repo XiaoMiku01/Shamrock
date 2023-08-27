@@ -8,7 +8,7 @@ import moe.fuqiuluo.remote.action.IActionHandler
 
 // TODO
 internal object ScanQRCode: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
+    override suspend fun internalHandle(session: ActionSession): String {
         val qrcode = QRoute.api(IQRCodeApi::class.java)
         val picBytes = Base64.decode(session.getString("pic"), Base64.DEFAULT)
         qrcode.scanImage(picBytes, 0, picBytes.size)

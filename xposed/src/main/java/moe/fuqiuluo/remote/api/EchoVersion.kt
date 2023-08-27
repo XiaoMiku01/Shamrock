@@ -52,9 +52,7 @@ fun Routing.echoVersion() {
             if (handler == null) {
                 respond(false, Status.UnsupportedAction, EmptyObject, "不支持的Action")
             } else {
-                call.respondText(
-                    handler.handle(ActionSession(params)), ContentType.Application.Json
-                )
+                call.respondText(handler.handle(ActionSession(params)), ContentType.Application.Json)
             }
         }
     }

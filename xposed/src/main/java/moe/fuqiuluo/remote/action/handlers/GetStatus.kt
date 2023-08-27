@@ -9,7 +9,7 @@ import moe.fuqiuluo.remote.entries.resultToString
 import mqq.app.MobileQQ
 
 internal object GetStatus: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
+    override suspend fun internalHandle(session: ActionSession): String {
         val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
         val curUin = runtime.currentAccountUin
         return resultToString(true, Status.Ok, listOf(

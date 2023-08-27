@@ -17,7 +17,7 @@ import mqq.app.MobileQQ
 import kotlin.coroutines.resume
 
 internal object GetTroopList: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
+    override suspend fun internalHandle(session: ActionSession): String {
         val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
         if (runtime !is AppInterface)
             return logic("AppRuntime cannot cast to AppInterface")

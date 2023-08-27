@@ -10,7 +10,7 @@ import moe.fuqiuluo.remote.entries.resultToString
 // 请开启HTTP回调 把事件回调回去
 // 而不是在我这里轮询
 internal object GetLatestEvents: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
+    override suspend fun internalHandle(session: ActionSession): String {
         return resultToString(
             true, Status.Ok, listOf<EmptyObject>()
         )

@@ -11,33 +11,27 @@ import moe.fuqiuluo.remote.entries.resultToString
 import moe.fuqiuluo.xposed.tools.*
 
 internal object ActionManager {
-    val actionMap = mutableMapOf(
-        "test" to TestHandler,
-        "get_latest_events" to GetLatestEvents,
-        "get_supported_actions" to GetSupportedActions,
-        "get_status" to GetStatus,
-        "get_version" to GetVersion,
-        "get_self_info" to GetSelfInfo,
-        "get_user_info" to GetProfileCard,
-        "get_friend_list" to GetFriendList,
-        "get_group_info" to GetTroopInfo,
-        "get_group_list" to GetTroopList,
-        "get_group_member_info" to GetTroopMemberInfo,
-        "get_group_member_list" to GetTroopMemberList,
-        "set_group_name" to ModifyTroopName,
-        "leave_group" to LeaveTroop,
-        "send_message" to SendMessage,
-        "get_uid" to GetUid,
-        "get_uin_by_uid" to GetUinByUid,
-        "delete_message" to DeleteMessage,
-        "sanc_qrcode" to ScanQRCode,
-        "set_qq_profile" to SetProfileCard,
-        "get_msg" to GetMsg,
-        "get_forward_msg" to GetForwardMsg,
-        "send_like" to SendLike,
-        "set_group_kick" to KickTroopMember,
-        "set_group_ban" to BanTroopMember
-    )
+    val actionMap = mutableMapOf<String, IActionHandler>()
+
+    init {
+        arrayOf(
+            // Framework Info
+            TestHandler, GetLatestEvents, GetSupportedActions, GetStatus, GetVersion, GetSelfInfo,
+
+            // UserActions
+            GetProfileCard, GetFriendList, SendLike, GetUid, GetUinByUid, ScanQRCode, SetProfileCard,
+
+            // GroupInfo
+            GetTroopList, GetTroopInfo, GetTroopList, GetTroopMemberInfo, GetTroopMemberList,
+
+            // GroupActions
+            ModifyTroopName, LeaveTroop, KickTroopMember, BanTroopMember, SetGroupWholeBan,
+
+            SendMessage, DeleteMessage, GetMsg, GetForwardMsg
+        ).forEach {
+            actionMap[it.path()] = it
+        }
+    }
 
     operator fun get(action: String): IActionHandler? {
         return actionMap[action]
@@ -45,35 +39,46 @@ internal object ActionManager {
 }
 
 internal abstract class IActionHandler {
-    abstract suspend fun handle(session: ActionSession): String
+    protected abstract suspend fun internalHandle(session: ActionSession): String
 
     abstract fun path(): String
 
-    fun ok(msg: String = ""): String {
+    open val requiredParams: Array<String> = arrayOf()
+
+    suspend fun handle(session: ActionSession): String {
+        requiredParams.forEach {
+            if (!session.has(it)) {
+                return noParam(it)
+            }
+        }
+        return internalHandle(session)
+    }
+
+    protected fun ok(msg: String = ""): String {
         return resultToString(true, Status.Ok, EmptyObject, msg)
     }
 
-    inline fun <reified T> ok(data: T, msg: String = ""): String {
+    protected inline fun <reified T> ok(data: T, msg: String = ""): String {
         return resultToString(true, Status.Ok, data!!, msg)
     }
 
-    fun noParam(paramName: String): String {
+    protected fun noParam(paramName: String): String {
         return failed(Status.BadParam, "lack of [$paramName]")
     }
 
-    fun badParam(why: String): String {
+    protected fun badParam(why: String): String {
         return failed(Status.BadParam, why)
     }
 
-    fun error(why: String): String {
+    protected fun error(why: String): String {
         return failed(Status.InternalHandlerError, why)
     }
 
-    fun logic(why: String): String {
+    protected fun logic(why: String): String {
         return failed(Status.LogicError, why)
     }
 
-    fun failed(status: Status, msg: String): String {
+    protected fun failed(status: Status, msg: String): String {
         return resultToString(false, status, EmptyObject, msg)
     }
 }

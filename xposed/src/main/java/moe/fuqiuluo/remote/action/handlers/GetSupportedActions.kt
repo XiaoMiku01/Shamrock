@@ -7,7 +7,7 @@ import moe.fuqiuluo.remote.entries.Status
 import moe.fuqiuluo.remote.entries.resultToString
 
 internal object GetSupportedActions: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
+    override suspend fun internalHandle(session: ActionSession): String {
         return resultToString(true, Status.Ok, ActionManager.actionMap.keys.toList())
     }
 

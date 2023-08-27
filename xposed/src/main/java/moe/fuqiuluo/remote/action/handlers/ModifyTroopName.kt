@@ -9,15 +9,8 @@ import moe.fuqiuluo.remote.entries.EmptyObject
 import mqq.app.MobileQQ
 
 internal object ModifyTroopName: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
-        if (!session.has("group_id")) {
-            return noParam("group_id")
-        }
+    override suspend fun internalHandle(session: ActionSession): String {
         val groupId = session.getString("group_id")
-
-        if (!session.has("group_name")) {
-            return noParam("group_name")
-        }
         val groupName = session.getString("group_name")
 
         val runtime = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
@@ -32,6 +25,8 @@ internal object ModifyTroopName: IActionHandler() {
             logic("You are not the administrator of the group")
         }
     }
+
+    override val requiredParams: Array<String> = arrayOf("group_id", "group_name")
 
     override fun path(): String = "set_group_name"
 }

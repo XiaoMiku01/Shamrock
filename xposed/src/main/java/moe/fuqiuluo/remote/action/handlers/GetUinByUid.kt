@@ -10,7 +10,7 @@ import moe.fuqiuluo.xposed.tools.asString
 import kotlin.coroutines.resume
 
 internal object GetUinByUid: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
+    override suspend fun internalHandle(session: ActionSession): String {
         val kernelService = NTServiceFetcher.kernelService
         val sessionService = kernelService.wrapperSession
         val uidList = session.getArray("uid_list").map {

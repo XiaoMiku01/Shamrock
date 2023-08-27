@@ -5,8 +5,8 @@ import moe.fuqiuluo.remote.action.IActionHandler
 import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 
 internal object GetForwardMsg: IActionHandler() {
-    override suspend fun handle(session: ActionSession): String {
-        val id = session.getStringOrNull("id") ?: return noParam("id")
+    override suspend fun internalHandle(session: ActionSession): String {
+        val id = session.getString("id")
 
         val kernelService = NTServiceFetcher.kernelService
         val sessionService = kernelService.wrapperSession
@@ -14,5 +14,8 @@ internal object GetForwardMsg: IActionHandler() {
 
         return error("不支持实现，请提交ISSUE！")
     }
+
+    override val requiredParams: Array<String> = arrayOf("id")
+
     override fun path(): String  = "get_forward_msg"
 }
