@@ -34,7 +34,7 @@ internal class HookWrapperCodec: IAction {
         "LightAppSvc.mini_app_userapp.GetDropdownAppList",
         "LightAppSvc.mini_app_ad.GetAd",
         "SQQzoneSvc.advReport",
-        "ConfigurationService.ReqGetConfig"
+        //"ConfigurationService.ReqGetConfig"
     )
 
     override fun invoke(ctx: Context) {
