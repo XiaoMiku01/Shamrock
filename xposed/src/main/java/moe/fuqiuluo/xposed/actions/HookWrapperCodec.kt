@@ -29,7 +29,12 @@ internal class HookWrapperCodec: IAction {
         "trpc.down.game_switch.GameSwitch.SsoGetDownloadConfig",
         "trpc.zplan.aio_avatar.Mobile.SsoBatchGetSceneConfig",
         "OidbSvcTrpcTcp.0x1127_5",
-        "OidbSvcTrpcTcp.0x10aa"
+        "OidbSvcTrpcTcp.0x10aa",
+        "WalletConfigSvr.getConfig",
+        "LightAppSvc.mini_app_userapp.GetDropdownAppList",
+        "LightAppSvc.mini_app_ad.GetAd",
+        "SQQzoneSvc.advReport",
+        "ConfigurationService.ReqGetConfig"
     )
 
     override fun invoke(ctx: Context) {
