@@ -7,15 +7,23 @@ import io.ktor.server.routing.Routing
 import moe.fuqiuluo.remote.action.ActionManager
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.handlers.BanTroopMember
+import moe.fuqiuluo.remote.action.handlers.SetGroupAdmin
 import moe.fuqiuluo.remote.action.handlers.SetGroupWholeBan
 import moe.fuqiuluo.xposed.tools.fetchOrNull
 import moe.fuqiuluo.xposed.tools.fetchOrThrow
 import moe.fuqiuluo.xposed.tools.getOrPost
 
 fun Routing.troopAction() {
+    getOrPost("/set_group_admin") {
+        val groupId = fetchOrThrow("group_id") .toLong()
+        val userId = fetchOrThrow("user_id") .toLong()
+        val enable = fetchOrThrow("enable").toBooleanStrict()
+        call.respondText(SetGroupAdmin(groupId, userId, enable))
+    }
+
     getOrPost("/set_group_whole_ban") {
         val groupId = fetchOrThrow("group_id") .toLong()
-        val enable = fetchOrThrow("user_id").toBooleanStrict()
+        val enable = fetchOrThrow("enable").toBooleanStrict()
         call.respondText(SetGroupWholeBan(groupId, enable))
     }
 

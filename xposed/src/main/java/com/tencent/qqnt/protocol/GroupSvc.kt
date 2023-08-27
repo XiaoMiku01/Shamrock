@@ -46,6 +46,15 @@ internal object GroupSvc: BaseSvc() {
         }
     }
 
+    fun setGroupAdmin(groupId: Long, userId: Long, enable: Boolean) {
+        val buffer = ByteBuffer.allocate(9)
+        buffer.putInt(groupId.toInt())
+        buffer.putInt(userId.toInt())
+        buffer.put(if (enable) 1 else 0)
+        val array = buffer.array()
+        sendOidb("OidbSvc.0x55c_1", 1372, 1, array)
+    }
+
     fun setGroupWholeBan(groupId: Long, enable: Boolean) {
         val reqBody = oidb_0x89a.ReqBody()
         reqBody.uint64_group_code.set(groupId)

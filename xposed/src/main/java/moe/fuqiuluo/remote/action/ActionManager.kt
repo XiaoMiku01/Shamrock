@@ -25,7 +25,7 @@ internal object ActionManager {
             GetTroopList, GetTroopInfo, GetTroopList, GetTroopMemberInfo, GetTroopMemberList,
 
             // GroupActions
-            ModifyTroopName, LeaveTroop, KickTroopMember, BanTroopMember, SetGroupWholeBan,
+            ModifyTroopName, LeaveTroop, KickTroopMember, BanTroopMember, SetGroupWholeBan, SetGroupAdmin,
 
             SendMessage, DeleteMessage, GetMsg, GetForwardMsg
         ).forEach {
