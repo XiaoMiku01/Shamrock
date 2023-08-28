@@ -6,6 +6,14 @@ import android.util.Log
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.TextAlign
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.Date
 
 object AppRuntime {
@@ -21,6 +29,8 @@ object AppRuntime {
 
     lateinit var requestCount: MutableIntState
 
+    private val lock = Mutex()
+
     object AccountInfo {
         lateinit var uin: MutableState<String>
 
@@ -29,22 +39,42 @@ object AppRuntime {
 
     fun log(msg: String, level: Level = Level.INFO) {
         if (::logger.isInitialized) {
-            val format = "%s%s %s".format(format.format(Date()), level.name, msg)
+            GlobalScope.launch {
+                lock.withLock {
+                    val format = "%s%s %s".format(format.format(Date()), level.name, msg)
+                    val buffer = logger.logCache
+                    if (logger.size.intValue >= maxLogSize || buffer.length > 30000) {
+                        buffer.setLength(0)
+                        logger.logRanges = mutableListOf()
+                        logger.size.intValue = 0
+                    }
 
-            val buffer = logger.logCache
+                    val start = buffer.length
+                    val end = start + format.length
 
-            if (logger.size.intValue >= maxLogSize || buffer.length > 30000) {
-                buffer.setLength(0)
-                logger.logRanges = mutableListOf()
-                logger.size.intValue = 0
+                    logger.size.intValue += format.length
+                    buffer.append(format)
+                    logger.logRanges.add(Logger.LogRange(start, end, level))
+
+                    logger.logValue.value = AnnotatedString(
+                        text = logger.logCache.toString(),
+                        spanStyles = logger.logRanges.map {
+                            AnnotatedString.Range(
+                                SpanStyle(
+                                    color = it.level.color
+                                ), it.start, it.end
+                            )
+                        },
+                        paragraphStyles = logger.logRanges.map {
+                            AnnotatedString.Range(
+                                ParagraphStyle(
+                                    textAlign = TextAlign.Start
+                                ), it.start, it.end
+                            )
+                        }
+                    )
+                }
             }
-
-            val start = buffer.length
-            val end = start + format.length
-
-            logger.size.intValue += format.length
-            buffer.append(format)
-            logger.logRanges.add(Logger.LogRange(start, end, level))
         } else {
             Log.e("AppRuntime", "logger is not initialized")
         }
@@ -71,9 +101,10 @@ enum class Level(
 }
 
 class Logger(
-    var logCache: StringBuffer,
+    val logCache: StringBuffer,
     val size: MutableIntState,
     var logRanges: MutableList<LogRange>,
+    val logValue: MutableState<AnnotatedString>
 ) {
     data class LogRange(
         val start: Int,

@@ -24,15 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ParagraphStyle
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import moe.fuqiuluo.shamrock.ui.app.AppRuntime
 import moe.fuqiuluo.shamrock.ui.app.Logger
-import java.lang.StringBuilder
 
 @Composable
 fun LogFragment(
@@ -68,30 +64,10 @@ fun LogFragment(
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val text = remember(logger.size.intValue) {
-                    mutableStateOf(AnnotatedString(
-                        text = logger.logCache.toString(),
-                        spanStyles = logger.logRanges.map {
-                            AnnotatedString.Range(
-                                SpanStyle(
-                                    color = it.level.color
-                                ), it.start, it.end
-                            )
-                        },
-                        paragraphStyles = logger.logRanges.map {
-                            AnnotatedString.Range(
-                                ParagraphStyle(
-                                    textAlign = TextAlign.Start
-                                ), it.start, it.end
-                            )
-                        }
-                    ))
-                }
-
                 SelectionContainer {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = text.value,
+                        text = logger.logValue.value,
                         fontSize = 12.sp,
                         color = Color(0xff6c6c6c)
                     )
@@ -106,6 +82,6 @@ fun LogFragment(
 @Composable
 private fun LogPreview() {
     LogFragment(
-        Logger(StringBuffer(), mutableIntStateOf(0), mutableListOf())
+        Logger(StringBuffer(), mutableIntStateOf(0), mutableListOf(), mutableStateOf(AnnotatedString("")))
     )
 }
