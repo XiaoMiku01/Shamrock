@@ -48,7 +48,11 @@ internal object GroupSvc: BaseSvc() {
         }
     }
 
-    suspend fun modifyGroupMemberCard(groupId: Long, userId: Long, name: String): Boolean {
+    fun modifyGroupName(groupId: Long, name: String) {
+
+    }
+
+    fun modifyGroupMemberCard(groupId: Long, userId: Long, name: String): Boolean {
         val createToServiceMsg: ToServiceMsg = createToServiceMsg("friendlist.ModifyGroupCardReq")
         createToServiceMsg.extraData.putLong("dwZero", 0L)
         createToServiceMsg.extraData.putLong("dwGroupCode", groupId)

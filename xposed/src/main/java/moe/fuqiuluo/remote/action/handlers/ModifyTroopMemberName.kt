@@ -21,5 +21,7 @@ internal object ModifyTroopMemberName: IActionHandler() {
         else error("check if member or group exist")
     }
 
+    override val requiredParams: Array<String> = arrayOf("group_id", "user_id")
+
     override fun path(): String = "set_group_card"
 }
