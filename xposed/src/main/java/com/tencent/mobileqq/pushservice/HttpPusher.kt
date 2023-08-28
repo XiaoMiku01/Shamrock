@@ -15,6 +15,7 @@ import com.tencent.qqnt.msg.toSegment
 import com.tencent.qqnt.protocol.GroupSvc
 import com.tencent.qqnt.protocol.MsgSvc
 import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -113,7 +114,9 @@ internal object HttpPusher {
                 }.bodyAsText()
                 handleQuicklyReply(record, msgHash, respond)
             } catch (e: ConnectTimeoutException) {
-                LogCenter.log("消息推送失败: ${e.message}", Level.ERROR)
+                LogCenter.log("消息推送失败: 请检查你的推送服务器。", Level.ERROR)
+            } catch (e: HttpRequestTimeoutException) {
+                LogCenter.log("消息推送失败: 推送服务器无法连接。", Level.ERROR)
             } catch (e: Throwable) {
                 LogCenter.log("消息推送失败: ${e.stackTraceToString()}", Level.ERROR)
             }

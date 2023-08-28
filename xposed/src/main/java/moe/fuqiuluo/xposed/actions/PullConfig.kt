@@ -10,6 +10,7 @@ import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
 import moe.fuqiuluo.xposed.helper.internal.IPCRequest
 import moe.fuqiuluo.xposed.loader.ActionLoader
 import moe.fuqiuluo.xposed.loader.NativeLoader
+import mqq.app.MobileQQ
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
@@ -26,6 +27,12 @@ class PullConfig: IAction {
 
         DynamicReceiver.register("fetchPort", IPCRequest {
             DataRequester.request("success", mapOf("port" to HTTPServer.currServerPort))
+        })
+        DynamicReceiver.register("checkAndStartService", IPCRequest {
+            if (HTTPServer.isQueryServiceStarted) {
+                HTTPServer.isQueryServiceStarted = false
+            }
+            initHttp(MobileQQ.getContext())
         })
 
         DataRequester.request("init", onFailure = {

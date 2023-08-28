@@ -33,14 +33,16 @@ object AppRuntime {
 
             val builder = logger.logCache.value
 
-            if (logger.logRanges.size >= maxLogSize || builder.length > 30000) {
+            if (logger.size.intValue >= maxLogSize || builder.length > 30000) {
                 builder.clear()
                 logger.logRanges.clear()
+                logger.size.intValue = 0
             }
 
             val start = builder.length
             val end = start + format.length
 
+            logger.size.intValue += format.length
             builder.append(format)
             logger.logRanges.add(Logger.LogRange(start, end, level))
         } else {
@@ -70,6 +72,7 @@ enum class Level(
 
 class Logger(
     val logCache: MutableState<StringBuilder>,
+    val size: MutableIntState,
     val logRanges: MutableList<LogRange>,
 ) {
     data class LogRange(

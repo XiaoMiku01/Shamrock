@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,7 +33,6 @@ import androidx.compose.ui.unit.sp
 import moe.fuqiuluo.shamrock.ui.app.AppRuntime
 import moe.fuqiuluo.shamrock.ui.app.Logger
 import java.lang.StringBuilder
-import java.util.Collections.EMPTY_LIST
 
 @Composable
 fun LogFragment(
@@ -68,34 +68,25 @@ fun LogFragment(
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                @Suppress("UNCHECKED_CAST") val text = remember {
-                    mutableStateOf(
-                        AnnotatedString(
-                            text = "",
-                            spanStyles = EMPTY_LIST as List<AnnotatedString.Range<SpanStyle>>,
-                            paragraphStyles = EMPTY_LIST as List<AnnotatedString.Range<ParagraphStyle>>
-                        )
-                    )
-                }
-                val spanStyles = mutableListOf<AnnotatedString.Range<SpanStyle>>()
-                val paragraphStyles = mutableListOf<AnnotatedString.Range<ParagraphStyle>>()
-                logger.logRanges.forEach {
-                    spanStyles.add(AnnotatedString.Range(
-                        SpanStyle(
-                            color = it.level.color
-                        ), it.start, it.end
-                    ))
-                    paragraphStyles.add(AnnotatedString.Range(
-                        ParagraphStyle(
-                            textAlign = TextAlign.Start
-                        ), it.start, it.end
+                val text = remember(logger.size.intValue) {
+                    mutableStateOf(AnnotatedString(
+                        text = logger.logCache.value.toString(),
+                        spanStyles = logger.logRanges.map {
+                            AnnotatedString.Range(
+                                SpanStyle(
+                                    color = it.level.color
+                                ), it.start, it.end
+                            )
+                        },
+                        paragraphStyles = logger.logRanges.map {
+                            AnnotatedString.Range(
+                                ParagraphStyle(
+                                    textAlign = TextAlign.Start
+                                ), it.start, it.end
+                            )
+                        }
                     ))
                 }
-                text.value = AnnotatedString(
-                    text = logger.logCache.value.toString(),
-                    spanStyles = spanStyles,
-                    paragraphStyles = paragraphStyles
-                )
 
                 SelectionContainer {
                     Text(
@@ -115,6 +106,6 @@ fun LogFragment(
 @Composable
 private fun LogPreview() {
     LogFragment(
-        Logger(mutableStateOf(StringBuilder()), mutableListOf())
+        Logger(mutableStateOf(StringBuilder()), mutableIntStateOf(0), mutableListOf())
     )
 }

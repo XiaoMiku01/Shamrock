@@ -8,6 +8,6 @@ object FetchPortHandler: ModuleHandler() {
     override val cmd: String = "success"
 
     override fun onReceive(callbackId: Int, values: ContentValues, context: Context) {
-        DashboardInitializer(values.getAsInteger("port"))
+        DashboardInitializer(context, values.getAsInteger("port"))
     }
 }

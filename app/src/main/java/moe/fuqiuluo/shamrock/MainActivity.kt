@@ -122,7 +122,7 @@ private fun AppMainView() {
         }
 
         AppRuntime.logger = remember {
-            Logger(mutableStateOf(StringBuilder()), mutableListOf())
+            Logger(mutableStateOf(StringBuilder()), mutableIntStateOf(0), mutableListOf())
         }
 
         AppRuntime.AccountInfo.also {
