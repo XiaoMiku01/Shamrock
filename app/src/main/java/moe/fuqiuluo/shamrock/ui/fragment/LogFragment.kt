@@ -70,7 +70,7 @@ fun LogFragment(
             ) {
                 val text = remember(logger.size.intValue) {
                     mutableStateOf(AnnotatedString(
-                        text = logger.logCache.value.toString(),
+                        text = logger.logCache.toString(),
                         spanStyles = logger.logRanges.map {
                             AnnotatedString.Range(
                                 SpanStyle(
@@ -106,6 +106,6 @@ fun LogFragment(
 @Composable
 private fun LogPreview() {
     LogFragment(
-        Logger(mutableStateOf(StringBuilder()), mutableIntStateOf(0), mutableListOf())
+        Logger(StringBuffer(), mutableIntStateOf(0), mutableListOf())
     )
 }

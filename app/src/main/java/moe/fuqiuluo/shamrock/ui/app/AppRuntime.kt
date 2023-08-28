@@ -31,19 +31,19 @@ object AppRuntime {
         if (::logger.isInitialized) {
             val format = "%s%s %s".format(format.format(Date()), level.name, msg)
 
-            val builder = logger.logCache.value
+            val buffer = logger.logCache
 
-            if (logger.size.intValue >= maxLogSize || builder.length > 30000) {
-                builder.clear()
-                logger.logRanges.clear()
+            if (logger.size.intValue >= maxLogSize || buffer.length > 30000) {
+                buffer.setLength(0)
+                logger.logRanges = mutableListOf()
                 logger.size.intValue = 0
             }
 
-            val start = builder.length
+            val start = buffer.length
             val end = start + format.length
 
             logger.size.intValue += format.length
-            builder.append(format)
+            buffer.append(format)
             logger.logRanges.add(Logger.LogRange(start, end, level))
         } else {
             Log.e("AppRuntime", "logger is not initialized")
@@ -71,9 +71,9 @@ enum class Level(
 }
 
 class Logger(
-    val logCache: MutableState<StringBuilder>,
+    var logCache: StringBuffer,
     val size: MutableIntState,
-    val logRanges: MutableList<LogRange>,
+    var logRanges: MutableList<LogRange>,
 ) {
     data class LogRange(
         val start: Int,

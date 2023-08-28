@@ -39,6 +39,7 @@ import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.json
 import moe.fuqiuluo.xposed.tools.jsonArray
 import mqq.app.MobileQQ
+import java.net.SocketException
 
 internal object HttpPusher {
     private val actionMsgTypes = arrayOf(
@@ -115,6 +116,8 @@ internal object HttpPusher {
                 handleQuicklyReply(record, msgHash, respond)
             } catch (e: ConnectTimeoutException) {
                 LogCenter.log("消息推送失败: 请检查你的推送服务器。", Level.ERROR)
+            } catch (e: SocketException) {
+                LogCenter.log("消息推送失败: 网络波动。", Level.ERROR)
             } catch (e: HttpRequestTimeoutException) {
                 LogCenter.log("消息推送失败: 推送服务器无法连接。", Level.ERROR)
             } catch (e: Throwable) {

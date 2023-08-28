@@ -46,6 +46,10 @@ internal object GroupSvc: BaseSvc() {
         }
     }
 
+    fun modifyGroupMemberCard(groupId: Long, userId: Long, name: String) {
+
+    }
+
     fun setGroupAdmin(groupId: Long, userId: Long, enable: Boolean) {
         val buffer = ByteBuffer.allocate(9)
         buffer.putInt(groupId.toInt())
