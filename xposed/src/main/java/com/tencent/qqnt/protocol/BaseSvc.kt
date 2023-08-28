@@ -15,21 +15,29 @@ abstract class BaseSvc {
     protected val app: QQAppInterface
         get() = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
 
+    protected fun createToServiceMsg(cmd: String): ToServiceMsg {
+        return ToServiceMsg("mobileqq.service", app.currentAccountUin, cmd)
+    }
+
+    protected fun send(toServiceMsg: ToServiceMsg) {
+        app.sendToService(toServiceMsg)
+    }
+
     protected fun sendExtra(cmd: String, builder: (Bundle) -> Unit) {
-        val toServiceMsg = ToServiceMsg("mobileqq.service", app.currentAccountUin, cmd)
+        val toServiceMsg = createToServiceMsg(cmd)
         builder(toServiceMsg.extraData)
         app.sendToService(toServiceMsg)
     }
 
     protected fun sendPb(cmd: String, buffer: ByteArray) {
-        val toServiceMsg = ToServiceMsg("mobileqq.service", app.currentAccountUin, cmd)
+        val toServiceMsg = createToServiceMsg(cmd)
         toServiceMsg.putWupBuffer(buffer)
         toServiceMsg.addAttribute("req_pb_protocol_flag", true)
         app.sendToService(toServiceMsg)
     }
 
     protected fun sendOidb(cmd: String, cmdId: Int, serviceId: Int, buffer: ByteArray) {
-        val to = ToServiceMsg("mobileqq.service", app.currentAccountUin, cmd)
+        val to = createToServiceMsg(cmd)
         val oidb = oidb_sso.OIDBSSOPkg()
         oidb.uint32_command.set(cmdId)
         oidb.uint32_service_type.set(serviceId)

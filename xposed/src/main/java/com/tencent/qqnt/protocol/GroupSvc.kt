@@ -9,7 +9,9 @@ import com.tencent.mobileqq.data.troop.TroopMemberInfo
 import com.tencent.mobileqq.troop.api.ITroopInfoService
 import com.tencent.mobileqq.troop.api.ITroopMemberInfoService
 import com.tencent.protofile.join_group_link.join_group_link
+import com.tencent.qphone.base.remote.ToServiceMsg
 import com.tencent.qqnt.kernel.nativeinterface.MemberInfo
+import friendlist.stUinInfo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
@@ -46,8 +48,22 @@ internal object GroupSvc: BaseSvc() {
         }
     }
 
-    fun modifyGroupMemberCard(groupId: Long, userId: Long, name: String) {
-
+    suspend fun modifyGroupMemberCard(groupId: Long, userId: Long, name: String): Boolean {
+        val createToServiceMsg: ToServiceMsg = createToServiceMsg("friendlist.ModifyGroupCardReq")
+        createToServiceMsg.extraData.putLong("dwZero", 0L)
+        createToServiceMsg.extraData.putLong("dwGroupCode", groupId)
+        val info = stUinInfo()
+        info.cGender = -1
+        info.dwuin = userId
+        info.sEmail = ""
+        info.sName = name
+        info.sPhone = ""
+        info.sRemark = ""
+        info.dwFlag = 1
+        createToServiceMsg.extraData.putSerializable("vecUinInfo", arrayListOf(info))
+        createToServiceMsg.extraData.putLong("dwNewSeq", 0L)
+        send(createToServiceMsg)
+        return true
     }
 
     fun setGroupAdmin(groupId: Long, userId: Long, enable: Boolean) {
@@ -125,20 +141,17 @@ internal object GroupSvc: BaseSvc() {
     }
 
     fun isOwner(groupId: String): Boolean {
-        val runtime = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
         val groupInfo = getGroupInfo(groupId)
-        return groupInfo.troopowneruin == runtime.account
+        return groupInfo.troopowneruin == app.account
     }
 
     fun isAdmin(groupId: String): Boolean {
-        val runtime = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
-
-        val service = runtime
+        val service = app
             .getRuntimeService(ITroopInfoService::class.java, "all")
 
         val groupInfo = service.getTroopInfo(groupId)
 
-        return groupInfo.isAdmin || groupInfo.troopowneruin == runtime.account
+        return groupInfo.isAdmin || groupInfo.troopowneruin == app.account
     }
 
     fun resignTroop(groupId: Long) {
