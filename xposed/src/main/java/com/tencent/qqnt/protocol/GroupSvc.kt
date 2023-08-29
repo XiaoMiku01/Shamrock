@@ -6,10 +6,12 @@ import com.tencent.mobileqq.app.BusinessHandlerFactory
 import com.tencent.mobileqq.app.QQAppInterface
 import com.tencent.mobileqq.data.troop.TroopInfo
 import com.tencent.mobileqq.data.troop.TroopMemberInfo
+import com.tencent.mobileqq.pb.ByteStringMicro
 import com.tencent.mobileqq.troop.api.ITroopInfoService
 import com.tencent.mobileqq.troop.api.ITroopMemberInfoService
 import com.tencent.protofile.join_group_link.join_group_link
 import com.tencent.qphone.base.remote.ToServiceMsg
+import com.tencent.qqnt.kernel.nativeinterface.JsonGrayBusiId
 import com.tencent.qqnt.kernel.nativeinterface.MemberInfo
 import friendlist.stUinInfo
 import kotlinx.coroutines.delay
@@ -23,6 +25,7 @@ import moe.fuqiuluo.xposed.tools.slice
 import mqq.app.MobileQQ
 import tencent.im.oidb.cmd0x89a.oidb_0x89a
 import tencent.im.oidb.cmd0x8a0.oidb_0x8a0
+import tencent.im.oidb.cmd0x8fc.Oidb_0x8fc
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.nio.ByteBuffer
@@ -46,6 +49,21 @@ internal object GroupSvc: BaseSvc() {
             val groupId = body.group_code.get()
             LruCacheTroop.put(groupId, text)
         }
+    }
+
+    suspend fun setGroupUniqueTitle(groupId: String, userId: String, title: String) {
+        val localMemberInfo = getTroopMemberInfoByUin(groupId, userId, true)!!
+        val req = Oidb_0x8fc.ReqBody()
+        req.uint64_group_code.set(groupId.toLong())
+        val memberInfo = Oidb_0x8fc.MemberInfo()
+        memberInfo.uint64_uin.set(userId.toLong())
+        memberInfo.bytes_uin_name.set(ByteStringMicro.copyFromUtf8(localMemberInfo.troopnick.ifBlank {
+            localMemberInfo.troopremark
+        }))
+        memberInfo.bytes_special_title.set(ByteStringMicro.copyFromUtf8(title))
+        memberInfo.uint32_special_title_expire_time.set(-1)
+        req.rpt_mem_level_info.add(memberInfo)
+        sendOidb("OidbSvc.0x8fc_2", 2300, 2, req.toByteArray())
     }
 
     fun modifyGroupMemberCard(groupId: Long, userId: Long, name: String): Boolean {

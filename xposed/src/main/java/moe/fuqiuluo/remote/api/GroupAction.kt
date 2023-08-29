@@ -10,12 +10,20 @@ import moe.fuqiuluo.remote.action.handlers.BanTroopMember
 import moe.fuqiuluo.remote.action.handlers.ModifyTroopMemberName
 import moe.fuqiuluo.remote.action.handlers.ModifyTroopName
 import moe.fuqiuluo.remote.action.handlers.SetGroupAdmin
+import moe.fuqiuluo.remote.action.handlers.SetGroupUnique
 import moe.fuqiuluo.remote.action.handlers.SetGroupWholeBan
 import moe.fuqiuluo.xposed.tools.fetchOrNull
 import moe.fuqiuluo.xposed.tools.fetchOrThrow
 import moe.fuqiuluo.xposed.tools.getOrPost
 
 fun Routing.troopAction() {
+    getOrPost("/set_group_special_title") {
+        val groupId = fetchOrThrow("group_id")
+        val userId = fetchOrThrow("user_id")
+        val title = fetchOrThrow("special_title")
+        call.respondText(SetGroupUnique(groupId, userId, title))
+    }
+
     getOrPost("/set_group_name") {
         val groupId = fetchOrThrow("group_id")
         val card = fetchOrThrow("group_name")
