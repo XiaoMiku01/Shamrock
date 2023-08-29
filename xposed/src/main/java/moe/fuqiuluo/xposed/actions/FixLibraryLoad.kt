@@ -12,8 +12,7 @@ internal class FixLibraryLoad: IAction {
             return
         }
         XposedHelpers.findAndHookMethod(com.arthenica.ffmpegkit.NativeLoader::class.java,
-            "loadLibrary", String::class.java,
-            object: XC_MethodHook() {
+            "loadLibrary", String::class.java, object: XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     val name: String = param.args[0] as String
                     if (name == "ffmpegkit") {

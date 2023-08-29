@@ -65,7 +65,7 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:2.3.3")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.3")
 
-    implementation("com.arthenica:ffmpeg-kit-audio:5.1.LTS")
+    implementation("com.arthenica:ffmpeg-kit-min:5.1.LTS")
     implementation("androidx.exifinterface:exifinterface:1.3.6")
 
     compileOnly ("de.robv.android.xposed:api:82")
