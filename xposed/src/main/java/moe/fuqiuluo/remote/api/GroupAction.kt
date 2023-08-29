@@ -9,6 +9,8 @@ import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.handlers.BanTroopMember
 import moe.fuqiuluo.remote.action.handlers.GetTroopInfo
 import moe.fuqiuluo.remote.action.handlers.GetTroopList
+import moe.fuqiuluo.remote.action.handlers.GetTroopMemberInfo
+import moe.fuqiuluo.remote.action.handlers.GetTroopMemberList
 import moe.fuqiuluo.remote.action.handlers.ModifyTroopMemberName
 import moe.fuqiuluo.remote.action.handlers.ModifyTroopName
 import moe.fuqiuluo.remote.action.handlers.SetGroupAdmin
@@ -19,6 +21,19 @@ import moe.fuqiuluo.xposed.tools.fetchOrThrow
 import moe.fuqiuluo.xposed.tools.getOrPost
 
 fun Routing.troopAction() {
+    getOrPost("/get_group_member_list") {
+        val groupId = fetchOrThrow("group_id")
+        val refresh = fetchOrNull("refresh")?.toBooleanStrict() ?: false
+        call.respondText(GetTroopMemberList(groupId, refresh))
+    }
+
+    getOrPost("/get_group_member_info") {
+        val groupId = fetchOrThrow("group_id")
+        val userId = fetchOrThrow("user_id")
+        val refresh = fetchOrNull("no_cache")?.toBooleanStrict() ?: false
+        call.respondText(GetTroopMemberInfo(groupId, userId, refresh))
+    }
+
     getOrPost("/get_group_list") {
         val refresh = fetchOrNull("refresh")?.toBooleanStrict() ?: false
         call.respondText(GetTroopList(refresh))
@@ -26,7 +41,7 @@ fun Routing.troopAction() {
 
     getOrPost("/get_group_info") {
         val groupId = fetchOrThrow("group_id")
-        val refresh = fetchOrNull("refresh")?.toBooleanStrict() ?: false
+        val refresh = fetchOrNull("no_cache")?.toBooleanStrict() ?: false
         call.respondText(GetTroopInfo(groupId, refresh))
     }
 

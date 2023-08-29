@@ -11,7 +11,6 @@ import com.tencent.mobileqq.troop.api.ITroopInfoService
 import com.tencent.mobileqq.troop.api.ITroopMemberInfoService
 import com.tencent.protofile.join_group_link.join_group_link
 import com.tencent.qphone.base.remote.ToServiceMsg
-import com.tencent.qqnt.kernel.nativeinterface.JsonGrayBusiId
 import com.tencent.qqnt.kernel.nativeinterface.MemberInfo
 import friendlist.stUinInfo
 import kotlinx.coroutines.GlobalScope
@@ -21,8 +20,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
-import moe.fuqiuluo.remote.action.handlers.GetTroopInfo
-import moe.fuqiuluo.remote.action.handlers.GetTroopList
+import moe.fuqiuluo.remote.action.handlers.GetTroopMemberList
 import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.tools.slice
@@ -37,6 +35,7 @@ import kotlin.coroutines.resume
 
 internal object GroupSvc: BaseSvc() {
     private val RefreshTroopMemberInfoLock = Mutex()
+    private val RefreshTroopMemberListLock = Mutex()
     private val LruCacheTroop = LruCache<Long, String>(5)
 
     private lateinit var METHOD_REQ_MEMBER_INFO: Method
@@ -53,6 +52,24 @@ internal object GroupSvc: BaseSvc() {
             val groupId = body.group_code.get()
             LruCacheTroop.put(groupId, text)
         }
+    }
+
+    suspend fun getGroupMemberList(groupId: Long, refresh: Boolean): List<TroopMemberInfo>? {
+        val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
+        if (runtime !is AppInterface)
+            return null
+
+        val service = runtime.getRuntimeService(ITroopMemberInfoService::class.java, "all")
+        var memberList = service.getAllTroopMembers(groupId.toString())
+        if (refresh || memberList == null) {
+            memberList = requestTroopMemberInfo(service, groupId)
+        }
+
+        if (memberList == null) {
+            return null
+        }
+
+        return memberList
     }
 
     suspend fun getGroupList(refresh: Boolean): List<TroopInfo>? {
@@ -335,6 +352,22 @@ internal object GroupSvc: BaseSvc() {
         }
     }
 
+    private suspend fun requestTroopMemberInfo(service: ITroopMemberInfoService, groupId: Long): List<TroopMemberInfo>? {
+        return RefreshTroopMemberListLock.withLock {
+            val groupIdStr = groupId.toString()
+            service.deleteTroopMembers(groupIdStr)
+            refreshTroopMemberList(groupId)
+
+            withTimeoutOrNull(10000) {
+                var memberList: List<TroopMemberInfo>?
+                do {
+                    delay(100)
+                    memberList = service.getAllTroopMembers(groupIdStr)
+                } while (memberList.isNullOrEmpty())
+                return@withTimeoutOrNull memberList
+            }
+        }
+    }
 
     private suspend fun requestGroupList(
         service: ITroopInfoService,

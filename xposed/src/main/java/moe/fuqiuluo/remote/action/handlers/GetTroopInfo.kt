@@ -26,7 +26,9 @@ internal object GetTroopInfo: IActionHandler() {
                 classText = groupInfo.mGroupClassExtText,
                 isFrozen = groupInfo.mIsFreezed != 0,
                 maxMember = groupInfo.wMemberMax,
-                memNum = groupInfo.wMemberNum
+                memNum = groupInfo.wMemberNum,
+                memCount = groupInfo.wMemberNum,
+                maxNum = groupInfo.wMemberMax,
             ))
         }
     }
