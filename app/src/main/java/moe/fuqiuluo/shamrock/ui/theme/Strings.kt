@@ -12,6 +12,34 @@ import moe.fuqiuluo.shamrock.R
 private val LocalStringDefault = Default()
 private val LocalString2B = Chūnibyō()
 
+val RANDOM_TITLE = arrayOf(
+    "Clover", "CuteKitty", "Shamrock",
+    "Threeleaf", "CuteCat", "FuckingCat",
+    "XVideos", "Onlyfans", "Pornhub",
+    "Xposed", "LittleFox", "Springboot",
+    "Kotlin", "Rust & Android", "Dashabi",
+    "YYDS", "Amd Yes", "Gayhub",
+    "Yuzukkity", "HongKongDoll", "Xinrao"
+)
+val RANDOM_SUB_TITLE = arrayOf(
+    "A Framework Base On Xposed",
+    "今天吃什么好呢?",
+    "遇事不决，量子力学!",
+    "Just kkb?",
+    "いいよ，こいよ",
+    "伊已逝 吾亦逝",
+    "忆久意久 把义领",
+    "喵帕斯!",
+    "Creeper?",
+    "Make American Great Again!",
+    "TXHookPro",
+    "曾经有人失去了那个她",
+    "欲买桂花同载酒，终不似，少年游。",
+    "抚千窟为佑 看长安落花",
+    "どこにもない",
+    "春日和 かかってらしゃい"
+)
+
 val LocalString: VarString
     @ReadOnlyComposable
     @Composable

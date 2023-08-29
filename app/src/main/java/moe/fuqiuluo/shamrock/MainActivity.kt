@@ -72,6 +72,8 @@ import moe.fuqiuluo.shamrock.ui.fragment.LabFragment
 import moe.fuqiuluo.shamrock.ui.fragment.LogFragment
 import moe.fuqiuluo.shamrock.ui.service.internal.broadcastToModule
 import moe.fuqiuluo.shamrock.ui.theme.LocalString
+import moe.fuqiuluo.shamrock.ui.theme.RANDOM_SUB_TITLE
+import moe.fuqiuluo.shamrock.ui.theme.RANDOM_TITLE
 import moe.fuqiuluo.shamrock.ui.theme.ShamrockTheme
 import moe.fuqiuluo.shamrock.ui.theme.TabSelectedColor
 import moe.fuqiuluo.shamrock.ui.theme.ToolbarColor
@@ -116,10 +118,11 @@ private fun AppMainView() {
     val coreVersion = remember { mutableStateOf("1.0.0") }
     val coreName = remember { mutableStateOf("Xposed") }
     val coreCode = remember { mutableIntStateOf(1000) }
+    val voiceSwitch = remember { mutableStateOf(false) }
 
     if (!AppRuntime.isInit) {
         AppRuntime.state = remember {
-            RuntimeState(isFined, coreVersion, coreCode, coreName)
+            RuntimeState(isFined, coreVersion, coreCode, coreName, voiceSwitch)
         }
 
         AppRuntime.logger = remember {
@@ -166,15 +169,7 @@ private fun AppMainView() {
 
             Scaffold(
                 topBar = { ToolBar(
-                    title = arrayOf(
-                        "Clover", "CuteKitty", "Shamrock",
-                        "Threeleaf", "CuteCat", "FuckingCat",
-                        "XVideos", "Onlyfans", "Pornhub",
-                        "Xposed", "LittleFox", "Springboot",
-                        "Kotlin", "Rust & Android", "Dashabi",
-                        "YYDS", "Amd Yes", "Gayhub",
-                        "Yuzukkity", "HongKongDoll", "Xinrao"
-                    ).random()
+                    title = RANDOM_TITLE.random()
                 ) }
             ) {
                 val topPadding = it.calculateTopPadding()
@@ -202,7 +197,6 @@ private fun AppMainView() {
                         TitlesWithIcon.forEachIndexed { index, titleWithIcon ->
                             AnimatedTab(scope, state, index, titleWithIcon)
                         }
-
                     }
 
                     Divider(
@@ -243,24 +237,7 @@ private fun ToolBar(title: String) {
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = arrayOf(
-                    "A Framework Base On Xposed",
-                    "今天吃什么好呢?",
-                    "遇事不决，量子力学!",
-                    "Just kkb?",
-                    "いいよ，こいよ",
-                    "伊已逝 吾亦逝",
-                    "忆久意久 把义领",
-                    "喵帕斯!",
-                    "Creeper?",
-                    "Make American Great Again!",
-                    "TXHookPro",
-                    "曾经有人失去了那个她",
-                    "欲买桂花同载酒，终不似，少年游。",
-                    "抚千窟为佑 看长安落花",
-                    "どこにもない",
-                    "春日和 かかってらしゃい"
-                ).random(),
+                text = RANDOM_SUB_TITLE.random(),
                 color = ToolbarColor,
                 fontSize = 14.sp
             )

@@ -38,7 +38,7 @@ object DashboardInitializer {
             heartbeatTimer.cancel()
         }
         heartbeatTimer = timer("heartbeat", false, 0, 1000L * 30) {
-            log("心跳请求发送成功。")
+            log("心跳请求发送已发送。")
             checkService(context)
         }
     }

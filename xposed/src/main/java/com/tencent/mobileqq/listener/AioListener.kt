@@ -9,6 +9,7 @@ import de.robv.android.xposed.XposedBridge
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import java.util.ArrayList
 import java.util.HashMap
@@ -19,21 +20,29 @@ internal object AioListener: IKernelMsgListener {
 
         GlobalScope.launch {
             msgList.forEach {
-                val rawMsg = it.elements.toCQCode(it.chatType)
-                val msgHash = MessageHelper.convertMsgIdToMsgHash(it.chatType, it.msgId, it.peerUin)
-                when (it.chatType) {
-                    MsgConstant.KCHATTYPEGROUP -> {
-                        LogCenter.log("群消息(group = ${it.peerName}(${it.peerUin}), uin = ${it.senderUin}, msg = $rawMsg)")
-                        HttpPusher.pushGroupMsg(it, it.elements, rawMsg, msgHash)
-                    }
-                    MsgConstant.KCHATTYPEC2C -> {
-                        LogCenter.log("私聊消息(private = ${it.senderUin}, msg = $rawMsg)")
-                        HttpPusher.pushPrivateMsg(it, it.elements, rawMsg, msgHash)
-                    }
-                    else -> {
-                        LogCenter.log("不支持PUSH事件: ${it.chatType}")
-                    }
+                kotlin.runCatching {
+                    handleMsg(it)
+                }.onFailure {
+                    LogCenter.log(it.stackTraceToString(), Level.WARN)
                 }
+            }
+        }
+    }
+
+    private suspend fun handleMsg(record: MsgRecord) {
+        val rawMsg = record.elements.toCQCode(record.chatType)
+        val msgHash = MessageHelper.convertMsgIdToMsgHash(record.chatType, record.msgId, record.peerUin)
+        when (record.chatType) {
+            MsgConstant.KCHATTYPEGROUP -> {
+                LogCenter.log("群消息(group = ${record.peerName}(${record.peerUin}), uin = ${record.senderUin}, msg = $rawMsg)")
+                HttpPusher.pushGroupMsg(record, record.elements, rawMsg, msgHash)
+            }
+            MsgConstant.KCHATTYPEC2C -> {
+                LogCenter.log("私聊消息(private = ${record.senderUin}, msg = $rawMsg)")
+                HttpPusher.pushPrivateMsg(record, record.elements, rawMsg, msgHash)
+            }
+            else -> {
+                LogCenter.log("不支持PUSH事件: ${record.chatType}")
             }
         }
     }

@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.shamrock.R
+import moe.fuqiuluo.shamrock.ui.app.AppRuntime
+import moe.fuqiuluo.shamrock.ui.app.Level
 import moe.fuqiuluo.shamrock.ui.theme.LocalString
 import moe.fuqiuluo.shamrock.ui.theme.TabUnSelectedColor
 import moe.fuqiuluo.shamrock.ui.tools.NoticeTextDialog
@@ -72,6 +74,7 @@ fun LabFragment() {
                 ) {
                     preferences.edit { putBoolean("2B", it) }
                     scope.toast(ctx, "重启生效哦！")
+                    return@Function true
                 }
             }
         }
@@ -96,6 +99,32 @@ fun LabFragment() {
                 ) {
                     preferences.edit { putBoolean("auto_clear", it) }
                     scope.toast(ctx, "重启QQ生效")
+                    return@Function false
+                }
+            }
+
+        }
+
+        ActionBox(
+            modifier = Modifier.padding(top = 12.dp),
+            painter = painterResource(id = R.drawable.round_logo_dev_24),
+            title = "语音编解码器"
+        ) {
+            Column {
+                Divider(
+                    modifier = Modifier,
+                    color = TabUnSelectedColor,
+                    thickness = 0.2.dp
+                )
+
+                Function(
+                    title = "语音流支持器",
+                    desc = "无法获取语音流支持器状态。",
+                    descColor = Color.Red,
+                    isSwitch = AppRuntime.state.supportVoice.value
+                ) {
+                    scope.toast(ctx, "重启QQ生效")
+                    return@Function true
                 }
             }
 
@@ -109,7 +138,7 @@ private fun Function(
     desc: String,
     descColor: Color,
     isSwitch: Boolean,
-    onClick: (Boolean) -> Unit
+    onClick: (Boolean) -> Boolean
 ) {
     Column(modifier = Modifier
         .absolutePadding(left = 8.dp, right = 8.dp, top = 12.dp, bottom = 0.dp)

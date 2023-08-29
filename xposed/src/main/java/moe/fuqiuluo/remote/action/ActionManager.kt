@@ -26,7 +26,9 @@ internal object ActionManager {
 
             // GroupActions
             ModifyTroopName, LeaveTroop, KickTroopMember, BanTroopMember, SetGroupWholeBan, SetGroupAdmin, ModifyTroopMemberName,
+            SetGroupUnique,
 
+            // MSG ACTIONS
             SendMessage, DeleteMessage, GetMsg, GetForwardMsg
         ).forEach {
             actionMap[it.path()] = it

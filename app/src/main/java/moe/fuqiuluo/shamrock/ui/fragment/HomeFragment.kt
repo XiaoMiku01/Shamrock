@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import moe.fuqiuluo.shamrock.R
 import moe.fuqiuluo.shamrock.ui.app.RuntimeState
 import moe.fuqiuluo.shamrock.ui.theme.LocalString
+import moe.fuqiuluo.shamrock.ui.theme.STATE_END_COLOR
+import moe.fuqiuluo.shamrock.ui.theme.STATE_START_COLOR
 
 @Composable
 fun HomeFragment(
@@ -103,7 +105,7 @@ private fun StatusCardBoard(
             .fillMaxWidth()
             .background(
                 Brush.linearGradient(
-                    listOf(Color(0xFF03AA9A), Color(0xFF4DB8AD))
+                    listOf(STATE_START_COLOR, STATE_END_COLOR)
                 ), shape = RoundedCornerShape(12.dp)
             ),
         verticalAlignment = Alignment.CenterVertically
@@ -149,9 +151,12 @@ private fun MainPreview() {
     val coreVersion = remember { mutableStateOf("1.0.0") }
     val coreName = remember { mutableStateOf("Xposed") }
     val coreCode = remember { mutableIntStateOf(1000) }
+    val voiceSwitch = remember {
+        mutableStateOf(false)
+    }
 
     val runtime = remember {
-        RuntimeState(isFined, coreVersion, coreCode, coreName)
+        RuntimeState(isFined, coreVersion, coreCode, coreName, voiceSwitch)
     }
 
     HomeFragment(runtime)

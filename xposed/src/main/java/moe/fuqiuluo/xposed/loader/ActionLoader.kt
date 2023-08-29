@@ -1,6 +1,7 @@
 package moe.fuqiuluo.xposed.loader
 
 import android.content.Context
+import moe.fuqiuluo.xposed.actions.AntiBackgroundMsf
 import moe.fuqiuluo.xposed.actions.CreateHTTP
 import moe.fuqiuluo.xposed.actions.DataReceiver
 import moe.fuqiuluo.xposed.actions.FetchService
@@ -28,6 +29,7 @@ object ActionLoader {
     private val ACTION_LIST = arrayOf<KClass<*>>(
         FetchService::class, // 获取服务实例
         CreateHTTP::class, // 创建HTTP API
+        AntiBackgroundMsf::class, // 反QQ后台模式
     )
 
     // 先从APP拉取配置文件，再执行其他操作

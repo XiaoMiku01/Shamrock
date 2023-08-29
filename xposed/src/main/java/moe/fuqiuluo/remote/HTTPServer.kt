@@ -6,6 +6,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import moe.fuqiuluo.remote.api.*
@@ -13,6 +14,7 @@ import moe.fuqiuluo.remote.config.contentNegotiation
 import moe.fuqiuluo.remote.config.statusPages
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
+import moe.fuqiuluo.xposed.loader.NativeLoader
 
 object HTTPServer {
     @JvmStatic
@@ -48,7 +50,14 @@ object HTTPServer {
         isQueryServiceStarted = true
         this.currServerPort = port
         LogCenter.log("Start HTTP Server: http://0.0.0.0:$currServerPort/")
-        DataRequester.request("success", mapOf("port" to currServerPort))
+        DataRequester.request("success", mapOf(
+            "port" to currServerPort,
+            "voice" to NativeLoader.isVoiceLoaded
+        ))
+    }
+
+    fun isActive(): Boolean {
+        return server.application.isActive
     }
 
     suspend fun changePort(port: Int) {

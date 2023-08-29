@@ -54,6 +54,8 @@ import kotlinx.coroutines.launch
 import moe.fuqiuluo.shamrock.R
 import moe.fuqiuluo.shamrock.ui.app.AppRuntime
 import moe.fuqiuluo.shamrock.ui.app.Level
+import moe.fuqiuluo.shamrock.ui.theme.ACCOUNT_END_COLOR
+import moe.fuqiuluo.shamrock.ui.theme.ACCOUNT_START_COLOR
 import moe.fuqiuluo.shamrock.ui.theme.TabSelectedColor
 import moe.fuqiuluo.shamrock.ui.theme.TabUnSelectedColor
 import moe.fuqiuluo.shamrock.ui.tools.InputDialog
@@ -254,6 +256,7 @@ private fun FunctionCard(
             ) {
                 preferences.edit { putBoolean("tablet", it) }
                 scope.toast(ctx, "重启QQ生效")
+                return@Function true
             }
 
             Function(
@@ -264,6 +267,7 @@ private fun FunctionCard(
             ) {
                 preferences.edit { putBoolean("webhook", it) }
                 scope.toast(ctx, "重启QQ生效")
+                return@Function true
             }
 
             Function(
@@ -274,6 +278,7 @@ private fun FunctionCard(
             ) {
                 preferences.edit { putBoolean("use_cqcode", it) }
                 scope.toast(ctx, "重启QQ生效")
+                return@Function true
             }
 
             Function(
@@ -284,6 +289,7 @@ private fun FunctionCard(
             ) {
                 preferences.edit { putBoolean("ws", it) }
                 scope.toast(ctx, "重启QQ生效")
+                return@Function true
             }
 
             Function(
@@ -294,6 +300,7 @@ private fun FunctionCard(
             ) {
                 preferences.edit { putBoolean("ws_client", it) }
                 scope.toast(ctx, "重启QQ生效")
+                return@Function true
 
             }
 
@@ -306,6 +313,7 @@ private fun FunctionCard(
                 preferences.edit { putBoolean("pro_api", it) }
                 scope.toast(ctx, "重启QQ生效")
                 AppRuntime.log("专业级API = $it", Level.WARN)
+                return@Function true
             }
         }
     }
@@ -317,7 +325,7 @@ private fun Function(
     desc: String? = null,
     descColor: Color? = null,
     isSwitch: Boolean,
-    onClick: (Boolean) -> Unit
+    onClick: (Boolean) -> Boolean
 ) {
     Column(
         modifier = Modifier
@@ -373,8 +381,8 @@ private fun InformationCard(ctx: Context) {
 @Composable
 private fun InfoItem(
     modifier: Modifier = Modifier,
-    titleColor: Color = Color(0xFF5A5A5A),
-    contentColor: Color = Color(0xFF5A5A5A),
+    titleColor: Color = TabSelectedColor,
+    contentColor: Color = TabSelectedColor,
     title: String,
     content: String,
     doubleClick: ((String) -> Unit)? = null
@@ -386,7 +394,7 @@ private fun InfoItem(
             .combinedClickable(onDoubleClick = {
                 doubleClick?.invoke(content)
             }) {
-               // nothing
+                true
             }
         ,
         verticalAlignment = Alignment.CenterVertically
@@ -420,7 +428,7 @@ private fun AccountCard(
             .fillMaxWidth()
             .background(
                 Brush.linearGradient(
-                    listOf(Color(0xFF2196F3), Color(0xFF00BCD4))
+                    listOf(ACCOUNT_START_COLOR, ACCOUNT_END_COLOR)
                 ), shape = RoundedCornerShape(12.dp)
             ),
         verticalAlignment = Alignment.CenterVertically

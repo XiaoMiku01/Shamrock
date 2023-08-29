@@ -41,7 +41,7 @@ fun IosSwitch(
     switchValue: Boolean,
     positiveColor: Color = Color(0xFF35C759),
     negativeColor: Color = Color(0xFFE9E9EA),
-    onValueChanged: (Boolean) -> Unit,
+    onValueChanged: (Boolean) -> Boolean,
 ) {
     var width by remember { (mutableStateOf(0.dp)) }
 
@@ -96,8 +96,9 @@ fun IosSwitch(
                 interactionSource = interactionSource,
                 indication = null
             ) {
-                switchClicked = !switchClicked
-                onValueChanged(switchClicked)
+                if(onValueChanged(!switchClicked)) {
+                    switchClicked = !switchClicked
+                }
             }
     ) {
         Row {
@@ -126,7 +127,7 @@ private fun SwitchPreView() {
         switchValue = false,
         buttonHeight = 22.dp,
         onValueChanged = {
-
+            false
         }
     )
 }
