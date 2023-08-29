@@ -119,8 +119,8 @@ fun LabFragment() {
 
                 Function(
                     title = "语音流支持器",
-                    desc = "无法获取语音流支持器状态。",
-                    descColor = Color.Red,
+                    desc = "请按照Wiki提示安装语音转换器。",
+                    descColor = it,
                     isSwitch = AppRuntime.state.supportVoice.value
                 ) {
                     scope.toast(ctx, "重启QQ生效")

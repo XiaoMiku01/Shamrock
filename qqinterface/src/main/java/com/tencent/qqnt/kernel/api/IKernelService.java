@@ -6,4 +6,6 @@ import mqq.app.api.IRuntimeService;
 
 public interface IKernelService extends IRuntimeService {
     IQQNTWrapperSession getWrapperSession();
+
+    boolean isInit();
 }

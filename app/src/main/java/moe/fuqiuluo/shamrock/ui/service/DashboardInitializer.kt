@@ -38,7 +38,6 @@ object DashboardInitializer {
             heartbeatTimer.cancel()
         }
         heartbeatTimer = timer("heartbeat", false, 0, 1000L * 30) {
-            log("心跳请求发送已发送。")
             checkService(context)
         }
     }
@@ -54,6 +53,7 @@ object DashboardInitializer {
                         if (result.retcode != 0) {
                             log("尝试从接口获取账号信息失败，未知错误。", Level.ERROR)
                         } else {
+                            log("心跳请求发送已发送。")
                             AccountInfo.let { account ->
                                 account.uin.value = result.data.uin.toString()
                                 account.nick.value = result.data.nick

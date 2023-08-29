@@ -58,4 +58,8 @@ public interface IQQNTWrapperSession {
     void onDispatchPush(int i2, byte[] bArr);
 
     void onDispatchRequestReply(long j2, int i2, byte[] bArr);
+
+    void switchToBackGround();
+
+    void switchToFront();
 }

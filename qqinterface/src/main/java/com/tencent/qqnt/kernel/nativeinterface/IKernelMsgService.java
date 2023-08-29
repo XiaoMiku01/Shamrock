@@ -17,4 +17,12 @@ public interface IKernelMsgService {
     void addLocalRecordMsg(Contact contact, long msgId, MsgElement elem, HashMap<Integer, MsgAttributeInfo> hashMap, boolean z, IOperateCallback callback);
 
     void getMultiMsg(Contact contact, long msgId, long uniseq, IGetMultiMsgCallback cb);
+
+    void switchBackGround(BackGroundInfo backGroundInfo, IOperateCallback cb);
+
+    void switchBackGroundForMqq(byte[] bArr, IOperateCallback cb);
+
+    void switchForeGround(IOperateCallback cb);
+
+    void switchForeGroundForMqq(byte[] bArr, IOperateCallback cb);
 }

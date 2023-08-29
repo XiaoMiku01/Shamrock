@@ -2,6 +2,7 @@ package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
 import de.robv.android.xposed.XposedHelpers
+import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.loader.LuoClassloader
 import moe.fuqiuluo.xposed.tools.hookMethod
@@ -15,6 +16,8 @@ internal class AntiBackgroundMsf: IAction {
             it.hookMethod("onBackground").before {
                 it.result = null
             }
+        }.onFailure {
+            LogCenter.log("Keeping MiniMsgUser alive failed: ${it.message}", Level.WARN)
         }
 
         try {
@@ -23,9 +26,7 @@ internal class AntiBackgroundMsf: IAction {
                 it.args[1] = true
             }
         } catch (e: Throwable) {
-            LogCenter.log("Keeping MSF alive failed: ${e.message}")
+            LogCenter.log("Keeping MSF alive failed: ${e.message}", Level.WARN)
         }
-
-
     }
 }
