@@ -1,9 +1,12 @@
 package moe.fuqiuluo.remote.api
 
+import com.tencent.mobileqq.data.Card
 import com.tencent.mobileqq.profilecard.api.IProfileCardBlacklistApi
 import com.tencent.mobileqq.qroute.QRoute
 import com.tencent.qqnt.msg.LogicException
+import com.tencent.qqnt.protocol.CardSvc
 import io.ktor.server.application.call
+import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
@@ -19,6 +22,21 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 fun Routing.userAction() {
+    getOrPost("/get_stranger_info") {
+        val uin = fetchOrThrow("user_id")
+        val info = CardSvc.getProfileCard(uin)
+        call.respond(mapOf(
+            "user_id" to uin,
+            "nickname" to info.strNick,
+            "age" to info.age.toString(),
+            "sex" to when(info.shGender) {
+                Card.FEMALE -> "female"
+                Card.MALE -> "male"
+                else -> "unknown"
+            }
+        ))
+    }
+
     get("/is_blacklist_uin") {
         val uin = fetchGetOrThrow("uin")
         val blacklistApi = QRoute.api(IProfileCardBlacklistApi::class.java)
