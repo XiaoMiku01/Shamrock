@@ -14,12 +14,15 @@ import com.tencent.qphone.base.remote.ToServiceMsg
 import com.tencent.qqnt.kernel.nativeinterface.JsonGrayBusiId
 import com.tencent.qqnt.kernel.nativeinterface.MemberInfo
 import friendlist.stUinInfo
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import moe.fuqiuluo.remote.action.handlers.GetTroopInfo
+import moe.fuqiuluo.remote.action.handlers.GetTroopList
 import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.tools.slice
@@ -50,6 +53,20 @@ internal object GroupSvc: BaseSvc() {
             val groupId = body.group_code.get()
             LruCacheTroop.put(groupId, text)
         }
+    }
+
+    suspend fun getGroupList(refresh: Boolean): List<TroopInfo>? {
+        val service = app.getRuntimeService(ITroopInfoService::class.java, "all")
+
+        var troopList = service.allTroopList
+        if(refresh || !service.isTroopCacheInited || troopList == null) {
+            if(!requestGroupList(service, troopList)) {
+                return null
+            } else {
+                troopList = service.allTroopList
+            }
+        }
+        return troopList
     }
 
     suspend fun getGroupInfo(groupId: String, refresh: Boolean): TroopInfo? {
@@ -314,6 +331,30 @@ internal object GroupSvc: BaseSvc() {
                         return@forEach
                     }
                 }
+            }
+        }
+    }
+
+
+    private suspend fun requestGroupList(
+        service: ITroopInfoService,
+        troopList: List<TroopInfo>?
+    ): Boolean {
+        refreshTroopList()
+
+        return suspendCancellableCoroutine { continuation ->
+            val waiter = GlobalScope.launch {
+                do {
+                    delay(1000)
+                } while (
+                    !service.isTroopCacheInited
+                // || (!troopList.isNullOrEmpty() && service.hasNoTroop()) 判断不合理
+                )
+                continuation.resume(true)
+            }
+            continuation.invokeOnCancellation {
+                waiter.cancel()
+                continuation.resume(false)
             }
         }
     }

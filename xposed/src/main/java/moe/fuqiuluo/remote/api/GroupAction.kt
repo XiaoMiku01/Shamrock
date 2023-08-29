@@ -8,6 +8,7 @@ import moe.fuqiuluo.remote.action.ActionManager
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.handlers.BanTroopMember
 import moe.fuqiuluo.remote.action.handlers.GetTroopInfo
+import moe.fuqiuluo.remote.action.handlers.GetTroopList
 import moe.fuqiuluo.remote.action.handlers.ModifyTroopMemberName
 import moe.fuqiuluo.remote.action.handlers.ModifyTroopName
 import moe.fuqiuluo.remote.action.handlers.SetGroupAdmin
@@ -18,6 +19,11 @@ import moe.fuqiuluo.xposed.tools.fetchOrThrow
 import moe.fuqiuluo.xposed.tools.getOrPost
 
 fun Routing.troopAction() {
+    getOrPost("/get_group_list") {
+        val refresh = fetchOrNull("refresh")?.toBooleanStrict() ?: false
+        call.respondText(GetTroopList(refresh))
+    }
+
     getOrPost("/get_group_info") {
         val groupId = fetchOrThrow("group_id")
         val refresh = fetchOrNull("refresh")?.toBooleanStrict() ?: false
