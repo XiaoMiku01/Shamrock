@@ -12,6 +12,7 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import moe.fuqiuluo.remote.action.ActionManager
 import moe.fuqiuluo.remote.action.ActionSession
+import moe.fuqiuluo.remote.action.handlers.GetFriendList
 import moe.fuqiuluo.remote.entries.Status
 import moe.fuqiuluo.xposed.tools.fetchGetOrThrow
 import moe.fuqiuluo.xposed.tools.fetchOrNull
@@ -35,6 +36,11 @@ fun Routing.userAction() {
                 else -> "unknown"
             }
         ))
+    }
+
+    getOrPost("/get_friend_list") {
+        val refresh = fetchOrNull("refresh")?.toBoolean() ?: false
+        call.respondText(GetFriendList(refresh))
     }
 
     get("/is_blacklist_uin") {
