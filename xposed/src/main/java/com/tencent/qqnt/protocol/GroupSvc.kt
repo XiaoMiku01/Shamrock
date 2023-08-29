@@ -19,6 +19,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
+import moe.fuqiuluo.remote.action.handlers.GetTroopInfo
 import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.tools.slice
@@ -49,6 +50,24 @@ internal object GroupSvc: BaseSvc() {
             val groupId = body.group_code.get()
             LruCacheTroop.put(groupId, text)
         }
+    }
+
+    suspend fun getGroupInfo(groupId: String, refresh: Boolean): TroopInfo? {
+        val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
+        if (runtime !is AppInterface)
+            return null
+
+        val service = runtime
+            .getRuntimeService(ITroopInfoService::class.java, "all")
+
+        var groupInfo = getGroupInfo(groupId)
+
+        if(refresh || !service.isTroopCacheInited || groupInfo.troopuin.isNullOrBlank()) {
+            groupInfo = requestGroupList(service, groupId.toLong())
+                ?: return null
+        }
+
+        return groupInfo
     }
 
     suspend fun setGroupUniqueTitle(groupId: String, userId: String, title: String) {
