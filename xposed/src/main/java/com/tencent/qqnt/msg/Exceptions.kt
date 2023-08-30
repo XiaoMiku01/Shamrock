@@ -10,3 +10,7 @@ internal class ParamsIllegalException(key: String)
 
 internal class LogicException(why: String)
     :RuntimeException(why), InternalMessageMakerError
+
+internal class ErrorTokenException()
+    :RuntimeException("access_token error"), InternalMessageMakerError
+

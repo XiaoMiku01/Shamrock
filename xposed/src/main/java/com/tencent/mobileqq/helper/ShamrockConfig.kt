@@ -28,8 +28,13 @@ internal object ShamrockConfig {
             putBoolean(  "use_cqcode", intent.getBooleanExtra("use_cqcode", false)) // 使用CQ码
             putString(   "ws_addr",    intent.getStringExtra("ws_addr"))                       // 被动WS地址
             putBoolean(  "pro_api",    intent.getBooleanExtra("pro_api", false))    // 开发调试API开关
+            putString(   "token",      intent.getStringExtra("token"))                         // 鉴权
             putBoolean("isInit", true)
         }
+    }
+
+    fun getToken(): String {
+        return preferences.getString("token", "") ?: ""
     }
 
     fun useCQ(): Boolean {

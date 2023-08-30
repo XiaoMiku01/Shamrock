@@ -221,6 +221,35 @@ private fun APIInfoCard(
                 )
             }
 
+            val authToken = remember { mutableStateOf(preferences.getString("token", "")!!) }
+            val dialogAuthTokenInputState = InputDialog(
+                openDialog = remember { mutableStateOf(false) },
+                title = "鉴权Token",
+                desc = "用于鉴权的Token。",
+                isError = remember { mutableStateOf(false) },
+                text = authToken,
+                hint = "12345678",
+                keyboardType = KeyboardType.Text,
+                errorText = "输入的参数不合法",
+            ) {
+                it.length > 36
+            }
+            InfoItem(
+                title = "鉴权Token",
+                content = authToken.value
+            ) {
+                dialogAuthTokenInputState.show(
+                    confirm = {
+                        preferences.edit { putString("token", authToken.value) }
+                        scope.toast(ctx, "重启QQ生效")
+                        AppRuntime.log("设置鉴权Token为[${authToken.value}]，重启QQ生效。")
+                    },
+                    cancel = {
+                        scope.toast(ctx, "取消修改")
+                    }
+                )
+            }
+
             InfoItem(
                 title = "累计调用次数",
                 content = AppRuntime.requestCount.intValue.toString()

@@ -20,7 +20,8 @@ internal object InitHandler: ModuleHandler() {
             "ws_client" to preferences.getBoolean("ws_client", false),
             "use_cqcode" to preferences.getBoolean("use_cqcode", false),
             "ws_addr" to preferences.getString("ws_addr", ""),
-            "pro_api" to preferences.getBoolean("pro_api", false)
+            "pro_api" to preferences.getBoolean("pro_api", false),
+            "token" to preferences.getString("token", null)
         ))
     }
 }

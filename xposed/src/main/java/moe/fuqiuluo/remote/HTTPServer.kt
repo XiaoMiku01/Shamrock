@@ -1,6 +1,7 @@
 package moe.fuqiuluo.remote
 
 import com.tencent.mobileqq.helper.ShamrockConfig
+import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -12,6 +13,7 @@ import kotlinx.coroutines.sync.withLock
 import moe.fuqiuluo.remote.api.*
 import moe.fuqiuluo.remote.config.contentNegotiation
 import moe.fuqiuluo.remote.config.statusPages
+import moe.fuqiuluo.remote.plugin.Auth
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
 import moe.fuqiuluo.xposed.loader.NativeLoader
@@ -29,6 +31,7 @@ object HTTPServer {
         if (isQueryServiceStarted) return
         actionMutex.withLock {
             server = embeddedServer(Netty, port = port) {
+                install(Auth)
                 contentNegotiation()
                 statusPages()
                 routing {

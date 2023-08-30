@@ -1,8 +1,10 @@
 package moe.fuqiuluo.remote.config
 
+import com.tencent.qqnt.msg.ErrorTokenException
 import com.tencent.qqnt.msg.LogicException
 import com.tencent.qqnt.msg.ParamsException
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.uri
@@ -18,6 +20,9 @@ fun Application.statusPages() {
         }
         exception<LogicException> { call, cause ->
             call.respond(CommonResult("failed", Status.LogicError.code, ErrorCatch(call.request.uri, cause.message ?: "")))
+        }
+        exception<ErrorTokenException> { call, cause ->
+            call.respond(CommonResult("failed", Status.BadRequest.code, ErrorCatch(call.request.uri, cause.message ?: "")))
         }
         exception<Throwable> { call, cause ->
             call.respond(CommonResult("failed", Status.InternalHandlerError.code, ErrorCatch(call.request.uri, cause.stackTraceToString())))

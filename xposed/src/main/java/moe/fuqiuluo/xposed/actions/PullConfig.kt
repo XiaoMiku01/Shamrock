@@ -9,6 +9,7 @@ import com.tencent.qqnt.utils.PlatformUtils
 import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
 import moe.fuqiuluo.xposed.helper.internal.IPCRequest
 import moe.fuqiuluo.xposed.loader.ActionLoader
+import moe.fuqiuluo.xposed.loader.LuoClassloader
 import moe.fuqiuluo.xposed.loader.NativeLoader
 import mqq.app.MobileQQ
 import kotlin.concurrent.thread
@@ -26,7 +27,10 @@ class PullConfig: IAction {
         if (!PlatformUtils.isMainProcess()) return
 
         DynamicReceiver.register("fetchPort", IPCRequest {
-            DataRequester.request("success", mapOf("port" to HTTPServer.currServerPort))
+            DataRequester.request("success", mapOf(
+                "port" to HTTPServer.currServerPort,
+                "voice" to NativeLoader.isVoiceLoaded
+            ))
         })
         DynamicReceiver.register("checkAndStartService", IPCRequest {
             if (HTTPServer.isQueryServiceStarted) {
