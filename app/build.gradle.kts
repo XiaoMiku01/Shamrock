@@ -7,8 +7,6 @@ plugins {
     kotlin("plugin.serialization") version "1.8.10"
 }
 
-var isSign = false
-
 android {
     namespace = "moe.fuqiuluo.shamrock"
     ndkVersion = "25.1.8937393"
@@ -18,7 +16,7 @@ android {
         applicationId = "moe.fuqiuluo.shamrock"
         minSdk = 24
         targetSdk = 33
-        versionCode = 5
+        versionCode = 6
         versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -52,9 +50,6 @@ android {
                         fileName.append("-release")
                     } else if(command.endsWith("Debug")) {
                         fileName.append("-debug")
-                    }
-                    if (!isSign) {
-                        fileName.append("-unsigned")
                     }
                     it.outputFileName = fileName.append(".apk").toString()
                 }
@@ -123,10 +118,8 @@ android {
 fun configureAppSigningConfigsForRelease(project: Project) {
     val keystorePath: String? = System.getenv("KEYSTORE_PATH")
     if (keystorePath.isNullOrBlank()) {
-        println("ERROR: KEYSTORE_PATH is not set or is blank.")
         return
     }
-    isSign = true
     project.configure<ApplicationExtension> {
         signingConfigs {
             create("release") {
