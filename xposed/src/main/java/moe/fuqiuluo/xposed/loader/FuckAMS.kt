@@ -1,13 +1,11 @@
 @file:Suppress("UNUSED_VARIABLE", "LocalVariableName")
 package moe.fuqiuluo.xposed.loader
 
-import android.annotation.SuppressLint
 import android.content.pm.ApplicationInfo
 import android.os.Build
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import moe.fuqiuluo.xposed.tools.hookMethod
-import java.io.File
 import java.lang.reflect.Method
 
 internal object FuckAMS {
