@@ -38,6 +38,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         ${SRC_DIR}
         cqcode.cpp
         silk.cpp
+        group_honor.cpp
         message.cpp
         shamrock.cpp)
 

@@ -54,13 +54,13 @@ internal object GroupSvc: BaseSvc() {
         }
     }
 
-    suspend fun getGroupMemberList(groupId: Long, refresh: Boolean): List<TroopMemberInfo>? {
+    suspend fun getGroupMemberList(groupId: String, refresh: Boolean): List<TroopMemberInfo>? {
         val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
         if (runtime !is AppInterface)
             return null
 
         val service = runtime.getRuntimeService(ITroopMemberInfoService::class.java, "all")
-        var memberList = service.getAllTroopMembers(groupId.toString())
+        var memberList = service.getAllTroopMembers(groupId)
         if (refresh || memberList == null) {
             memberList = requestTroopMemberInfo(service, groupId)
         }
@@ -253,6 +253,13 @@ internal object GroupSvc: BaseSvc() {
         METHOD_REQ_MODIFY_GROUP_NAME.invoke(businessHandler, groupId, name, false)
     }
 
+    fun parseHonor(honor: String?): List<Int> {
+        return (honor ?: "")
+            .split("|")
+            .filter { it.isNotBlank() }
+            .map { it.toInt() }
+    }
+
     fun groupUin2GroupCode(groupuin: Long): Long {
         var calc = groupuin / 1000000L
         while (true) {
@@ -352,17 +359,16 @@ internal object GroupSvc: BaseSvc() {
         }
     }
 
-    private suspend fun requestTroopMemberInfo(service: ITroopMemberInfoService, groupId: Long): List<TroopMemberInfo>? {
+    private suspend fun requestTroopMemberInfo(service: ITroopMemberInfoService, groupId: String): List<TroopMemberInfo>? {
         return RefreshTroopMemberListLock.withLock {
-            val groupIdStr = groupId.toString()
-            service.deleteTroopMembers(groupIdStr)
+            service.deleteTroopMembers(groupId)
             refreshTroopMemberList(groupId)
 
             withTimeoutOrNull(10000) {
                 var memberList: List<TroopMemberInfo>?
                 do {
                     delay(100)
-                    memberList = service.getAllTroopMembers(groupIdStr)
+                    memberList = service.getAllTroopMembers(groupId)
                 } while (memberList.isNullOrEmpty())
                 return@withTimeoutOrNull memberList
             }
@@ -392,7 +398,7 @@ internal object GroupSvc: BaseSvc() {
         }
     }
 
-    fun refreshTroopMemberList(groupId: Long) {
+    fun refreshTroopMemberList(groupId: String) {
         val app = MobileQQ.getMobileQQ().waitAppRuntime()
         if (app !is AppInterface)
             throw RuntimeException("AppRuntime cannot cast to AppInterface")
@@ -410,7 +416,7 @@ internal object GroupSvc: BaseSvc() {
             }
         }
 
-        METHOD_REQ_TROOP_MEM_LIST.invoke(businessHandler, true, groupId.toString(), groupUin2GroupCode(groupId).toString(), 5)
+        METHOD_REQ_TROOP_MEM_LIST.invoke(businessHandler, true, groupId, groupUin2GroupCode(groupId.toLong()).toString(), 5)
     }
 
     fun refreshTroopList() {

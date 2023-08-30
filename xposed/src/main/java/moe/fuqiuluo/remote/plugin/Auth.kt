@@ -12,7 +12,8 @@ internal val Auth = createApplicationPlugin("Auth") {
     }
     this.onCallReceive { call, _ ->
         var accessToken = call.request.queryParameters["access_token"]
-            ?: call.request.headers["Authorization"] ?: return@onCallReceive
+            ?: call.request.headers["Authorization"]
+            ?: throw ErrorTokenException()
         if (accessToken.startsWith("Bearer ")) {
             accessToken = accessToken.substring(7)
         }

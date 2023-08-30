@@ -232,7 +232,7 @@ private fun APIInfoCard(
                 keyboardType = KeyboardType.Text,
                 errorText = "输入的参数不合法",
             ) {
-                it.length > 36
+                it.length in 0 .. 36
             }
             InfoItem(
                 title = "鉴权Token",

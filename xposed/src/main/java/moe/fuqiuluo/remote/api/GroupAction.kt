@@ -7,6 +7,7 @@ import io.ktor.server.routing.Routing
 import moe.fuqiuluo.remote.action.ActionManager
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.handlers.BanTroopMember
+import moe.fuqiuluo.remote.action.handlers.GetTroopHonor
 import moe.fuqiuluo.remote.action.handlers.GetTroopInfo
 import moe.fuqiuluo.remote.action.handlers.GetTroopList
 import moe.fuqiuluo.remote.action.handlers.GetTroopMemberInfo
@@ -21,6 +22,12 @@ import moe.fuqiuluo.xposed.tools.fetchOrThrow
 import moe.fuqiuluo.xposed.tools.getOrPost
 
 fun Routing.troopAction() {
+    getOrPost("/get_group_honor_info") {
+        val groupId = fetchOrThrow("group_id")
+        val refresh = fetchOrNull("refresh")?.toBooleanStrict() ?: false
+        call.respondText(GetTroopHonor(groupId, refresh))
+    }
+
     getOrPost("/get_group_member_list") {
         val groupId = fetchOrThrow("group_id")
         val refresh = fetchOrNull("refresh")?.toBooleanStrict() ?: false

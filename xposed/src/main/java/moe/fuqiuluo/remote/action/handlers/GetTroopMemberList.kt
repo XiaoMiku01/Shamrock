@@ -16,7 +16,7 @@ internal object GetTroopMemberList: IActionHandler() {
     }
 
     suspend operator fun invoke(groupId: String, refresh: Boolean): String {
-        val memberList = GroupSvc.getGroupMemberList(groupId.toLong(), refresh)
+        val memberList = GroupSvc.getGroupMemberList(groupId, refresh)
             ?: return error("unable to get group member list")
         return ok(arrayListOf<SimpleTroopMemberInfo>().apply {
             memberList.forEach {  info ->
@@ -26,10 +26,7 @@ internal object GetTroopMemberList: IActionHandler() {
                         name = info.friendnick.ifNullOrEmpty(info.autoremark) ?: "",
                         showName = info.troopnick.ifNullOrEmpty(info.troopColorNick),
                         distance = info.distance,
-                        honor = (info.honorList ?: "")
-                            .split("|")
-                            .filter { it.isNotBlank() }
-                            .map { it.toInt() },
+                        honor = GroupSvc.parseHonor(info.honorList),
                         joinTime = info.join_time,
                         lastActiveTime = info.last_active_time,
                         uniqueName = info.mUniqueTitle,
