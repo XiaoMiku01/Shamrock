@@ -14,7 +14,7 @@ import com.tencent.qqnt.msg.InternalMessageMakerError
 import com.tencent.qqnt.msg.MessageMaker
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
-import moe.fuqiuluo.xposed.helper.MMKVFetcher
+import moe.fuqiuluo.utils.MMKVFetcher
 import moe.fuqiuluo.xposed.tools.EmptyJsonObject
 import moe.fuqiuluo.xposed.tools.asJsonObject
 import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
@@ -117,7 +117,7 @@ internal object MessageHelper {
 
     fun convertMsgIdToMsgHash(chatType: Int, msgId: Long, peerId: Long): Int {
         val hashCode: Int = generateMsgIdHash(chatType, msgId)
-        val mmkv = MMKVFetcher.defaultMMKV()
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock")
         when (chatType) {
             MsgConstant.KCHATTYPEGROUP -> {
                 mmkv.putLong("troop$msgId", peerId)
@@ -137,7 +137,7 @@ internal object MessageHelper {
     fun removeMsgByHashCode(hashCode: Int) {
         val msgId = getMsgIdByHashCode(hashCode)
         val chatType = getChatType(msgId)
-        val mmkv = MMKVFetcher.defaultMMKV()
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock")
         mmkv.remove(hashCode.toString())
         when (chatType) {
             MsgConstant.KCHATTYPEGROUP -> mmkv.remove("troop$msgId")
@@ -147,7 +147,9 @@ internal object MessageHelper {
     }
 
     fun getMsgIdByHashCode(hashCode: Int): Long {
-        return MMKVFetcher.defaultMMKV().getLong(hashCode.toString(), 0)
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock")
+        return mmkv
+            .getLong(hashCode.toString(), 0)
     }
 
     external fun createMessageUniseq(chatType: Int, time: Long): Long
@@ -189,7 +191,7 @@ internal object MessageHelper {
 
     fun getPeerIdByMsgId(msgId: Long): Long {
         val chatType = getChatType(msgId)
-        val mmkv = MMKVFetcher.defaultMMKV()
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock")
         return when (chatType) {
             MsgConstant.KCHATTYPEGROUP -> mmkv.getLong("troop$msgId", 0)
             MsgConstant.KCHATTYPEC2C -> mmkv.getLong("c2c$msgId", 0)

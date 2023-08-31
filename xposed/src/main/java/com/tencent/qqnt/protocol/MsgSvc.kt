@@ -12,7 +12,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonArray
 import moe.fuqiuluo.xposed.helper.LogCenter
-import moe.fuqiuluo.xposed.helper.MMKVFetcher
+import moe.fuqiuluo.utils.MMKVFetcher
 import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import kotlin.coroutines.resume
 
@@ -83,7 +83,7 @@ internal object MsgSvc: BaseSvc() {
 
     private suspend fun internalGenerateContact(msgId: Long): Contact {
         val chatType = MessageHelper.getChatType(msgId)
-        val mmkv = MMKVFetcher.defaultMMKV()
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock")
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
             val key = "troop$msgId"
             val groupId = mmkv.getLong(key, 0)
