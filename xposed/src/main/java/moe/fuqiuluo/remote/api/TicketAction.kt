@@ -6,6 +6,7 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing
 import moe.fuqiuluo.remote.action.handlers.GetCSRF
 import moe.fuqiuluo.remote.action.handlers.GetCookies
+import moe.fuqiuluo.remote.action.handlers.GetCredentials
 import moe.fuqiuluo.remote.entries.Status
 import moe.fuqiuluo.xposed.tools.fetchOrNull
 import moe.fuqiuluo.xposed.tools.fetchOrThrow
@@ -13,6 +14,15 @@ import moe.fuqiuluo.xposed.tools.getOrPost
 import moe.fuqiuluo.xposed.tools.respond
 
 fun Routing.ticketActions() {
+    getOrPost("/get_credentials") {
+        val domain = fetchOrNull("domain")
+        if (domain != null) {
+            call.respondText(GetCredentials(domain))
+        } else {
+            call.respondText(GetCredentials())
+        }
+    }
+
     getOrPost("/get_cookies") {
         val domain = fetchOrNull("domain")
         if (domain != null) {

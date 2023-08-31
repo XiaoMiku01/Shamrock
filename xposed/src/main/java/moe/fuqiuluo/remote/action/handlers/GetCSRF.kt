@@ -1,6 +1,6 @@
 package moe.fuqiuluo.remote.action.handlers
 
-import com.tencent.mobileqq.data.CSRF
+import com.tencent.mobileqq.data.Credentials
 import com.tencent.qqnt.protocol.TicketSvc
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
@@ -16,13 +16,13 @@ internal object GetCSRF: IActionHandler() {
         val uin = TicketSvc.getUin()
         val pskey = TicketSvc.getPSKey(uin, domain)
             ?: return invoke()
-        return ok(CSRF(TicketSvc.getCSRF(pskey)))
+        return ok(Credentials(bkn = TicketSvc.getCSRF(pskey)))
     }
 
     operator fun invoke(): String {
         val uin = TicketSvc.getUin()
         val pskey = TicketSvc.getPSKey(uin)
-        return ok(CSRF(TicketSvc.getCSRF(pskey)))
+        return ok(Credentials(bkn = TicketSvc.getCSRF(pskey)))
     }
 
     override fun path(): String = "get_csrf_token"

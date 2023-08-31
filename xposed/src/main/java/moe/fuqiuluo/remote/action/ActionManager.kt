@@ -19,14 +19,15 @@ internal object ActionManager {
             TestHandler, GetLatestEvents, GetSupportedActions, GetStatus, GetVersion, GetSelfInfo,
 
             // UserActions
-            GetProfileCard, GetFriendList, SendLike, GetUid, GetUinByUid, ScanQRCode, SetProfileCard, GetCookies, GetCSRF,
+            GetProfileCard, GetFriendList, SendLike, GetUid, GetUinByUid, ScanQRCode, SetProfileCard,
+            GetCookies, GetCSRF, GetCredentials,
 
             // GroupInfo
             GetTroopList, GetTroopInfo, GetTroopList, GetTroopMemberInfo, GetTroopMemberList,
 
             // GroupActions
-            ModifyTroopName, LeaveTroop, KickTroopMember, BanTroopMember, SetGroupWholeBan, SetGroupAdmin, ModifyTroopMemberName,
-            SetGroupUnique, GetTroopHonor,
+            ModifyTroopName, LeaveTroop, KickTroopMember, BanTroopMember, SetGroupWholeBan, SetGroupAdmin,
+            ModifyTroopMemberName, SetGroupUnique, GetTroopHonor,
 
             // MSG ACTIONS
             SendMessage, DeleteMessage, GetMsg, GetForwardMsg
