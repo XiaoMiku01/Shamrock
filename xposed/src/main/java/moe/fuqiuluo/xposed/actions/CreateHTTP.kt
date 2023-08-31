@@ -17,10 +17,10 @@ internal class CreateHTTP: IAction {
         val port = ShamrockConfig.getPort()
 
         GlobalScope.launch {
-            kotlin.runCatching {
+            try {
                 HTTPServer.start(port)
-            }.onFailure {
-                XposedBridge.log(it)
+            } catch (e: Throwable) {
+                XposedBridge.log(e)
             }
         }
     }

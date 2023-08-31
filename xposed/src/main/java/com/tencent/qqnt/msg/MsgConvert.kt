@@ -11,8 +11,10 @@ import kotlinx.serialization.json.JsonObject
 import com.tencent.qqnt.transfile.RichProtoSvc
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
+import moe.fuqiuluo.xposed.tools.asJson
 import moe.fuqiuluo.xposed.tools.asJsonObject
 import moe.fuqiuluo.xposed.tools.asString
+import moe.fuqiuluo.xposed.tools.asStringOrNull
 import moe.fuqiuluo.xposed.tools.json
 
 internal suspend fun MsgRecord.toSegment(): ArrayList<HashMap<String, JsonElement>> {
@@ -37,6 +39,9 @@ internal object MsgConvert {
     }
 
     suspend fun convertMsgElementsToCQCode(elements: List<MsgElement>, chatType: Int): String {
+        if(elements.isEmpty()) {
+            return ""
+        }
         return MessageHelper.encodeCQCode(convertMsgElementsToMsgSegment(chatType, elements))
     }
 
@@ -162,13 +167,35 @@ internal object MsgConvert {
                 when (face.emojiId.lowercase()) {
                     "4823d3adb15df08014ce5d6796b76ee1" -> return hashMapOf("type" to "dice".json)
                     "83c8a293ae65ca140f348120a77448ee" -> return hashMapOf("type" to "rps".json)
+                    else -> LogCenter.log("暂不支持的超表: ${face.emojiId}", Level.WARN)
                 }
             }
             MsgConstant.KELEMTYPEARKSTRUCT -> {
-                kotlin.runCatching {
-                    val data = Json.parseToJsonElement(element.arkElement.bytesData).asJsonObject
-                    when (data["view"].asString) {
-                        "news" -> {
+                try {
+                    val data = element.arkElement.bytesData.asJsonObject
+                    val app = data["app"].asString
+                    when (app) {
+                        "com.tencent.troopsharecard" -> {
+                            val info = data["meta"].asJsonObject["contact"].asJsonObject
+                            return hashMapOf(
+                                "type" to "contact".json,
+                                "data" to JsonObject(mapOf(
+                                    "type" to "group".json,
+                                    "id" to info["jumpUrl"].asString.split("group_code=")[1].json,
+                                ))
+                            )
+                        }
+                        "com.tencent.contact.lua" -> {
+                            val info = data["meta"].asJsonObject["contact"].asJsonObject
+                            return hashMapOf(
+                                "type" to "contact".json,
+                                "data" to JsonObject(mapOf(
+                                    "type" to "private".json,
+                                    "id" to info["jumpUrl"].asString.split("uin=")[1].json,
+                                ))
+                            )
+                        }
+                        /*"com.tencent.structmsg" -> {
                             val info = data["meta"].asJsonObject["news"].asJsonObject
                             return hashMapOf(
                                 "type" to "share".json,
@@ -179,8 +206,8 @@ internal object MsgConvert {
                                     "image" to info["preview"]!!
                                 ))
                             )
-                        }
-                        "LocationShare" -> {
+                        }*/
+                        "com.tencent.map" -> {
                             val info = data["meta"].asJsonObject["Location.Search"].asJsonObject
                             return hashMapOf(
                                 "type" to "location".json,
@@ -192,37 +219,6 @@ internal object MsgConvert {
                                 ))
                             )
                         }
-                        "contact" -> {
-                            val info = data["meta"].asJsonObject["contact"].asJsonObject
-                            val packageName = data["app"].asString
-                            if(packageName == "com.tencent.troopsharecard") {
-                                return hashMapOf(
-                                    "type" to "contact".json,
-                                    "data" to JsonObject(mapOf(
-                                        "type" to "group".json,
-                                        "id" to info["jumpUrl"].asString.split("group_code=")[1].json,
-                                    ))
-                                )
-                            //} else if (packageName == "com.tencent.multimsg") {
-                            } else if (packageName == "com.tencent.contact.lua") {
-                                return hashMapOf(
-                                    "type" to "contact".json,
-                                    "data" to JsonObject(mapOf(
-                                        "type" to "private".json,
-                                        "id" to info["jumpUrl"].asString.split("uin=")[1].json,
-                                    ))
-                                )
-                            } else {
-                                LogCenter.log("Not supported xml app: $packageName", Level.WARN)
-                                return hashMapOf(
-                                    "type" to "json".json,
-                                    "data" to JsonObject(mapOf(
-                                        "data" to element.arkElement.bytesData.json,
-                                    ))
-                                )
-                            }
-                        }
-                        // "music" -> {}
                         else -> {
                             return hashMapOf(
                                 "type" to "json".json,
@@ -232,8 +228,8 @@ internal object MsgConvert {
                             )
                         }
                     }
-                }.onFailure {
-                    LogCenter.log(it.stackTraceToString(), Level.ERROR)
+                } catch (e: Throwable) {
+                    LogCenter.log(e.stackTraceToString(), Level.WARN)
                 }
             }
             MsgConstant.KELEMTYPEREPLY -> {
@@ -246,9 +242,7 @@ internal object MsgConvert {
                     ))
                 )
             }
-            else -> {
-                LogCenter.log("不支持的消息Elem转消息段: ${element.elementType}", Level.WARN)
-            }
+            else -> LogCenter.log("不支持的消息Elem转消息段: ${element.elementType}", Level.WARN)
         }
         return null
     }

@@ -20,30 +20,30 @@ internal object AioListener: IKernelMsgListener {
 
         GlobalScope.launch {
             msgList.forEach {
-                kotlin.runCatching {
-                    handleMsg(it)
-                }.onFailure {
-                    LogCenter.log(it.stackTraceToString(), Level.WARN)
-                }
+                handleMsg(it)
             }
         }
     }
 
     private suspend fun handleMsg(record: MsgRecord) {
-        val rawMsg = record.elements.toCQCode(record.chatType)
-        val msgHash = MessageHelper.convertMsgIdToMsgHash(record.chatType, record.msgId, record.peerUin)
-        when (record.chatType) {
-            MsgConstant.KCHATTYPEGROUP -> {
-                LogCenter.log("群消息(group = ${record.peerName}(${record.peerUin}), uin = ${record.senderUin}, msg = $rawMsg)")
-                HttpPusher.pushGroupMsg(record, record.elements, rawMsg, msgHash)
+        try {
+            val rawMsg = record.elements.toCQCode(record.chatType)
+            val msgHash = MessageHelper.convertMsgIdToMsgHash(record.chatType, record.msgId, record.peerUin)
+            when (record.chatType) {
+                MsgConstant.KCHATTYPEGROUP -> {
+                    LogCenter.log("群消息(group = ${record.peerName}(${record.peerUin}), uin = ${record.senderUin}, msg = $rawMsg)")
+                    HttpPusher.pushGroupMsg(record, record.elements, rawMsg, msgHash)
+                }
+                MsgConstant.KCHATTYPEC2C -> {
+                    LogCenter.log("私聊消息(private = ${record.senderUin}, msg = $rawMsg)")
+                    HttpPusher.pushPrivateMsg(record, record.elements, rawMsg, msgHash)
+                }
+                else -> {
+                    LogCenter.log("不支持PUSH事件: ${record.chatType}")
+                }
             }
-            MsgConstant.KCHATTYPEC2C -> {
-                LogCenter.log("私聊消息(private = ${record.senderUin}, msg = $rawMsg)")
-                HttpPusher.pushPrivateMsg(record, record.elements, rawMsg, msgHash)
-            }
-            else -> {
-                LogCenter.log("不支持PUSH事件: ${record.chatType}")
-            }
+        } catch (e: Throwable) {
+            LogCenter.log(e.stackTraceToString(), Level.WARN)
         }
     }
 

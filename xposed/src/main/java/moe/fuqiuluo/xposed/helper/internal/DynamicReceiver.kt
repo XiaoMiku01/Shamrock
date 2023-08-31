@@ -23,16 +23,15 @@ internal object DynamicReceiver: BroadcastReceiver() {
     override fun onReceive(ctx: Context, intent: Intent) {
         val hash = intent.getIntExtra("__hash", -1)
         val cmd = intent.getStringExtra("__cmd") ?: ""
-        kotlin.runCatching {
+        try {
             if (cmd.isNotBlank()) {
                 cmdHandler[cmd].also {
                     if (it == null)
                         LogCenter.log("无广播处理器: $cmd", Level.ERROR)
                 }?.callback?.handle(intent)
             } else GlobalScope.launch { mutex.withLock {
+                if (hash == -1) return@withLock
                 hashHandler.forEach {
-                    if (hash == -1) return@forEach
-
                     if (hash == it.hashCode()) {
                         it.callback?.handle(intent)
                         if (it.seq != -1)
@@ -41,8 +40,8 @@ internal object DynamicReceiver: BroadcastReceiver() {
                     }
                 }
             } }
-        }.onFailure {
-            LogCenter.log("处理器[$cmd]错误: $it", Level.ERROR)
+        } catch (e: Throwable) {
+            LogCenter.log("广播处理器[$cmd]错误: $e", Level.ERROR)
         }
     }
 

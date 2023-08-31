@@ -41,8 +41,8 @@ fun Routing.obtainProtocolData() {
         val t106 = tlv_t106()
 
         val qimei = kotlin.runCatching {
-            moe.fuqiuluo.xposed.tools.util.buf_to_string(util.get_qimei(ctx))
-        }.getOrNull()
+            util.get_qimei(ctx).toHexString()
+        }.getOrDefault("")
 
         val encodeTable = FEBound::class.java.getDeclaredField("mConfigEnCode").also {
             it.isAccessible = true
@@ -58,10 +58,10 @@ fun Routing.obtainProtocolData() {
                 mqq.qqProcessName,
                 mqq.appId.toLong(), mqq.qua, mqq.ntCoreVersion,
                 mqq.msfConnectedNetType,
-                qimei ?: "",
+                qimei,
                 util.getSvnVersion(),
-                moe.fuqiuluo.xposed.tools.util.buf_to_string( util.getGuidFromFile(ctx) ),
-                moe.fuqiuluo.xposed.tools.util.buf_to_string( util.get_ksid(ctx) ),
+                util.getGuidFromFile(ctx).toHexString(),
+                util.get_ksid(ctx).toHexString(),
                 util.get_network_type(ctx),
                 t18._ping_version.toByte(), t18._sso_version,
                 t100._sso_ver, t100._db_buf_ver,

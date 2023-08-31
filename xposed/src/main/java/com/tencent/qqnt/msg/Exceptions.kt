@@ -1,16 +1,12 @@
 package com.tencent.qqnt.msg
 
-internal interface InternalMessageMakerError
+internal abstract class InternalMessageMakerError(why: String): RuntimeException(why)
 
-internal class ParamsException(key: String)
-    :RuntimeException("Lack of param $key"), InternalMessageMakerError
+internal class ParamsException(key: String): InternalMessageMakerError("Lack of param $key")
 
-internal class ParamsIllegalException(key: String)
-    :RuntimeException("Illegal param $key"), InternalMessageMakerError
+internal class ParamsIllegalException(key: String): InternalMessageMakerError("Illegal param $key")
 
-internal class LogicException(why: String)
-    :RuntimeException(why), InternalMessageMakerError
+internal class LogicException(why: String) : InternalMessageMakerError(why)
 
-internal class ErrorTokenException()
-    :RuntimeException("access_token error"), InternalMessageMakerError
+internal class ErrorTokenException : InternalMessageMakerError("access_token error")
 

@@ -38,7 +38,7 @@ internal class HookWrapperCodec: IAction {
     )
 
     override fun invoke(ctx: Context) {
-        kotlin.runCatching {
+        try {
             val isInit = atomic(false)
             CodecWarpper::class.java.hookMethod("init").after {
                 if (isInit.value) return@after
@@ -50,15 +50,15 @@ internal class HookWrapperCodec: IAction {
                 hookReceive(it.thisObject.javaClass)
                 isInit.lazySet(true)
             }
-        }.onFailure {
-            log(it)
+        } catch (e: Exception) {
+            log(e)
         }
     }
 
     private fun hookReceive(thizClass: Class<*>) {
         thizClass.hookMethod("onResponse").before {
             val from = it.args[1] as FromServiceMsg
-            kotlin.runCatching {
+            try {
                 if ("SSO.LoginMerge" == from.serviceCmd) {
                     val merge = SSOLoginMerge.BusiBuffData()
                         .mergeFrom(from.wupBuffer.slice(4))
@@ -76,19 +76,18 @@ internal class HookWrapperCodec: IAction {
                     }
                     merge.BusiBuffVec.set(busiBufVec)
                     from.putWupBuffer(merge.toByteArray())
-                    it.args[1] = from
                 } else {
                     if (from.serviceCmd in IgnoredCmd) {
                         from.serviceCmd = "ShamrockInjectedCmd"
                         from.putWupBuffer(EMPTY_BYTE_ARRAY)
                         from.requestSsoSeq = 0
-                        it.args[1] = from
                     } else {
                         pushOnReceive(from)
                     }
                 }
+            } finally {
+                it.args[1] = from
             }
-
         }
     }
 

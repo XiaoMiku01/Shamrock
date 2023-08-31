@@ -29,7 +29,7 @@ internal object NTServiceFetcher {
     }
 
     private fun registerMSG() {
-        kotlin.runCatching {
+        try {
             if (!PlatformUtils.isMainProcess()) return
 
             val msgService = KernelServiceHelper.getMsgService(iKernelService)
@@ -40,13 +40,13 @@ internal object NTServiceFetcher {
 
                 isRegisteredMSG.lazySet(true)
             }
-        }.onFailure {
-            XposedBridge.log(it)
+        } catch (e: Throwable) {
+            XposedBridge.log(e)
         }
     }
 
     private fun antiBackground() {
-        kotlin.runCatching {
+        try {
             val kernelService = NTServiceFetcher.kernelService
             if (kernelService.isInit) {
                 val sessionService = kernelService.wrapperSession
@@ -72,8 +72,8 @@ internal object NTServiceFetcher {
                 LogCenter.log("反后台模式注入成功！", Level.DEBUG)
                 isForcedFore.lazySet(true)
             }
-        }.onFailure {
-            LogCenter.log("Keeping NT alive failed: ${it.message}", Level.WARN)
+        } catch (e: Throwable) {
+            LogCenter.log("Keeping NT alive failed: ${e.message}", Level.WARN)
         }
     }
 

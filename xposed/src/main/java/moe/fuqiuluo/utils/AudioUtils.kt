@@ -121,8 +121,8 @@ object AudioUtils {
             return MediaType.Silk
         }
 
-        kotlin.runCatching {
-            val extractor = MediaExtractor()
+        val extractor = MediaExtractor()
+        try {
             extractor.setDataSource(file.absolutePath)
             for (i in 0 until extractor.trackCount) {
                 val format = extractor.getTrackFormat(i)
@@ -135,6 +135,7 @@ object AudioUtils {
                     else -> {}
                 }
             }
+        } finally {
             extractor.release()
         }
 

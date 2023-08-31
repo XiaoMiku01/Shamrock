@@ -80,17 +80,16 @@ internal object MessageHelper {
         val msgList = arrayListOf<MsgElement>()
         messageList.forEach {
             val msg = it.jsonObject
-            kotlin.runCatching {
+            try {
                 val maker = MessageMaker[msg["type"].asString]
-                if(maker != null) {
+                if (maker != null) {
                     val data = msg["data"].asJsonObjectOrNull ?: EmptyJsonObject
                     msgList.add(maker(chatType, msgId, targetUin, data))
                 }
-            }.onFailure {
-                if (it is InternalMessageMakerError) {
-                    throw it
-                }
-                LogCenter.log(it.stackTraceToString(), Level.ERROR)
+            } catch (e: InternalMessageMakerError) {
+                throw e
+            } catch (e: Throwable) {
+                LogCenter.log(e.stackTraceToString(), Level.ERROR)
             }
         }
         return msgList

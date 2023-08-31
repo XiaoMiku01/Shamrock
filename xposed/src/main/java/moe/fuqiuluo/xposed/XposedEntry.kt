@@ -37,17 +37,21 @@ class XposedEntry: IXposedHookLoadPackage {
     }
 
     private fun entryMQQ(classLoader: ClassLoader) {
-        val startup = afterHook(51) { param -> kotlin.runCatching {
-            val clz = param.thisObject.javaClass.classLoader!!
-                .loadClass("com.tencent.common.app.BaseApplicationImpl")
-            val field = clz.declaredFields.first {
-                it.type == clz
+        val startup = afterHook(51) { param ->
+            try {
+                val clz = param.thisObject.javaClass.classLoader!!
+                    .loadClass("com.tencent.common.app.BaseApplicationImpl")
+                val field = clz.declaredFields.first {
+                    it.type == clz
+                }
+                val app: Context? = field.get(null) as? Context
+                if (app != null) {
+                    execStartupInit(app)
+                }
+            } catch (e: Throwable) {
+                log(e)
             }
-            val app: Context? = field.get(null) as? Context
-            if (app != null) {
-                execStartupInit(app)
-            }
-        }.onFailure { log(it) } }
+        }
 
         kotlin.runCatching {
             val loadDex = classLoader.loadClass("com.tencent.mobileqq.startup.step.LoadDex")
