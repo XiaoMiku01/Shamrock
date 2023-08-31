@@ -50,7 +50,7 @@ internal object GetCookies: IActionHandler() {
                         break
                     }
                 }
-                delay(100)
+                delay(1000)
             }
         }
 
