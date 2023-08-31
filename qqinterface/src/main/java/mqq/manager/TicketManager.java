@@ -9,17 +9,17 @@ public interface TicketManager extends Manager {
 
     String getOpenSdkKey(String uin, int i2);
 
-    String getPskey(String uin, String str2);
+    String getPskey(String uin, String domain);
+
+    String getPt4Token(String uin, String domain);
+
+    String getSkey(String uin);
 
     //Ticket getPskey(String uin, long j2, String[] strArr, WtTicketPromise wtTicketPromise);
 
     //Ticket getPskeyForOpen(String uin, long j2, String[] strArr, byte[] bArr, WtTicketPromise wtTicketPromise);
 
     //void getPskeyIgnoreCache(String uin, long j2, String[] strArr, WtTicketPromise wtTicketPromise);
-
-    String getPt4Token(String uin, String str2);
-
-    String getSkey(String uin);
 
     //Ticket getSkey(String str, long j2, WtTicketPromise wtTicketPromise);
 

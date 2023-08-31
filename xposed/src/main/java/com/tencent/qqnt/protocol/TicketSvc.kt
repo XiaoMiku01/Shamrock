@@ -28,9 +28,27 @@ internal object TicketSvc: BaseSvc() {
         const val WLOGIN_VKEY = 131072
     }
 
+    fun getUin(): String {
+        return app.currentUin
+    }
 
     fun getStWeb(uin: String): String {
         return (app.getManager(QQAppInterface.TICKET_MANAGER) as TicketManager).getStweb(uin)
     }
 
+    fun getSKey(uin: String): String {
+        return (app.getManager(QQAppInterface.TICKET_MANAGER) as TicketManager).getSkey(uin)
+    }
+
+    fun getPSKey(uin: String): String {
+        return (app.getManager(QQAppInterface.TICKET_MANAGER) as TicketManager).getSuperkey(uin)
+    }
+
+    fun getPSKey(uin: String, domain: String): String? {
+        return (app.getManager(QQAppInterface.TICKET_MANAGER) as TicketManager).getPskey(uin, domain)
+    }
+
+    fun getPt4Token(uin: String, domain: String): String? {
+        return (app.getManager(QQAppInterface.TICKET_MANAGER) as TicketManager).getPt4Token(uin, domain)
+    }
 }
