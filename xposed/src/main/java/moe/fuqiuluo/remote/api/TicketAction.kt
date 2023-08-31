@@ -4,6 +4,7 @@ import com.tencent.qqnt.protocol.TicketSvc
 import io.ktor.server.application.call
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing
+import moe.fuqiuluo.remote.action.handlers.GetCSRF
 import moe.fuqiuluo.remote.action.handlers.GetCookies
 import moe.fuqiuluo.remote.entries.Status
 import moe.fuqiuluo.xposed.tools.fetchOrNull
@@ -18,6 +19,15 @@ fun Routing.ticketActions() {
             call.respondText(GetCookies(domain))
         } else {
             call.respondText(GetCookies())
+        }
+    }
+
+    getOrPost("/get_csrf_token") {
+        val domain = fetchOrNull("domain")
+        if (domain != null) {
+            call.respondText(GetCSRF(domain))
+        } else {
+            call.respondText(GetCSRF())
         }
     }
 
