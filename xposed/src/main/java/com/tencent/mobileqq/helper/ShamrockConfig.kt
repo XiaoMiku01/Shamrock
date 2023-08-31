@@ -2,22 +2,17 @@ package com.tencent.mobileqq.helper
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import androidx.core.content.edit
-import mqq.app.MobileQQ
+import moe.fuqiuluo.utils.MMKVFetcher
 
 internal object ShamrockConfig {
-    private val preferences: SharedPreferences
-        get() = MobileQQ.getContext().getSharedPreferences("shamrock_config", 0)
-
     fun isInit(context: Context): Boolean {
-        val preferences = context.getSharedPreferences("shamrock_config", 0)
-        return preferences.getBoolean("isInit", false)
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
+        return mmkv.getBoolean("isInit", false)
     }
 
     fun updateConfig(context: Context, intent: Intent) {
-        val preferences = context.getSharedPreferences("shamrock_config", 0)
-        preferences.edit {
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
+        mmkv.apply {
             putBoolean(  "tablet",     intent.getBooleanExtra("tablet", false))     // 强制平板模式
             putInt(      "port",       intent.getIntExtra("port", 5700))            // 主动HTTP端口
             putBoolean(  "ws",         intent.getBooleanExtra("ws", false))         // 主动WS开关
@@ -34,30 +29,37 @@ internal object ShamrockConfig {
     }
 
     fun getToken(): String {
-        return preferences.getString("token", "") ?: ""
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
+        return mmkv.getString("token", "") ?: ""
     }
 
     fun useCQ(): Boolean {
-        return preferences.getBoolean("use_cqcode", false)
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
+        return mmkv.getBoolean("use_cqcode", false)
     }
 
     fun allowWebHook(): Boolean {
-        return preferences.getBoolean("http", false)
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
+        return mmkv.getBoolean("http", false)
     }
 
     fun getWebHookAddress(): String {
-        return preferences.getString("http_addr", "") ?: ""
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
+        return mmkv.getString("http_addr", "") ?: ""
     }
 
     fun forceTablet(): Boolean {
-        return preferences.getBoolean("tablet", true)
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
+        return mmkv.getBoolean("tablet", true)
     }
 
     fun getPort(): Int {
-        return preferences.getInt("port", 5700)
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
+        return mmkv.getInt("port", 5700)
     }
 
     fun isPro(): Boolean {
-        return preferences.getBoolean("pro_api", false)
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
+        return mmkv.getBoolean("pro_api", false)
     }
 }

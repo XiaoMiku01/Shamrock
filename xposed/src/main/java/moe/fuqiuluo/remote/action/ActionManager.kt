@@ -30,7 +30,10 @@ internal object ActionManager {
             ModifyTroopMemberName, SetGroupUnique, GetTroopHonor,
 
             // MSG ACTIONS
-            SendMessage, DeleteMessage, GetMsg, GetForwardMsg
+            SendMessage, DeleteMessage, GetMsg, GetForwardMsg,
+
+            // RESOURCE ACTION
+            GetRecord
         ).forEach {
             actionMap[it.path()] = it
         }
