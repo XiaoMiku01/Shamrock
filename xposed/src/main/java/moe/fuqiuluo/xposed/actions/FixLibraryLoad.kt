@@ -1,37 +1,32 @@
 package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
-import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedHelpers
-import com.tencent.qqnt.utils.PlatformUtils
 import moe.fuqiuluo.xposed.loader.NativeLoader
+import moe.fuqiuluo.xposed.tools.hookMethod
 
 internal class FixLibraryLoad: IAction {
-    override fun invoke(ctx: Context) {
-        if (!PlatformUtils.isMainProcess()) {
-            return
-        }
-        XposedHelpers.findAndHookMethod(com.arthenica.ffmpegkit.NativeLoader::class.java,
-            "loadLibrary", String::class.java, object: XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    val name: String = param.args[0] as String
-                    if (name == "ffmpegkit") {
-                        arrayOf(
-                            "avutil",
-                            "swscale",
-                            "swresample",
-                            "avcodec",
-                            "avformat",
-                            "avfilter",
-                            "avdevice"
-                        ).forEach {
-                            NativeLoader.load(it)
-                        }
-                    }
-                    NativeLoader.load(name)
-                    param.result = null
-                }
-            })
+    val redirectedLibrary =arrayOf(
+        "ffmpegkit_abidetect",
+        "avutil",
+        "swscale",
+        "swresample",
+        "avcodec",
+        "avformat",
+        "avfilter",
+        "avdevice",
+        "ffmpegkit"
+    )
 
+    override fun invoke(ctx: Context) {
+        com.arthenica.ffmpegkit.NativeLoader::class.java.hookMethod("loadLibrary").before {
+            val name: String = it.args[0] as String
+            if (name in redirectedLibrary) {
+                redirectedLibrary.forEach {
+                    NativeLoader.load(it)
+                }
+                NativeLoader.load(name)
+            }
+            it.result = null
+        }
     }
 }

@@ -2,6 +2,7 @@
 package com.tencent.qqnt.msg
 
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.exifinterface.media.ExifInterface
 import com.tencent.mobileqq.app.QQAppInterface
 import com.tencent.mobileqq.emoticon.QQSysFaceUtil
@@ -30,6 +31,8 @@ import com.tencent.qqnt.transfile.with
 import com.tencent.qqnt.utils.PlatformUtils
 import moe.fuqiuluo.utils.AudioUtils
 import moe.fuqiuluo.utils.MediaType
+import moe.fuqiuluo.xposed.helper.Level
+import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import moe.fuqiuluo.xposed.helper.msgService
 import moe.fuqiuluo.xposed.tools.asBooleanOrNull
@@ -335,7 +338,7 @@ internal object MessageMaker {
         data.checkAndThrow("file")
 
         val file = data["file"].asString.let {
-            val md5 = it.replace(regex = "\\{|\\}|\\-".toRegex(), replacement = "").split(".")[0].lowercase()
+            val md5 = it.replace(regex = "[{}\\-]".toRegex(), replacement = "").split(".")[0].lowercase()
             var file = if (md5.length == 32) {
                 FileUtils.getFile(it)
             } else {
@@ -435,7 +438,7 @@ internal object MessageMaker {
         data.checkAndThrow("file")
 
         var file = data["file"].asString.let {
-            val md5 = it.replace(regex = "\\{|\\}|\\-".toRegex(), replacement = "").split(".")[0].lowercase()
+            val md5 = it.replace(regex = "[{}\\-]".toRegex(), replacement = "").split(".")[0].lowercase()
             var file = if (md5.length == 32) {
                 FileUtils.getFile(it)
             } else {
@@ -455,20 +458,25 @@ internal object MessageMaker {
 
         when (AudioUtils.getMediaType(file)) {
             MediaType.Silk -> {
+                //LogCenter.log("Silk: $file", Level.DEBUG)
+
                 ptt.formatType = MsgConstant.KPTTFORMATTYPESILK
                 ptt.duration = 1
             }
             MediaType.Amr -> {
+                //LogCenter.log("Amr: $file", Level.DEBUG)
                 ptt.duration = AudioUtils.getDurationSec(file)
                 ptt.formatType = MsgConstant.KPTTFORMATTYPEAMR
             }
             MediaType.Pcm -> {
+                //LogCenter.log("Pcm To Silk: $file", Level.DEBUG)
                 val result = AudioUtils.pcmToSilk(file)
                 ptt.duration = (result.second * 0.001).roundToInt()
                 file = result.first
                 ptt.formatType = MsgConstant.KPTTFORMATTYPESILK
             }
             else -> {
+                //LogCenter.log("Audio To SILK: $file", Level.DEBUG)
                 val result = AudioUtils.audioToSilk(file)
                 ptt.duration = result.first
                 file = result.second
@@ -519,7 +527,7 @@ internal object MessageMaker {
         val isOriginal = data["original"].asBooleanOrNull ?: true
         val isFlash = data["flash"].asBooleanOrNull ?: false
         val file = data["file"].asString.let {
-            val md5 = it.replace(regex = "\\{|\\}|\\-".toRegex(), replacement = "").split(".")[0].lowercase()
+            val md5 = it.replace(regex = "[{}\\-]".toRegex(), replacement = "").split(".")[0].lowercase()
             var tmpPicFile = if (md5.length == 32) {
                 FileUtils.getFile(md5)
             } else {

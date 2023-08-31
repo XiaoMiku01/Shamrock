@@ -4,11 +4,16 @@ import android.graphics.Bitmap
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
+import android.util.Log
 import com.arthenica.ffmpegkit.FFmpegKit
+import com.arthenica.ffmpegkit.FFmpegKitConfig
 import com.arthenica.ffmpegkit.FFprobeKit
 import com.arthenica.ffmpegkit.ReturnCode
 import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
 import com.tencent.qqnt.utils.FileUtils
+import moe.fuqiuluo.xposed.helper.Level
+import moe.fuqiuluo.xposed.helper.LogCenter
+import moe.fuqiuluo.xposed.loader.NativeLoader
 import oicq.wlogin_sdk.tools.MD5
 import java.io.File
 import java.io.FileOutputStream
@@ -28,6 +33,22 @@ object AudioUtils {
     private val SampleRateMap = intArrayOf(8000, 12000, 16000, 24000, 36000, 44100, 48000)
     private val sampleRate: Int
         get() = SampleRateMap[3]
+
+    init {
+        // arrayOf(
+        //    "ffmpegkit_abidetect",
+        //    "avutil",
+        //    "swscale",
+        //    "swresample",
+        //    "avcodec",
+        //    "avformat",
+        //    "avfilter",
+        //    "avdevice"
+        //).forEach {
+        //    NativeLoader.load(it)
+        //}
+        //NativeLoader.load("ffmpegkit")
+    }
 
     fun getVideoTime(file: File): Int {
         val retriever = MediaMetadataRetriever()
@@ -61,18 +82,32 @@ object AudioUtils {
     }
 
     internal fun audioToSilk(audio: File): Pair<Int, File> {
+        //LogCenter.log("audioToSilk: $audio", Level.DEBUG)
+
         val md5 = MD5.getFileMD5(audio)
+
+        //LogCenter.log("AudioMD5: $md5", Level.DEBUG)
+
         val silkFile = FileUtils.getFile("silk_$md5")
         if (silkFile.exists()) {
             return getDurationSec(audio) to silkFile
         }
+
+        //LogCenter.log("AudioToForSilk: $silkFile", Level.DEBUG)
+
         val pcmFile = audioToPcm(audio)
+
+        //LogCenter.log("AudioPcmForSilk: $pcmFile", Level.DEBUG)
+
         var duration: Int
         pcmToSilk(pcmFile).let {
             pcmFile.delete()
             it.first.renameTo(silkFile)
             duration = it.second
         }
+
+        LogCenter.log("AudioSilk Duration: $duration", Level.DEBUG)
+
         if (duration < 1000) {
             duration = 1000
         }
@@ -92,13 +127,25 @@ object AudioUtils {
     }
 
     fun audioToPcm(audio: File): File {
-        val tmp = FileUtils.getTmpFile("pcm", false)
-        val ffmpegCommand = "-y -i $audio -f s16le -acodec pcm_s16le -ac 1 -ar $sampleRate $tmp"
-        val session = FFmpegKit.execute(ffmpegCommand)
-        if (!ReturnCode.isSuccess(session.returnCode)) {
-            error("mp3 to pcm error: ${session.allLogsAsString}")
+        try {
+            val tmp = FileUtils.getTmpFile("pcm", false)
+            //LogCenter.log("PcmTMP: $tmp", Level.DEBUG)
+            val ffmpegCommand = "-y -i $audio -f s16le -acodec pcm_s16le -ac 1 -ar $sampleRate $tmp"
+
+            //LogCenter.log("ExecStart: $tmp", Level.DEBUG)
+
+            val session = FFmpegKit.execute(ffmpegCommand)
+            if (!ReturnCode.isSuccess(session.returnCode)) {
+                error("mp3 to pcm error: ${session.allLogsAsString}")
+            }
+
+            //LogCenter.log("KitSession: $session", Level.DEBUG)
+
+            return tmp
+        } catch (e: Throwable) {
+            LogCenter.log(e.stackTraceToString(), Level.ERROR)
+            throw e
         }
-        return tmp
     }
 
     fun getDurationSec(audio: File): Int {
@@ -126,15 +173,19 @@ object AudioUtils {
             extractor.setDataSource(file.absolutePath)
             for (i in 0 until extractor.trackCount) {
                 val format = extractor.getTrackFormat(i)
-                when(format.getString(MediaFormat.KEY_MIME)) {
+                when (val mime = format.getString(MediaFormat.KEY_MIME)) {
                     "audio/mp4a-latm" -> return MediaType.M4a
                     "audio/amr-wb", "audio/amr", "audio/3gpp" -> return MediaType.Amr
-                    "audio/raw" , "audio/wav" -> return MediaType.Wav
+                    "audio/raw", "audio/wav" -> return MediaType.Wav
                     "audio/mpeg_L2", "audio/mpeg_L1", "audio/mpeg", "audio/mpeg2" -> return MediaType.Mp3
                     "audio/flac" -> return MediaType.Flac
-                    else -> {}
+                    else -> if (mime?.startsWith("audio/")== true) {
+                        LogCenter.log("Unable to check audio: $mime", Level.WARN)
+                    }
                 }
             }
+        } catch (e: Throwable) {
+            LogCenter.log(e.stackTraceToString(), Level.WARN)
         } finally {
             extractor.release()
         }

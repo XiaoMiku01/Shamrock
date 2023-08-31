@@ -41,8 +41,8 @@ object DownloadUtils {
             val progress = atomic(0)
             val channel = Channel<Int>()
             var processed = 0
-            for (i in 0 until threadCnt) {
-                if (processed + blockSize != contentLength && i == threadCnt - 1) {
+            repeat(threadCnt) {
+                if (processed + blockSize != contentLength && it == threadCnt - 1) {
                     blockSize = contentLength - processed
                 }
                 val start = processed
@@ -58,6 +58,7 @@ object DownloadUtils {
                         break
                     }
                 }
+                return@withTimeoutOrNull true
             } ?: dest.delete()
         }
     }

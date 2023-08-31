@@ -1,6 +1,7 @@
 package moe.fuqiuluo.xposed.loader
 
 import android.annotation.SuppressLint
+import de.robv.android.xposed.XposedBridge
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import mqq.app.MobileQQ
@@ -21,8 +22,8 @@ internal object NativeLoader {
     @SuppressLint("UnsafeDynamicallyLoadedCode")
     fun load(name: String) {
         try {
-            val context = MobileQQ.getContext()
             if (name == "shamrock" || name == "xposed") {
+                val context = MobileQQ.getContext()
                 val packageManager = context.packageManager
                 val applicationInfo = packageManager.getApplicationInfo("moe.fuqiuluo.shamrock", 0)
                 val file = File(applicationInfo.nativeLibraryDir)
@@ -37,13 +38,14 @@ internal object NativeLoader {
                         return
                     } else {
                         sourceFile.copyTo(soFile)
+                        Runtime.getRuntime().exec("chmod 755 ${soFile.absolutePath}").waitFor()
                     }
                 }
-                System.load(soFile.absolutePath)
                 LogCenter.log("LoadExternalLibrary(name = $name)")
+                System.load(soFile.absolutePath)
             }
         } catch (e: Throwable) {
-            LogCenter.log(e.stackTraceToString(), Level.ERROR)
+            XposedBridge.log(e)
         }
     }
 }

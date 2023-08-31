@@ -8,6 +8,8 @@ import io.ktor.util.cio.writeChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.copyTo
 import moe.fuqiuluo.utils.DownloadUtils
+import moe.fuqiuluo.xposed.helper.Level
+import moe.fuqiuluo.xposed.helper.LogCenter
 import mqq.app.MobileQQ
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -45,9 +47,10 @@ internal object FileUtils {
                 val tmp = getTmpFile()
                 DownloadUtils.download(file, tmp)
                 tmp.inputStream().use {
-                    saveFileToCache(it).also {
-                        tmp.delete()
-                    }
+                    saveFileToCache(it)
+                }.also {
+                    tmp.delete()
+                    LogCenter.log("文件下载完成: ${it.absolutePath}, 地址: $file", Level.DEBUG)
                 }
             }
         }

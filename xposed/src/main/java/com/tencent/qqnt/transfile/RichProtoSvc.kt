@@ -17,6 +17,18 @@ import mqq.app.MobileQQ
 import kotlin.coroutines.resume
 
 internal object RichProtoSvc: BaseSvc() {
+    fun getGroupPicDownUrl(
+        md5: String
+    ): String {
+        return "http://gchat.qpic.cn/gchatpic_new/0/0-0-${md5.uppercase()}/0?term=2"
+    }
+
+    fun getC2CPicDownUrl(
+        md5: String
+    ): String {
+        return "https://c2cpicdw.qpic.cn/offpic_new/0/123-0-${md5.uppercase()}/0?term=2"
+    }
+
     suspend fun getC2CVideoDownUrl(
         peerId: String,
         md5Hex: String,

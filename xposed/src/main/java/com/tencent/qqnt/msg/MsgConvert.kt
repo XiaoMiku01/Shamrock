@@ -111,8 +111,8 @@ internal object MsgConvert {
                     "data" to JsonObject(mapOf(
                         "file" to md5.json,
                         "url" to when(chatType) {
-                            MsgConstant.KCHATTYPEGROUP -> "http://gchat.qpic.cn/gchatpic_new/0/0-0-${md5.uppercase()}/0?term=2"
-                            MsgConstant.KCHATTYPEC2C -> "https://c2cpicdw.qpic.cn/offpic_new/0/123-0-${md5.uppercase()}/0?term=2"
+                            MsgConstant.KCHATTYPEGROUP -> RichProtoSvc.getGroupPicDownUrl(md5)
+                            MsgConstant.KCHATTYPEC2C -> RichProtoSvc.getC2CPicDownUrl(md5)
                             else -> error("Not supported chat type: $chatType, convertMsgElementsToMsgSegment::Pic")
                         }.json
                     ))

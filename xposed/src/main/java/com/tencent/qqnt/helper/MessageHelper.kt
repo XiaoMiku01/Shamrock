@@ -86,8 +86,6 @@ internal object MessageHelper {
                     val data = msg["data"].asJsonObjectOrNull ?: EmptyJsonObject
                     msgList.add(maker(chatType, msgId, targetUin, data))
                 }
-            } catch (e: InternalMessageMakerError) {
-                throw e
             } catch (e: Throwable) {
                 LogCenter.log(e.stackTraceToString(), Level.ERROR)
             }
