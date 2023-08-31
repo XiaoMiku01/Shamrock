@@ -68,7 +68,17 @@ internal object MessageMaker {
         "location" to MessageMaker::createLocationElem,
         "music" to MessageMaker::createMusicElem,
         "reply" to MessageMaker::createReplyElem,
+        "multi_msg" to MessageMaker::createLongMsgStruct,
     )
+
+    private suspend fun createLongMsgStruct(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
+        data.checkAndThrow("res_id")
+        val elem = MsgElement()
+        val json = ArkElement("{\"app\":\"com.tencent.multimsg\",\"desc\":\"[聊天记录]\",\"bizsrc\":\"\",\"view\":\"contact\",\"ver\":\"0.0.0.5\",\"prompt\":\"[聊天记录]\",\"appID\":\"\",\"sourceName\":\"\",\"actionData\":\"\",\"actionData_A\":\"\",\"sourceUrl\":\"\",\"meta\":{\"detail\":{\"news\":[{\"text\":\"伏秋洛~: 。\"},{\"text\":\"伏秋洛: @伏秋洛~发句话会怀孕，臭傻逼。\"}],\"resid\":\"${data["res_id"].asString}\",\"source\":\"群聊的聊天记录\",\"summary\":\"查看2条转发消息\",\"uniseq\":\"7273179624949733826\"}},\"config\":{\"autosize\":1,\"forward\":1,\"round\":1,\"type\":\"normal\",\"width\":300},\"text\":\"\",\"extraApps\":[],\"sourceAd\":\"\",\"extra\":\"{\\\"filename\\\":\\\"0dc6b7c1-addb-43ad-90b7-4765d84e8315\\\",\\\"tsum\\\":2}\\n\"}", null, null)
+        elem.elementType = MsgConstant.KELEMTYPEARKSTRUCT
+        elem.arkElement = json
+        return elem
+    }
 
     private suspend fun createReplyElem(chatType: Int, msgId: Long, peerId: String, data: JsonObject): MsgElement {
         data.checkAndThrow("id")

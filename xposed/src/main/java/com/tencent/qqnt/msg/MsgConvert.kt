@@ -8,7 +8,7 @@ import com.tencent.qqnt.kernel.nativeinterface.MsgRecord
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import com.tencent.qqnt.protocol.RichProtoSvc
+import com.tencent.qqnt.transfile.RichProtoSvc
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.tools.asJsonObject

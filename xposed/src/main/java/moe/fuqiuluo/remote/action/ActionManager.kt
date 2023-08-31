@@ -19,7 +19,7 @@ internal object ActionManager {
             TestHandler, GetLatestEvents, GetSupportedActions, GetStatus, GetVersion, GetSelfInfo,
 
             // UserActions
-            GetProfileCard, GetFriendList, SendLike, GetUid, GetUinByUid, ScanQRCode, SetProfileCard,
+            GetProfileCard, GetFriendList, SendLike, GetUid, GetUinByUid, ScanQRCode, SetProfileCard, GetCookies,
 
             // GroupInfo
             GetTroopList, GetTroopInfo, GetTroopList, GetTroopMemberInfo, GetTroopMemberList,

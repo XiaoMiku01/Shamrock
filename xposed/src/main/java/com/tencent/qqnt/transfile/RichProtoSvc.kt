@@ -1,10 +1,13 @@
-package com.tencent.qqnt.protocol
+package com.tencent.qqnt.transfile
 
 import com.tencent.mobileqq.transfile.FileMsg
+import com.tencent.mobileqq.transfile.TransferRequest
 import com.tencent.mobileqq.transfile.api.IProtoReqManager
 import com.tencent.mobileqq.transfile.protohandler.RichProto
+import com.tencent.mobileqq.transfile.protohandler.RichProto.RichProtoReq
+import com.tencent.mobileqq.transfile.protohandler.RichProto.RichProtoReq.MultiMsgUpReq
 import com.tencent.mobileqq.transfile.protohandler.RichProtoProc
-import com.tencent.qqnt.transfile.FileTransfer
+import com.tencent.qqnt.protocol.BaseSvc
 import com.tencent.qqnt.utils.PlatformUtils
 import kotlinx.coroutines.suspendCancellableCoroutine
 import moe.fuqiuluo.xposed.helper.Level
@@ -21,8 +24,8 @@ internal object RichProtoSvc: BaseSvc() {
     ): String {
         return suspendCancellableCoroutine {
             val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
-            val richProtoReq = RichProto.RichProtoReq()
-            val downReq: RichProto.RichProtoReq.ShortVideoDownReq = RichProto.RichProtoReq.ShortVideoDownReq()
+            val richProtoReq = RichProtoReq()
+            val downReq: RichProtoReq.ShortVideoDownReq = RichProtoReq.ShortVideoDownReq()
             downReq.selfUin = runtime.currentAccountUin
             downReq.peerUin = peerId
             downReq.secondUin = peerId
@@ -64,8 +67,8 @@ internal object RichProtoSvc: BaseSvc() {
     ): String {
         return suspendCancellableCoroutine {
             val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
-            val richProtoReq = RichProto.RichProtoReq()
-            val downReq: RichProto.RichProtoReq.ShortVideoDownReq = RichProto.RichProtoReq.ShortVideoDownReq()
+            val richProtoReq = RichProtoReq()
+            val downReq: RichProtoReq.ShortVideoDownReq = RichProtoReq.ShortVideoDownReq()
             downReq.selfUin = runtime.currentAccountUin
             downReq.peerUin = peerId
             downReq.secondUin = peerId
@@ -106,8 +109,8 @@ internal object RichProtoSvc: BaseSvc() {
     ): String {
         return suspendCancellableCoroutine {
             val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
-            val richProtoReq = RichProto.RichProtoReq()
-            val pttDownReq: RichProto.RichProtoReq.C2CPttDownReq = RichProto.RichProtoReq.C2CPttDownReq()
+            val richProtoReq = RichProtoReq()
+            val pttDownReq: RichProtoReq.C2CPttDownReq = RichProtoReq.C2CPttDownReq()
             pttDownReq.selfUin = runtime.currentAccountUin
             pttDownReq.peerUin = peerId
             pttDownReq.secondUin = peerId
@@ -145,8 +148,8 @@ internal object RichProtoSvc: BaseSvc() {
     ): String {
         return suspendCancellableCoroutine {
             val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
-            val richProtoReq = RichProto.RichProtoReq()
-            val groupPttDownReq: RichProto.RichProtoReq.GroupPttDownReq = RichProto.RichProtoReq.GroupPttDownReq()
+            val richProtoReq = RichProtoReq()
+            val groupPttDownReq: RichProtoReq.GroupPttDownReq = RichProtoReq.GroupPttDownReq()
             groupPttDownReq.selfUin = runtime.currentAccountUin
             groupPttDownReq.peerUin = peerId
             groupPttDownReq.secondUin = peerId

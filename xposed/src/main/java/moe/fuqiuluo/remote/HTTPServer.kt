@@ -42,6 +42,7 @@ object HTTPServer {
                     messageAction()
                     troopAction()
                     friendAction()
+                    ticketActions()
                     if (ShamrockConfig.isPro()) {
                         qsign()
                         obtainProtocolData()

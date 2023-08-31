@@ -3,7 +3,6 @@ package moe.fuqiuluo.remote.api
 import com.tencent.mobileqq.app.QQAppInterface
 import com.tencent.mobileqq.dt.model.FEBound
 import com.tencent.qphone.base.remote.ToServiceMsg
-import com.tencent.qqnt.protocol.TicketSvc
 import io.ktor.server.routing.Routing
 import moe.fuqiuluo.remote.entries.Protocol
 import moe.fuqiuluo.remote.entries.QSignDtConfig
@@ -31,15 +30,6 @@ fun Routing.obtainProtocolData() {
         toServiceMsg.addAttribute("req_pb_protocol_flag", isPb)
         app.sendToService(toServiceMsg)
         respond(true, Status.Ok)
-    }
-
-    getOrPost("/get_ticket") {
-        val uin = fetchOrThrow("uin")
-        val ticket = when(fetchOrThrow("id").toInt()) {
-            32 -> TicketSvc.getStWeb(uin)
-            else -> error("不支持获取该Ticket")
-        }
-        respond(true, Status.Ok, "success", ticket)
     }
 
     getOrPost("/get_msf_info") {
