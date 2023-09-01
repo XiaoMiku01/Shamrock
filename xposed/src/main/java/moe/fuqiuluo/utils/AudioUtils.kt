@@ -199,4 +199,6 @@ object AudioUtils {
     }
 
     private external fun pcmToSilk(rate: Int, type: Byte, pcmFile: String, silkFile: String): Int
+
+    private external fun silkToPcm(rate: Int, type: Byte, pcmFile: String, silkFile: String): Int
 }
