@@ -20,7 +20,7 @@ internal object ActionManager {
 
             // UserActions
             GetProfileCard, GetFriendList, SendLike, GetUid, GetUinByUid, ScanQRCode, SetProfileCard,
-            GetCookies, GetCSRF, GetCredentials, RestartMe,
+            GetCookies, GetCSRF, GetCredentials, RestartMe, CleanCache,
 
             // GroupInfo
             GetTroopList, GetTroopInfo, GetTroopList, GetTroopMemberInfo, GetTroopMemberList,

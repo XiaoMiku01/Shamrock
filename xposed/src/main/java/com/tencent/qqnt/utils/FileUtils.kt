@@ -150,4 +150,9 @@ internal object FileUtils {
         tmpFile.renameTo(sourceFile)
         return sourceFile
     }
+
+    fun clearCache() {
+        CacheDir.delete()
+        CacheDir.mkdirs()
+    }
 }
