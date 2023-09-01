@@ -6,11 +6,16 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing
 import moe.fuqiuluo.remote.action.ActionManager
 import moe.fuqiuluo.remote.action.ActionSession
+import moe.fuqiuluo.remote.action.handlers.RestartMe
 import moe.fuqiuluo.xposed.tools.fetchOrNull
 import moe.fuqiuluo.xposed.tools.fetchOrThrow
 import moe.fuqiuluo.xposed.tools.getOrPost
 
 fun Routing.userAction() {
+    getOrPost("/set_restart") {
+        call.respondText(RestartMe(2000))
+    }
+
     getOrPost("/set_qq_profile") {
         val nickName = fetchOrThrow("nickname")
         val company = fetchOrThrow("company")
