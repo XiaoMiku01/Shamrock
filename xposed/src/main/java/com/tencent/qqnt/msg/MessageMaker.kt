@@ -12,6 +12,7 @@ import com.tencent.qqnt.kernel.nativeinterface.*
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import com.tencent.qqnt.helper.ContactHelper
+import com.tencent.qqnt.helper.LocalCacheHelper
 import com.tencent.qqnt.helper.MusicHelper
 import com.tencent.qqnt.protocol.ArkAppInfo
 import com.tencent.qqnt.protocol.ArkMsgSvc
@@ -438,9 +439,11 @@ internal object MessageMaker {
         data.checkAndThrow("file")
 
         var file = data["file"].asString.let {
-            val md5 = it.replace(regex = "[{}\\-]".toRegex(), replacement = "").split(".")[0].lowercase()
+            val md5 = it.replace(regex = "[{}\\-]".toRegex(), replacement = "")
+                .replace(" ", "")
+                .split(".")[0].lowercase()
             var file = if (md5.length == 32) {
-                FileUtils.getFile(it)
+                LocalCacheHelper.getCachePttFile(md5)
             } else {
                 FileUtils.parseAndSave(it)
             }
@@ -483,13 +486,13 @@ internal object MessageMaker {
                 ptt.formatType = MsgConstant.KPTTFORMATTYPESILK
             }
         }
-        val msgService = NTServiceFetcher.kernelService.msgService!!
-        val originalPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(
-            MsgConstant.KELEMTYPEPTT, 0, ptt.md5HexStr, file.name, 1, 0, null, "", true
-        ))!!
-        if (!QQNTWrapperUtil.CppProxy.fileIsExist(originalPath) || QQNTWrapperUtil.CppProxy.getFileSize(originalPath) != file.length()) {
-            QQNTWrapperUtil.CppProxy.copyFile(file.absolutePath, originalPath)
-        }
+        //val msgService = NTServiceFetcher.kernelService.msgService!!
+        //val originalPath = msgService.getRichMediaFilePathForMobileQQSend(RichMediaFilePathInfo(
+        //    MsgConstant.KELEMTYPEPTT, 0, ptt.md5HexStr, file.name, 1, 0, null, "", true
+        //))!!
+        //if (!QQNTWrapperUtil.CppProxy.fileIsExist(originalPath) || QQNTWrapperUtil.CppProxy.getFileSize(originalPath) != file.length()) {
+        //    QQNTWrapperUtil.CppProxy.copyFile(file.absolutePath, originalPath)
+        //}
 
         Transfer with when (chatType) {
             MsgConstant.KCHATTYPEGROUP -> Troop(peerId)

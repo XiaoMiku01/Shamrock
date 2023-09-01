@@ -1,6 +1,5 @@
 package moe.fuqiuluo.remote.action.handlers
 
-import com.tencent.qqnt.transfile.RichProtoSvc
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
 

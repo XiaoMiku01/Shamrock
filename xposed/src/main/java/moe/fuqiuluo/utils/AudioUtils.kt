@@ -9,6 +9,7 @@ import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFmpegKitConfig
 import com.arthenica.ffmpegkit.FFprobeKit
 import com.arthenica.ffmpegkit.ReturnCode
+import com.tencent.qqnt.helper.LocalCacheHelper
 import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
 import com.tencent.qqnt.utils.FileUtils
 import moe.fuqiuluo.xposed.helper.Level
@@ -82,48 +83,52 @@ object AudioUtils {
     }
 
     internal fun audioToSilk(audio: File): Pair<Int, File> {
-        //LogCenter.log("audioToSilk: $audio", Level.DEBUG)
-
         val md5 = MD5.getFileMD5(audio)
 
-        //LogCenter.log("AudioMD5: $md5", Level.DEBUG)
-
-        val silkFile = FileUtils.getFile("silk_$md5")
-        if (silkFile.exists()) {
-            return getDurationSec(audio) to silkFile
+        val mmkv = MMKVFetcher.mmkvWithId("audio2silk")
+        mmkv.getString(md5, null)?.let {
+            val silkFile = LocalCacheHelper.getCachePttFile(it)
+            if (silkFile.exists()) {
+                return getDurationSec(audio) to silkFile
+            }
         }
 
-        //LogCenter.log("AudioToForSilk: $silkFile", Level.DEBUG)
+        lateinit var silkFile: File
 
         val pcmFile = audioToPcm(audio)
-
-        //LogCenter.log("AudioPcmForSilk: $pcmFile", Level.DEBUG)
-
         var duration: Int
         pcmToSilk(pcmFile).let {
-            pcmFile.delete()
+            val silkMd5 = MD5.getFileMD5(it.first)
+            silkFile = LocalCacheHelper.getCachePttFile(silkMd5)
+            mmkv.putString(md5, silkMd5)
             it.first.renameTo(silkFile)
+            it.first.delete()
+            pcmFile.delete()
             duration = it.second
         }
-
-        LogCenter.log("AudioSilk Duration: $duration", Level.DEBUG)
-
         if (duration < 1000) {
             duration = 1000
         }
+
         return duration to silkFile
     }
 
     internal fun pcmToSilk(file: File): Pair<File, Int> {
         val tmpFile = FileUtils.getTmpFile("silk", false)
         val time = pcmToSilk(sampleRate, 2, file.absolutePath, tmpFile.absolutePath)
+
+        val silkMd5 = MD5.getFileMD5(tmpFile)
+        val silk = LocalCacheHelper.getCachePttFile(silkMd5)
+        tmpFile.renameTo(silk)
+        tmpFile.delete()
+
         when (time) {
             -1 -> error("input pcm file not found")
             -2 -> error("output silk file cannot open")
             -3 -> error("cannot create silk encoder")
             -4 -> error("cannot init silk encoder")
         }
-        return tmpFile to time
+        return silk to time
     }
 
     fun audioToPcm(audio: File): File {
