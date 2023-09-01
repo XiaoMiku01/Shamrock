@@ -11,6 +11,7 @@ import moe.fuqiuluo.utils.DownloadUtils
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import mqq.app.MobileQQ
+import oicq.wlogin_sdk.tools.MD5
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
@@ -56,25 +57,23 @@ internal object FileUtils {
         }
     }
 
-    fun isSilk(file: File): Boolean {
-        if (file.length() <= 7) {
-            return false
-        }
-
-        val bytes = ByteArray(7)
-        file.inputStream().use {
-            it.read(bytes)
-        }
-
-        return bytes[1] == 0x23.toByte() && bytes[2] == 0x21.toByte() && bytes[3] == 0x53.toByte()
-                && bytes[4] == 0x49.toByte() && bytes[5] == 0x4c.toByte() && bytes[6] == 0x4b.toByte()
+    fun renameByMd5(file: File): File {
+        val md5 = MD5.getFileMD5(file)
+        val newFile = file.parentFile!!.resolve(md5)
+        file.renameTo(newFile)
+        file.delete()
+        return newFile
     }
 
-    fun getTmpFile(prefix: String = "tmp", create: Boolean = true): File {
+    fun getTmpFile(
+        prefix: String = "tmp",
+        create: Boolean = true,
+        end: String = ""
+    ): File {
         if(!CacheDir.exists()) {
             CacheDir.mkdirs()
         }
-        return CacheDir.resolve(prefix + "_" + UUID.randomUUID().toString()).also {
+        return CacheDir.resolve(prefix + "_" + UUID.randomUUID().toString() + end).also {
             if (create && !it.exists()) it.createNewFile()
         }
     }

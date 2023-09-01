@@ -1,6 +1,6 @@
 package moe.fuqiuluo.remote.api
 
-import com.tencent.qqnt.msg.LogicException
+import com.tencent.qqnt.helper.LogicException
 import io.ktor.server.application.call
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing
@@ -40,6 +40,7 @@ fun Routing.userAction() {
         call.respondText(ActionManager["send_like"]?.handle(ActionSession(mapOf(
             "user_id" to uin,
             "cnt" to cnt
-        ))) ?: throw LogicException("Unable to obtain send_like handler."))
+        ))) ?: throw LogicException("Unable to obtain send_like handler.")
+        )
     }
 }

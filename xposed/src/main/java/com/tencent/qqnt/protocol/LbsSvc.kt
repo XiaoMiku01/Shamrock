@@ -6,7 +6,7 @@ import com.tencent.proto.lbsshare.LBSShare
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
-import com.tencent.qqnt.msg.ParamsIllegalException
+import com.tencent.qqnt.helper.IllegalParamsException
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.tools.slice
 import kotlin.math.roundToInt
@@ -43,10 +43,10 @@ internal object LbsSvc: BaseSvc() {
 
     suspend fun getAddressWithLonLat(lat: Double, lon: Double): String {
         if (lat > 90 || lat < 0) {
-            throw ParamsIllegalException("纬度大小错误")
+            throw IllegalParamsException("纬度大小错误")
         }
         if (lon > 180 || lon < 0) {
-            throw ParamsIllegalException("经度大小错误")
+            throw IllegalParamsException("经度大小错误")
         }
         val latO = (lat * 1000000).roundToInt()
         val lngO = (lon * 1000000).roundToInt()

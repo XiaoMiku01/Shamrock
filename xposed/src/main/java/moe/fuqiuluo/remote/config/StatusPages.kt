@@ -1,10 +1,9 @@
 package moe.fuqiuluo.remote.config
 
-import com.tencent.qqnt.msg.ErrorTokenException
-import com.tencent.qqnt.msg.LogicException
-import com.tencent.qqnt.msg.ParamsException
+import com.tencent.qqnt.helper.ErrorTokenException
+import com.tencent.qqnt.helper.LogicException
+import com.tencent.qqnt.helper.ParamsException
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.uri

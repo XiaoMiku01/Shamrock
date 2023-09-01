@@ -43,6 +43,7 @@ object HTTPServer {
                     troopAction()
                     friendAction()
                     ticketActions()
+                    fetchRes()
                     if (ShamrockConfig.isPro()) {
                         qsign()
                         obtainProtocolData()

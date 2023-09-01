@@ -5,7 +5,7 @@ import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
 import com.tencent.mobileqq.data.MessageResult
 import com.tencent.qqnt.helper.MessageHelper
-import com.tencent.qqnt.msg.ParamsException
+import com.tencent.qqnt.helper.ParamsException
 import com.tencent.qqnt.protocol.MsgSvc
 import kotlinx.serialization.json.JsonArray
 import moe.fuqiuluo.xposed.helper.Level

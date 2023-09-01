@@ -18,7 +18,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
-import com.tencent.qqnt.msg.ParamsException
+import com.tencent.qqnt.helper.ParamsException
 import io.ktor.http.HttpMethod
 import io.ktor.server.request.httpMethod
 import io.ktor.server.routing.route

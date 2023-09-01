@@ -4,9 +4,7 @@ import android.graphics.Bitmap
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
-import android.util.Log
 import com.arthenica.ffmpegkit.FFmpegKit
-import com.arthenica.ffmpegkit.FFmpegKitConfig
 import com.arthenica.ffmpegkit.FFprobeKit
 import com.arthenica.ffmpegkit.ReturnCode
 import com.tencent.qqnt.helper.LocalCacheHelper
@@ -14,7 +12,6 @@ import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
 import com.tencent.qqnt.utils.FileUtils
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
-import moe.fuqiuluo.xposed.loader.NativeLoader
 import oicq.wlogin_sdk.tools.MD5
 import java.io.File
 import java.io.FileOutputStream
@@ -153,6 +150,67 @@ object AudioUtils {
         }
     }
 
+    fun audioToAmr(silkFile: File, isSilk: Boolean): File {
+        return if (isSilk) {
+            val pcm = silkToPcm(silkFile)
+            val tmp = FileUtils.getTmpFile("", false, ".amr")
+            val ffmpegCommand = "-y -f s16le -acodec pcm_s16le -ac 1 -ar $sampleRate -i $pcm -ar 8000 $tmp"
+            val session = FFmpegKit.execute(ffmpegCommand)
+            if (!ReturnCode.isSuccess(session.returnCode)) {
+                LogCenter.log("pcm to amr error: ${session.allLogsAsString}", Level.ERROR)
+            }
+            pcm.delete()
+            FileUtils.renameByMd5(tmp)
+        } else {
+            silkFile
+        }
+    }
+
+    fun audioToFlac(silkFile: File, isSilk: Boolean): File {
+        return audioToFormat(silkFile, isSilk, "flac")
+    }
+
+    fun audioToOgg(silkFile: File, isSilk: Boolean): File {
+        return audioToFormat(silkFile, isSilk, "ogg")
+    }
+
+    fun audioToWav(silkFile: File, isSilk: Boolean): File {
+        return audioToFormat(silkFile, isSilk, "wav")
+    }
+
+    fun audioToSpx(silkFile: File, isSilk: Boolean): File {
+        return audioToFormat(silkFile, isSilk, "spx")
+    }
+
+    fun audioToM4a(pttFile: File, silk: Boolean): File {
+        return audioToFormat(pttFile, silk, "m4a")
+    }
+
+    fun audioToWma(pttFile: File, silk: Boolean): File {
+        return audioToFormat(pttFile, silk, "wma")
+    }
+
+    fun audioToMp3(silkFile: File, isSilk: Boolean): File {
+        return audioToFormat(silkFile, isSilk, "mp3")
+    }
+
+    fun audioToFormat(silkFile: File, isSilk: Boolean, format: String): File {
+        val out = FileUtils.getTmpFile("", false, ".$format")
+        var input: File = silkFile
+        val ffmpegCommand = if (isSilk) {
+            input = silkToPcm(input)
+            "-y -f s16le -acodec pcm_s16le -ac 1 -ar $sampleRate -i $input $out"
+        } else {
+            "-y -i $input $out"
+        }
+        val session = FFmpegKit.execute(ffmpegCommand)
+        if (!ReturnCode.isSuccess(session.returnCode)) {
+            LogCenter.log("audio to $format error: ${session.allLogsAsString}", Level.ERROR)
+        }
+        input.delete()
+        return FileUtils.renameByMd5(out)
+    }
+
     fun getDurationSec(audio: File): Int {
         return getDuration(audio)
     }
@@ -168,8 +226,22 @@ object AudioUtils {
         }
     }
 
+    fun isSilk(file: File): Boolean {
+        if (file.length() <= 7) {
+            return false
+        }
+
+        val bytes = ByteArray(7)
+        file.inputStream().use {
+            it.read(bytes)
+        }
+
+        return bytes[1] == 0x23.toByte() && bytes[2] == 0x21.toByte() && bytes[3] == 0x53.toByte()
+                && bytes[4] == 0x49.toByte() && bytes[5] == 0x4c.toByte() && bytes[6] == 0x4b.toByte()
+    }
+
     fun getMediaType(file: File): MediaType {
-        if(FileUtils.isSilk(file)) {
+        if(isSilk(file)) {
             return MediaType.Silk
         }
 
@@ -196,6 +268,14 @@ object AudioUtils {
         }
 
         return MediaType.Pcm
+    }
+
+    fun silkToPcm(silkFile: File): File {
+        val pcmFile = FileUtils.getTmpFile("pcm", false)
+        if (silkToPcm(sampleRate, 2, pcmFile.absolutePath, silkFile.absolutePath) < 0) {
+            error("silk to pcm error")
+        }
+        return pcmFile
     }
 
     private external fun pcmToSilk(rate: Int, type: Byte, pcmFile: String, silkFile: String): Int

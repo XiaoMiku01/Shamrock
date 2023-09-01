@@ -2,7 +2,6 @@
 package com.tencent.qqnt.msg
 
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.exifinterface.media.ExifInterface
 import com.tencent.mobileqq.app.QQAppInterface
 import com.tencent.mobileqq.emoticon.QQSysFaceUtil
@@ -13,7 +12,10 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import com.tencent.qqnt.helper.ContactHelper
 import com.tencent.qqnt.helper.LocalCacheHelper
+import com.tencent.qqnt.helper.LogicException
 import com.tencent.qqnt.helper.MusicHelper
+import com.tencent.qqnt.helper.ParamsException
+import com.tencent.qqnt.helper.IllegalParamsException
 import com.tencent.qqnt.protocol.ArkAppInfo
 import com.tencent.qqnt.protocol.ArkMsgSvc
 import com.tencent.qqnt.protocol.CardSvc
@@ -32,8 +34,6 @@ import com.tencent.qqnt.transfile.with
 import com.tencent.qqnt.utils.PlatformUtils
 import moe.fuqiuluo.utils.AudioUtils
 import moe.fuqiuluo.utils.MediaType
-import moe.fuqiuluo.xposed.helper.Level
-import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import moe.fuqiuluo.xposed.helper.msgService
 import moe.fuqiuluo.xposed.tools.asBooleanOrNull
@@ -169,7 +169,7 @@ internal object MessageMaker {
                 val ark = ArkElement(GroupSvc.getShareTroopArkMsg(id.toLong()), null, null)
                 elem.arkElement = ark
             }
-            else -> throw ParamsIllegalException("type")
+            else -> throw IllegalParamsException("type")
         }
 
         elem.elementType = MsgConstant.KELEMTYPEARKSTRUCT
@@ -266,7 +266,7 @@ internal object MessageMaker {
         face.vaspokeMinver = ""
         face.pokeStrength = (data["strength"].asIntOrNull ?: data["cnt"].asIntOrNull
                 ?: data["count"].asIntOrNull ?: data["time"].asIntOrNull ?: 0).also {
-            if(it < 0 || it > 3) throw ParamsIllegalException("strength")
+            if(it < 0 || it > 3) throw IllegalParamsException("strength")
         }
         face.msgType = 0
         face.faceBubbleCount = 0

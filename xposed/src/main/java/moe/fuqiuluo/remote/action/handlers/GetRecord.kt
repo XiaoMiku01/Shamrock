@@ -1,8 +1,10 @@
 package moe.fuqiuluo.remote.action.handlers
 
+import com.tencent.mobileqq.data.OutResource
 import com.tencent.qqnt.helper.LocalCacheHelper
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
+import moe.fuqiuluo.utils.AudioUtils
 
 internal object GetRecord: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
@@ -16,9 +18,19 @@ internal object GetRecord: IActionHandler() {
 
     operator fun invoke(file: String, format: String): String {
         val pttFile = LocalCacheHelper.getCachePttFile(file)
-
-
-        return logic("unable to fetch record file.")
+        return if(pttFile.exists()) {
+            val isSilk = AudioUtils.isSilk(pttFile)
+            val audioFile = when(format) {
+                "amr" -> AudioUtils.audioToAmr(pttFile, isSilk)
+                else -> AudioUtils.audioToFormat(pttFile, isSilk, format)
+            }
+            ok(OutResource(
+                audioFile.toString(),
+                url = "/res/${audioFile.nameWithoutExtension}"
+            ))
+        } else {
+            error("not found record file from cache")
+        }
     }
 
     override val requiredParams: Array<String> = arrayOf("file", "out_format")

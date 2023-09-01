@@ -1,7 +1,7 @@
 package moe.fuqiuluo.remote.plugin
 
 import com.tencent.mobileqq.helper.ShamrockConfig
-import com.tencent.qqnt.msg.ErrorTokenException
+import com.tencent.qqnt.helper.ErrorTokenException
 import io.ktor.server.application.createApplicationPlugin
 
 internal val Auth = createApplicationPlugin("Auth") {

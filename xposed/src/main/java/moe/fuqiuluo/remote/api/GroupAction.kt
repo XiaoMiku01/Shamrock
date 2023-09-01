@@ -1,6 +1,6 @@
 package moe.fuqiuluo.remote.api
 
-import com.tencent.qqnt.msg.LogicException
+import com.tencent.qqnt.helper.LogicException
 import io.ktor.server.application.call
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing
@@ -98,6 +98,7 @@ fun Routing.troopAction() {
             "user_id" to fetchOrThrow("user_id"),
             "group_id" to fetchOrThrow("group_id"),
             "reject_add_request" to (fetchOrNull("reject_add_request") ?: "false"),
-        ))) ?: throw LogicException("Unable to obtain set_group_kick handler."))
+        ))) ?: throw LogicException("Unable to obtain set_group_kick handler.")
+        )
     }
 }
