@@ -49,7 +49,7 @@ internal object AioListener: IKernelMsgListener {
 
     override fun onAddSendMsg(record: MsgRecord) {
         GlobalScope.launch {
-            LogCenter.log(record.toCQCode())
+            LogCenter.log("发送消息: " + record.toCQCode())
         }
     }
 
@@ -61,28 +61,24 @@ internal object AioListener: IKernelMsgListener {
         str: String?,
         bArr: ByteArray?
     ) {
-        XposedBridge.log("onRecvMsgSvrRspTransInfo($j2, $contact, $i2, $i3, $str)")
+        LogCenter.log("onRecvMsgSvrRspTransInfo($j2, $contact, $i2, $i3, $str)", Level.DEBUG)
     }
 
     override fun onRecvOnlineFileMsg(arrayList: ArrayList<MsgRecord>?) {
-
+        LogCenter.log(("onRecvOnlineFileMsg" + arrayList?.joinToString { ", " }), Level.DEBUG)
     }
 
     override fun onRecvS2CMsg(arrayList: ArrayList<Byte>?) {
-        XposedBridge.log("onRecvS2CMsg(${arrayList.toString()})")
+        LogCenter.log("onRecvS2CMsg(${arrayList.toString()})", Level.DEBUG)
     }
 
     override fun onRecvSysMsg(arrayList: ArrayList<Byte>?) {
-        XposedBridge.log("onRecvSysMsg(${arrayList.toString()})")
+        LogCenter.log("onRecvSysMsg(${arrayList.toString()})", Level.DEBUG)
     }
 
-    override fun onBroadcastHelperDownloadComplete(broadcastHelperTransNotifyInfo: BroadcastHelperTransNotifyInfo?) {
+    override fun onBroadcastHelperDownloadComplete(broadcastHelperTransNotifyInfo: BroadcastHelperTransNotifyInfo?) {}
 
-    }
-
-    override fun onBroadcastHelperProgerssUpdate(broadcastHelperTransNotifyInfo: BroadcastHelperTransNotifyInfo?) {
-
-    }
+    override fun onBroadcastHelperProgerssUpdate(broadcastHelperTransNotifyInfo: BroadcastHelperTransNotifyInfo?) {}
 
     override fun onChannelFreqLimitInfoUpdate(
         contact: Contact?,
@@ -92,16 +88,16 @@ internal object AioListener: IKernelMsgListener {
 
     }
 
-    override fun onContactUnreadCntUpdate(hashMap: HashMap<Int, HashMap<String, UnreadCntInfo>>?) {
-
+    override fun onContactUnreadCntUpdate(unreadMap: HashMap<Int, HashMap<String, UnreadCntInfo>>) {
+        // 推送未读消息数量
     }
 
     override fun onCustomWithdrawConfigUpdate(customWithdrawConfig: CustomWithdrawConfig?) {
-
+        LogCenter.log("onCustomWithdrawConfigUpdate: " + customWithdrawConfig.toString(), Level.DEBUG)
     }
 
     override fun onDraftUpdate(contact: Contact?, arrayList: ArrayList<MsgElement>?, j2: Long) {
-
+        LogCenter.log("onDraftUpdate: " + contact.toString() + "|" + arrayList + "|" + j2.toString(), Level.DEBUG)
     }
 
     override fun onEmojiDownloadComplete(emojiNotifyInfo: EmojiNotifyInfo?) {
@@ -117,7 +113,7 @@ internal object AioListener: IKernelMsgListener {
     }
 
     override fun onFileMsgCome(arrayList: ArrayList<MsgRecord>?) {
-
+        LogCenter.log("onFileMsgCome: " + arrayList.toString(), Level.DEBUG)
     }
 
     override fun onFirstViewDirectMsgUpdate(firstViewDirectMsgNotifyInfo: FirstViewDirectMsgNotifyInfo?) {
@@ -139,23 +135,23 @@ internal object AioListener: IKernelMsgListener {
     }
 
     override fun onGroupFileInfoAdd(groupItem: GroupItem?) {
-
+        LogCenter.log("onGroupFileInfoAdd: " + groupItem.toString(), Level.DEBUG)
     }
 
     override fun onGroupFileInfoUpdate(groupFileListResult: GroupFileListResult?) {
-
+        LogCenter.log("onGroupFileInfoUpdate: " + groupFileListResult.toString(), Level.DEBUG)
     }
 
     override fun onGroupGuildUpdate(groupGuildNotifyInfo: GroupGuildNotifyInfo?) {
-
+        LogCenter.log("onGroupGuildUpdate: " + groupGuildNotifyInfo.toString(), Level.DEBUG)
     }
 
     override fun onGroupTransferInfoAdd(groupItem: GroupItem?) {
-
+        LogCenter.log("onGroupTransferInfoAdd: " + groupItem.toString(), Level.DEBUG)
     }
 
     override fun onGroupTransferInfoUpdate(groupFileListResult: GroupFileListResult?) {
-
+        LogCenter.log("onGroupTransferInfoUpdate: " + groupFileListResult.toString(), Level.DEBUG)
     }
 
     override fun onHitCsRelatedEmojiResult(downloadRelateEmojiResultInfo: DownloadRelateEmojiResultInfo?) {
@@ -179,11 +175,11 @@ internal object AioListener: IKernelMsgListener {
     }
 
     override fun onKickedOffLine(kickedInfo: KickedInfo?) {
-
+        LogCenter.log("onKickedOffLine($kickedInfo)")
     }
 
-    override fun onLineDev(arrayList: ArrayList<DevInfo>?) {
-
+    override fun onLineDev(devList: ArrayList<DevInfo>?) {
+        //LogCenter.log("onLineDev($arrayList)")
     }
 
     override fun onLogLevelChanged(j2: Long) {
@@ -219,11 +215,11 @@ internal object AioListener: IKernelMsgListener {
     }
 
     override fun onMsgRecall(i2: Int, str: String?, j2: Long) {
-
+        LogCenter.log("onMsgRecall($i2, $str, $j2)")
     }
 
     override fun onMsgSecurityNotify(msgRecord: MsgRecord?) {
-
+        LogCenter.log("onMsgSecurityNotify($msgRecord)")
     }
 
     override fun onMsgSettingUpdate(msgSetting: MsgSetting?) {
@@ -235,11 +231,11 @@ internal object AioListener: IKernelMsgListener {
     }
 
     override fun onNtMsgSyncEnd() {
-
+        LogCenter.log("NTKernel同步消息完成", Level.DEBUG)
     }
 
     override fun onNtMsgSyncStart() {
-
+        LogCenter.log("NTKernel同步消息开始", Level.DEBUG)
     }
 
     override fun onReadFeedEventUpdate(firstViewDirectMsgNotifyInfo: FirstViewDirectMsgNotifyInfo?) {
@@ -251,11 +247,11 @@ internal object AioListener: IKernelMsgListener {
     }
 
     override fun onRecvUDCFlag(i2: Int) {
-
+        LogCenter.log("onRecvUDCFlag($i2)", Level.DEBUG)
     }
 
     override fun onRichMediaDownloadComplete(fileTransNotifyInfo: FileTransNotifyInfo?) {
-
+        LogCenter.log("onRichMediaDownloadComplete($fileTransNotifyInfo)", Level.DEBUG)
     }
 
     override fun onRichMediaProgerssUpdate(fileTransNotifyInfo: FileTransNotifyInfo?) {
@@ -271,11 +267,11 @@ internal object AioListener: IKernelMsgListener {
     }
 
     override fun onSendMsgError(j2: Long, contact: Contact?, i2: Int, str: String?) {
-
+        LogCenter.log("onSendMsgError($j2, $contact, $j2, $str)", Level.DEBUG)
     }
 
     override fun onSysMsgNotification(i2: Int, j2: Long, j3: Long, arrayList: ArrayList<Byte>?) {
-
+        LogCenter.log("onSysMsgNotification($i2, $j2, $j3, $arrayList)", Level.DEBUG)
     }
 
     override fun onTempChatInfoUpdate(tempChatInfo: TempChatInfo?) {
@@ -299,7 +295,7 @@ internal object AioListener: IKernelMsgListener {
     }
 
     override fun onUserTabStatusChanged(arrayList: ArrayList<TabStatusInfo>?) {
-
+        LogCenter.log("onUserTabStatusChanged($arrayList)", Level.DEBUG)
     }
 
     override fun onlineStatusBigIconDownloadPush(i2: Int, j2: Long, str: String?) {

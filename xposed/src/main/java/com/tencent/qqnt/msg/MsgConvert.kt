@@ -242,7 +242,17 @@ internal object MsgConvert {
                     ))
                 )
             }
-            else -> LogCenter.log("不支持的消息Elem转消息段: ${element.elementType}", Level.WARN)
+            MsgConstant.KELEMTYPEGRAYTIP -> {
+                val tip = element.grayTipElement
+                when(val tipType = tip.subElementType) {
+                    //MsgConstant.GRAYTIPELEMENTSUBTYPEJSON -> {
+                    //   val notify = tip.jsonGrayTipElement
+                    //}
+
+                    else -> LogCenter.log("不支持的提示类型: $tip", Level.WARN)
+                }
+            }
+            else -> LogCenter.log("不支持的Elem转消息段: ${element.elementType}", Level.WARN)
         }
         return null
     }

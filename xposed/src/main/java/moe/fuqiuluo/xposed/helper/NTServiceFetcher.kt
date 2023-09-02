@@ -1,10 +1,12 @@
 package moe.fuqiuluo.xposed.helper
 
 import com.tencent.mobileqq.listener.AioListener
+import com.tencent.mobileqq.listener.GroupEventListener
+import com.tencent.mobileqq.listener.NetworkListener
 import com.tencent.qqnt.kernel.api.IKernelService
 import com.tencent.qqnt.kernel.nativeinterface.IOperateCallback
+import com.tencent.qqnt.kernel.nativeinterface.IQQNTWrapperNetwork
 import com.tencent.qqnt.utils.PlatformUtils
-import de.robv.android.xposed.XposedBridge
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -13,7 +15,7 @@ import mqq.app.api.IRuntimeService
 
 internal object NTServiceFetcher {
     private lateinit var iKernelService: IKernelService
-    private var isRegisteredMSG = atomic(false)
+    private var isInitedForNT = atomic(false)
     private var isForcedFore = atomic(false)
     private val lock = Mutex()
 
@@ -21,31 +23,46 @@ internal object NTServiceFetcher {
         lock.withLock {
             if (service is IKernelService && !this::iKernelService.isInitialized) {
                 this.iKernelService = service
-                XposedBridge.log("Fetch kernel service successfully: $iKernelService")
+                LogCenter.log("Fetch kernel service successfully: $iKernelService")
             }
-            if (this::iKernelService.isInitialized && !isRegisteredMSG.value) registerMSG()
-            if (this::iKernelService.isInitialized && !isForcedFore.value) antiBackground()
+            if (::iKernelService.isInitialized) {
+                if (!isInitedForNT.value) {
+                    initNTKernelListener()
+                }
+                if (!isForcedFore.value) {
+                    antiBackgroundMode()
+                }
+            }
         }
     }
 
-    private fun registerMSG() {
+    private fun initNTKernelListener() {
+        if (!PlatformUtils.isMainProcess()) return
+
         try {
-            if (!PlatformUtils.isMainProcess()) return
+            //val kernelService = NTServiceFetcher.kernelService
+            //val sessionService = kernelService.wrapperSession
 
-            val msgService = KernelServiceHelper.getMsgService(iKernelService)
-            if (msgService != null) {
-                XposedBridge.log("Register MSG listener successfully.")
+            val msgService = KernelServiceHelper.getMsgService(iKernelService) ?: return
+            //val groupService = sessionService.groupService ?: return
+            //val networkService = IQQNTWrapperNetwork.CppProxy.openNetworkService() ?: return
 
-                msgService.addMsgListener(AioListener) // 注册消息监听器
+            LogCenter.log("Register MSG listener successfully.")
+            msgService.addMsgListener(AioListener)
 
-                isRegisteredMSG.lazySet(true)
-            }
+            //networkService.addNetworkServiceListener(NetworkListener)
+            //LogCenter.log("Register Network listener successfully.")
+
+            //groupService.addKernelGroupListener(GroupEventListener)
+            //LogCenter.log("Register Group listener successfully.")
+
+            isInitedForNT.lazySet(true)
         } catch (e: Throwable) {
-            XposedBridge.log(e)
+            LogCenter.log(e.stackTraceToString(), Level.WARN)
         }
     }
 
-    private fun antiBackground() {
+    private fun antiBackgroundMode() {
         try {
             val kernelService = NTServiceFetcher.kernelService
             if (kernelService.isInit) {

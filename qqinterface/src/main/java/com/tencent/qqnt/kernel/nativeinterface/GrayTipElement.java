@@ -17,7 +17,6 @@ public final class GrayTipElement implements Serializable {
     LocalGrayTipElement localGrayTipElement;
     ProclamationElement proclamationElement;
     RevokeElement revokeElement;
-    long serialVersionUID = 1;
     int subElementType;
     WalletGrayTipElement walletGrayTipElement;
     XmlElement xmlElement;

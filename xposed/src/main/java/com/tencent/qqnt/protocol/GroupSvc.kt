@@ -309,11 +309,18 @@ internal object GroupSvc: BaseSvc() {
         uin: String,
         refresh: Boolean = false
     ): TroopMemberInfo? {
-        val runtime = MobileQQ.getMobileQQ().waitAppRuntime()
-        val service = runtime.getRuntimeService(ITroopMemberInfoService::class.java, "all")
+        val service = app.getRuntimeService(ITroopMemberInfoService::class.java, "all")
         var info = service.getTroopMember(groupId, uin)
         if (refresh || !service.isMemberInCache(groupId, uin) || info == null || info.troopnick == null) {
             info = requestTroopMemberInfo(service, groupId.toLong(), uin.toLong())
+        }
+        if (info == null) {
+            info = getTroopMemberInfoByUinViaNt(groupId, uin.toLong())?.let {
+                TroopMemberInfo().apply {
+                    troopnick = it.cardName
+                    friendnick = it.nick
+                }
+            }
         }
         return info
     }
