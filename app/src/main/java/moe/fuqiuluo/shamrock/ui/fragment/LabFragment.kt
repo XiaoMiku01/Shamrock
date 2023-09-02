@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -21,11 +20,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.edit
-import kotlinx.coroutines.launch
 import moe.fuqiuluo.shamrock.R
 import moe.fuqiuluo.shamrock.ui.app.AppRuntime
-import moe.fuqiuluo.shamrock.ui.app.Level
+import moe.fuqiuluo.shamrock.ui.app.ShamrockConfig
 import moe.fuqiuluo.shamrock.ui.theme.LocalString
 import moe.fuqiuluo.shamrock.ui.theme.TabUnSelectedColor
 import moe.fuqiuluo.shamrock.ui.tools.NoticeTextDialog
@@ -35,7 +32,6 @@ import moe.fuqiuluo.shamrock.ui.tools.toast
 fun LabFragment() {
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
-    val preferences = ctx.getSharedPreferences("config", 0)
 
     Column(
         modifier = Modifier
@@ -70,9 +66,9 @@ fun LabFragment() {
                     title = "中二病模式",
                     desc = "也许会导致奇怪的问题，大抵就是你看不懂罢了。",
                     descColor = it,
-                    isSwitch = preferences.getBoolean("2B", false)
+                    isSwitch = ShamrockConfig.is2B(ctx)
                 ) {
-                    preferences.edit { putBoolean("2B", it) }
+                    ShamrockConfig.set2B(ctx, it)
                     scope.toast(ctx, "重启生效哦！")
                     return@Function true
                 }
@@ -95,10 +91,10 @@ fun LabFragment() {
                     title = "自动清理QQ垃圾",
                     desc = "也许会导致奇怪的问题。",
                     descColor = it,
-                    isSwitch = preferences.getBoolean("auto_clear", false)
+                    isSwitch = ShamrockConfig.isAutoClean(ctx)
                 ) {
-                    preferences.edit { putBoolean("auto_clear", it) }
-                    scope.toast(ctx, "重启QQ生效")
+                    ShamrockConfig.setAutoClean(ctx, it)
+                    ShamrockConfig.pushUpdate(ctx)
                     return@Function false
                 }
 
@@ -106,11 +102,11 @@ fun LabFragment() {
                     title = "拦截QQ无用发包",
                     desc = "测试阶段，可能导致网络异常。",
                     descColor = it,
-                    isSwitch = preferences.getBoolean("inject_packet", false)
+                    isSwitch = ShamrockConfig.isInjectPacket(ctx)
                 ) {
-                    preferences.edit { putBoolean("inject_packet", it) }
-                    scope.toast(ctx, "重启QQ生效")
-                    return@Function false
+                    ShamrockConfig.setInjectPacket(ctx, it)
+                    ShamrockConfig.pushUpdate(ctx)
+                    return@Function true
                 }
             }
 
@@ -134,8 +130,8 @@ fun LabFragment() {
                     descColor = it,
                     isSwitch = AppRuntime.state.supportVoice.value
                 ) {
-                    scope.toast(ctx, "重启QQ生效")
-                    return@Function true
+                        scope.toast(ctx, "请按照Github提示手动操作。")
+                    return@Function false
                 }
             }
 

@@ -7,7 +7,9 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import moe.fuqiuluo.remote.api.*
@@ -66,10 +68,12 @@ object HTTPServer {
         return server.application.isActive
     }
 
-    suspend fun changePort(port: Int) {
+    fun changePort(port: Int) {
         if (this.currServerPort == port && isQueryServiceStarted) return
-        stop()
-        start(port)
+        GlobalScope.launch {
+            stop()
+            start(port)
+        }
     }
 
     suspend fun stop() {

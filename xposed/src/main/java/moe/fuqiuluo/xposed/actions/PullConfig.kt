@@ -38,6 +38,22 @@ class PullConfig: IAction {
             }
             initHttp(MobileQQ.getContext())
         })
+        DynamicReceiver.register("push_config", IPCRequest {
+            ctx.toast("动态推送配置文件成功。")
+            ShamrockConfig.updateConfig(ctx, it)
+        })
+        DynamicReceiver.register("change_port", IPCRequest {
+            when (it.getStringExtra("type")) {
+                "port" -> {
+                    ctx.toast("动态修改HTTP端口成功。")
+                    HTTPServer.changePort(it.getIntExtra("port", 5700))
+                }
+                "ws_port" -> {
+                    ctx.toast("动态修改WS端口不支持。")
+                    //WsServer.changePort(it.getIntExtra("port", 5800))
+                }
+            }
+        })
 
         DataRequester.request("init", onFailure = {
             if (!ShamrockConfig.isInit(ctx)) {
@@ -47,7 +63,7 @@ class PullConfig: IAction {
                     exitProcess(1)
                 }
             } else {
-                ctx.toast("Shamrock进程未启动，不会推送配置文件。。")
+                ctx.toast("Shamrock进程未启动，不会推送配置文件。")
                 initHttp(ctx)
             }
         }, bodyBuilder = null) {
