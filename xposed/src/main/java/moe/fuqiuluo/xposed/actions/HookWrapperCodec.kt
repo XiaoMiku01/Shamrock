@@ -2,6 +2,7 @@
 package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
+import com.tencent.mobileqq.helper.ShamrockConfig
 import com.tencent.mobileqq.service.PacketReceiver
 import com.tencent.msf.service.protocol.pb.SSOLoginMerge
 import com.tencent.qphone.base.remote.FromServiceMsg
@@ -64,7 +65,7 @@ internal class HookWrapperCodec: IAction {
                         .mergeFrom(from.wupBuffer.slice(4))
                     val busiBufVec = merge.BusiBuffVec.get()
                     busiBufVec.forEach { item ->
-                        if (item.ServiceCmd.get() in IgnoredCmd) {
+                        if (item.ServiceCmd.get() in IgnoredCmd && ShamrockConfig.isInjectPacket()) {
                             busiBufVec.remove(item)
                         } else {
                             pushOnReceive(FromServiceMsg().apply {
@@ -77,10 +78,9 @@ internal class HookWrapperCodec: IAction {
                     merge.BusiBuffVec.set(busiBufVec)
                     from.putWupBuffer(merge.toByteArray())
                 } else {
-                    if (from.serviceCmd in IgnoredCmd) {
+                    if (from.serviceCmd in IgnoredCmd && ShamrockConfig.isInjectPacket()) {
                         from.serviceCmd = "ShamrockInjectedCmd"
                         from.putWupBuffer(EMPTY_BYTE_ARRAY)
-                        from.requestSsoSeq = 0
                     } else {
                         pushOnReceive(from)
                     }

@@ -21,7 +21,8 @@ internal object InitHandler: ModuleHandler() {
             "use_cqcode" to preferences.getBoolean("use_cqcode", false),
             "ws_addr" to preferences.getString("ws_addr", ""),
             "pro_api" to preferences.getBoolean("pro_api", false),
-            "token" to preferences.getString("token", null)
+            "token" to preferences.getString("token", null),
+            "inject_packet" to preferences.getBoolean("inject_packet", false),
         ))
     }
 }

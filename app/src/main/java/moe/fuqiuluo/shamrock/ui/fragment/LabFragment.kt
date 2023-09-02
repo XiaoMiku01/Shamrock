@@ -101,6 +101,17 @@ fun LabFragment() {
                     scope.toast(ctx, "重启QQ生效")
                     return@Function false
                 }
+
+                Function(
+                    title = "拦截QQ无用发包",
+                    desc = "测试阶段，可能导致网络异常。",
+                    descColor = it,
+                    isSwitch = preferences.getBoolean("inject_packet", false)
+                ) {
+                    preferences.edit { putBoolean("inject_packet", it) }
+                    scope.toast(ctx, "重启QQ生效")
+                    return@Function false
+                }
             }
 
         }
