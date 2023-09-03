@@ -28,6 +28,7 @@ internal object AioListener: IKernelMsgListener {
     private suspend fun handleMsg(record: MsgRecord) {
         try {
             val rawMsg = record.elements.toCQCode(record.chatType)
+            if (rawMsg.isEmpty()) return
             val msgHash = MessageHelper.convertMsgIdToMsgHash(record.chatType, record.msgId, record.peerUin)
             when (record.chatType) {
                 MsgConstant.KCHATTYPEGROUP -> {

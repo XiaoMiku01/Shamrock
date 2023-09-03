@@ -40,11 +40,11 @@ internal object NTServiceFetcher {
         if (!PlatformUtils.isMainProcess()) return
 
         try {
-            //val kernelService = NTServiceFetcher.kernelService
-            //val sessionService = kernelService.wrapperSession
+            val kernelService = NTServiceFetcher.kernelService
+            val sessionService = kernelService.wrapperSession
 
             val msgService = KernelServiceHelper.getMsgService(iKernelService) ?: return
-            //val groupService = sessionService.groupService ?: return
+            val groupService = sessionService.groupService ?: return
             //val networkService = IQQNTWrapperNetwork.CppProxy.openNetworkService() ?: return
 
             LogCenter.log("Register MSG listener successfully.")
@@ -53,8 +53,8 @@ internal object NTServiceFetcher {
             //networkService.addNetworkServiceListener(NetworkListener)
             //LogCenter.log("Register Network listener successfully.")
 
-            //groupService.addKernelGroupListener(GroupEventListener)
-            //LogCenter.log("Register Group listener successfully.")
+            groupService.addKernelGroupListener(GroupEventListener)
+            LogCenter.log("Register Group listener successfully.")
 
             isInitedForNT.lazySet(true)
         } catch (e: Throwable) {

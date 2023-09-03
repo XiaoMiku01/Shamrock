@@ -9,6 +9,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import com.tencent.qqnt.transfile.RichProtoSvc
+import kotlinx.io.core.BytePacketBuilder
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.tools.asJson
@@ -235,6 +236,7 @@ internal object MsgConvert {
             MsgConstant.KELEMTYPEREPLY -> {
                 val reply = element.replyElement
                 val msgId = reply.replayMsgId
+
                 return hashMapOf(
                     "type" to "reply".json,
                     "data" to JsonObject(mapOf(
@@ -248,7 +250,6 @@ internal object MsgConvert {
                     //MsgConstant.GRAYTIPELEMENTSUBTYPEJSON -> {
                     //   val notify = tip.jsonGrayTipElement
                     //}
-
                     else -> LogCenter.log("不支持的提示类型: $tip", Level.WARN)
                 }
             }

@@ -320,7 +320,6 @@ private fun FunctionCard(
             ) {
                 ShamrockConfig.setWsClient(ctx, it)
                 return@Function true
-
             }
 
             Function(

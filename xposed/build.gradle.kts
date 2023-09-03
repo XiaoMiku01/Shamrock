@@ -67,6 +67,7 @@ dependencies {
 
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation("androidx.exifinterface:exifinterface:1.3.6")
+    implementation("com.google.protobuf:protobuf-java:3.24.0")
 
     compileOnly ("de.robv.android.xposed:api:82")
     compileOnly (project(":qqinterface"))

@@ -17,15 +17,16 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFD0BCFF),
+    primary = TabSelectedColor,
     secondary = Color(0xFFCCC2DC),
-    tertiary = Color(0xFFEFB8C8)
+    tertiary = Color(0xFFFFFBFE),
+    surface = Color(0xFFFFFBFE),
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = TabSelectedColor,
     secondary = Color(0xFFCCC2DC),
-    tertiary = Color(0xFF7D5260),
+    tertiary = Color(0xFFFFFBFE),
     surface = Color(0xFFFFFBFE),
 
     /* Other default colors to override
