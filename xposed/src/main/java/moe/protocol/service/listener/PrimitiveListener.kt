@@ -20,6 +20,7 @@ import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.tools.slice
 import moe.protocol.service.data.push.NoticeSubType
+import moe.protocol.service.data.push.NoticeType
 import moe.protocol.servlet.helper.MessageHelper
 import moe.protocol.servlet.protocol.MsgSvc
 
@@ -52,7 +53,7 @@ internal object PrimitiveListener {
 
         LogCenter.log("群成员增加($groupCode): $target, type = $type")
 
-        HttpService.pushGroupMemberDecreased(time, target, groupCode, operation, when(type) {
+        HttpService.pushGroupMemberDecreased(time, target, groupCode, operation, NoticeType.GroupMemIncrease, when(type) {
             130 -> NoticeSubType.Approve
             131 -> NoticeSubType.Invite
             else -> NoticeSubType.Approve
@@ -69,7 +70,7 @@ internal object PrimitiveListener {
         val target = ContactHelper.getUinByUidAsync(targetUid).toLong()
         LogCenter.log("群成员减少($groupCode): $target, type = $type")
 
-        HttpService.pushGroupMemberDecreased(time, target, groupCode, operation, when(type) {
+        HttpService.pushGroupMemberDecreased(time, target, groupCode, operation, NoticeType.GroupMemDecrease, when(type) {
             130 -> NoticeSubType.Kick
             131 -> NoticeSubType.Leave
             3 -> NoticeSubType.KickMe
@@ -129,7 +130,6 @@ internal object PrimitiveListener {
                 val operatorUid = pb[11, 1].asUtf8String
                 val targetUid = pb[11, 3, 6].asUtf8String
                 val msgSeq = pb[11, 3, 1].asLong
-                val msgTime = pb[11, 3, 2].asLong
                 val tip = if (pb.has(11, 9)) pb[11, 9, 2].asUtf8String else ""
                 val msgId = MessageHelper.getMsgIdByMsgSeq(MsgConstant.KCHATTYPEGROUP, msgSeq)
                 val msgHash = if (msgId == 0L) msgSeq else MessageHelper.generateMsgIdHash(MsgConstant.KCHATTYPEGROUP, msgId)
@@ -138,7 +138,7 @@ internal object PrimitiveListener {
 
                 LogCenter.log("群消息撤回($groupId): $operator -> $target, seq = $msgSeq, hash = $msgHash, tip = $tip")
 
-
+                HttpService.pushGroupMsgRecall(time, operator, target, groupId, msgHash.toLong())
             }
             else -> LogCenter.log("未知的群提示类型: $type", Level.WARN)
         }

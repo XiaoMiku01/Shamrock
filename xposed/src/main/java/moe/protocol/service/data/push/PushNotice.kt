@@ -9,6 +9,7 @@ internal enum class NoticeType {
     @SerialName("group_admin") GroupAdminChange,
     @SerialName("group_decrease") GroupMemDecrease,
     @SerialName("group_increase") GroupMemIncrease,
+    @SerialName("group_recall") GroupRecall
 }
 
 @Serializable
@@ -36,5 +37,6 @@ internal data class PushNotice (
     @SerialName("group_id") val groupId: Long = 0,
     @SerialName("operator_id") val operatorId: Long,
     @SerialName("user_id") val userId: Long,
-    @SerialName("duration") val duration: Int = 0,
+    @SerialName("duration") val duration: Int,
+    @SerialName("message_id") val msgId: Long
 )

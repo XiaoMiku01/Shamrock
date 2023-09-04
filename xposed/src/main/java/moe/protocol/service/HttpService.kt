@@ -65,6 +65,23 @@ internal object HttpService: HttpPushServlet() {
         )
     }
 
+    fun pushGroupMsgRecall(
+        time: Long,
+        operation: Long,
+        userId: Long,
+        groupId: Long,
+        msgHash: Long
+    ) {
+        pushNotice(
+            time = time,
+            type = NoticeType.GroupRecall,
+            operation = operation,
+            userId = userId,
+            groupId =  groupId,
+            msgId = msgHash
+        )
+    }
+
     fun pushGroupBan(
         time: Long,
         operation: Long,
@@ -80,9 +97,10 @@ internal object HttpService: HttpPushServlet() {
         target: Long,
         groupId: Long,
         operation: Long = 0,
+        type: NoticeType,
         subType: NoticeSubType
     ) {
-        pushNotice(time, NoticeType.GroupMemDecrease, subType, operation, target, groupId)
+        pushNotice(time, type, subType, operation, target, groupId)
     }
 
     fun pushGroupAdminChange(time: Long, target: Long, groupId: Long, setAdmin: Boolean) {
@@ -92,15 +110,15 @@ internal object HttpService: HttpPushServlet() {
     fun pushNotice(
         time: Long,
         type: NoticeType,
-        subType: NoticeSubType,
+        subType: NoticeSubType = NoticeSubType.Set,
         operation: Long,
         userId: Long,
         groupId: Long = 0,
-        duration: Int = 0
+        duration: Int = 0,
+        msgId: Long = 0
     ) {
         GlobalScope.launch {
-            pushTo(
-                PushNotice(
+            pushTo(PushNotice(
                 time = time,
                 selfId = app.longAccountUin,
                 postType = "notice",
@@ -109,9 +127,9 @@ internal object HttpService: HttpPushServlet() {
                 operatorId = operation,
                 userId = userId,
                 groupId = groupId,
-                duration = duration
-            )
-            )
+                duration = duration,
+                msgId = msgId
+            ))
         }
     }
 
