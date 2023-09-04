@@ -1,6 +1,5 @@
-package com.tencent.mobileqq.data
+package com.tencent.mobileqq.data.push
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement

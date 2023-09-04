@@ -1,7 +1,7 @@
 package moe.fuqiuluo.remote.action.handlers
 
 import com.tencent.mobileqq.data.Card
-import com.tencent.mobileqq.data.MemberRole
+import com.tencent.mobileqq.data.push.MemberRole
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
 import com.tencent.mobileqq.data.SimpleTroopMemberInfo

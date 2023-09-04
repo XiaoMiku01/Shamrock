@@ -1,6 +1,7 @@
 @file:OptIn(DelicateCoroutinesApi::class)
 package com.tencent.mobileqq.listener
 
+import com.tencent.mobileqq.helper.ShamrockConfig
 import com.tencent.mobileqq.pushservice.HttpPusher
 import com.tencent.qqnt.helper.MessageHelper
 import com.tencent.qqnt.kernel.nativeinterface.*

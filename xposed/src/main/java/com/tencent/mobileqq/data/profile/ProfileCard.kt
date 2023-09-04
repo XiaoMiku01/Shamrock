@@ -1,5 +1,6 @@
-package com.tencent.mobileqq.data
+package com.tencent.mobileqq.data.profile
 
+import com.tencent.mobileqq.data.VipInfo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

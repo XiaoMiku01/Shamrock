@@ -247,9 +247,14 @@ internal object MsgConvert {
             MsgConstant.KELEMTYPEGRAYTIP -> {
                 val tip = element.grayTipElement
                 when(val tipType = tip.subElementType) {
-                    //MsgConstant.GRAYTIPELEMENTSUBTYPEJSON -> {
-                    //   val notify = tip.jsonGrayTipElement
-                    //}
+                    MsgConstant.GRAYTIPELEMENTSUBTYPEJSON -> {
+                       val notify = tip.jsonGrayTipElement
+                        if (notify.busiId == 1014L) {
+                            return null
+                        } else {
+                            LogCenter.log("不支持的灰条类型: $tipType", Level.WARN)
+                        }
+                    }
                     else -> LogCenter.log("不支持的提示类型: $tip", Level.WARN)
                 }
             }

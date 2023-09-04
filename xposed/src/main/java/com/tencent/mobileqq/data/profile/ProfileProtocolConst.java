@@ -1,4 +1,4 @@
-package com.tencent.mobileqq.data;
+package com.tencent.mobileqq.data.profile;
 
 public interface ProfileProtocolConst {
     public static final String CMD_GET_PROFILE_DETAIL = "OidbSvc.0x480_9_IMCore";

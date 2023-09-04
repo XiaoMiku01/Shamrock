@@ -1,11 +1,10 @@
 package moe.fuqiuluo.remote.action.handlers
 
 import com.tencent.mobileqq.data.Card
-import kotlinx.coroutines.sync.Mutex
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
-import com.tencent.mobileqq.data.Location
-import com.tencent.mobileqq.data.ProfileCard
+import com.tencent.mobileqq.data.profile.Location
+import com.tencent.mobileqq.data.profile.ProfileCard
 import com.tencent.mobileqq.data.VipInfo
 import com.tencent.mobileqq.data.VipType
 import com.tencent.qqnt.protocol.CardSvc
@@ -66,7 +65,8 @@ internal object GetProfileCard: IActionHandler() {
                 card.strCity, card.strCompany, card.strCountry, card.strProvince, card.strHometownDesc, card.strSchool
             ),
             cookie = card.vCookies
-        ))
+        )
+        )
     }
 
     override val requiredParams: Array<String> = arrayOf("user_id")

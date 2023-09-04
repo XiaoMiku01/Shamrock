@@ -1,6 +1,6 @@
 package com.tencent.qqnt.protocol
 
-import com.tencent.mobileqq.data.ProfileProtocolConst
+import com.tencent.mobileqq.data.profile.ProfileProtocolConst
 
 internal object VisitorSvc: BaseSvc() {
     const val FROM_C2C_AIO = 2

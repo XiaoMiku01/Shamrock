@@ -12,8 +12,7 @@ import moe.fuqiuluo.xposed.tools.broadcast
 import mqq.app.MobileQQ
 
 internal object PacketReceiver {
-    private val allowCommandList: MutableSet<String> by lazy { mutableSetOf(
-    ) }
+    private val allowCommandList: MutableSet<String> by lazy { mutableSetOf() }
     private val HandlerByIpcSet = hashSetOf<String>()
 
     init {
@@ -27,6 +26,9 @@ internal object PacketReceiver {
             LogCenter.log("UnRegisterHandler(cmd = $cmd)", Level.DEBUG)
             HandlerByIpcSet.remove(cmd)
         })
+        MobileQQ.getContext().broadcast("xqbot") {
+            putExtra("__cmd", "msf_waiter")
+        }
     }
 
     private fun msgFilter(cmd: String): Boolean {

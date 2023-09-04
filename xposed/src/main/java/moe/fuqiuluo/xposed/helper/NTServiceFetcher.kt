@@ -3,6 +3,7 @@ package moe.fuqiuluo.xposed.helper
 import com.tencent.mobileqq.listener.AioListener
 import com.tencent.mobileqq.listener.GroupEventListener
 import com.tencent.mobileqq.listener.NetworkListener
+import com.tencent.mobileqq.listener.PrimitiveListener
 import com.tencent.qqnt.kernel.api.IKernelService
 import com.tencent.qqnt.kernel.nativeinterface.IOperateCallback
 import com.tencent.qqnt.kernel.nativeinterface.IQQNTWrapperNetwork
@@ -32,6 +33,7 @@ internal object NTServiceFetcher {
                 if (!isForcedFore.value) {
                     antiBackgroundMode()
                 }
+                PrimitiveListener.listenTo()
             }
         }
     }

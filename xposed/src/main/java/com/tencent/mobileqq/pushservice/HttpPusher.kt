@@ -2,11 +2,11 @@
 package com.tencent.mobileqq.pushservice
 
 import com.tencent.mobileqq.app.QQAppInterface
-import com.tencent.mobileqq.data.MemberRole
-import com.tencent.mobileqq.data.MsgSubType
-import com.tencent.mobileqq.data.MsgType
-import com.tencent.mobileqq.data.PushMessage
-import com.tencent.mobileqq.data.Sender
+import com.tencent.mobileqq.data.push.MemberRole
+import com.tencent.mobileqq.data.push.MsgSubType
+import com.tencent.mobileqq.data.push.MsgType
+import com.tencent.mobileqq.data.push.PushMessage
+import com.tencent.mobileqq.data.push.Sender
 import com.tencent.mobileqq.helper.ShamrockConfig
 import com.tencent.qqnt.helper.MessageHelper
 import com.tencent.qqnt.kernel.nativeinterface.MsgElement
@@ -52,9 +52,7 @@ internal object HttpPusher {
         raw: String,
         msgHash: Int
     ) {
-        pushMsg(
-            record, elements, raw, msgHash, MsgType.Private, MsgSubType.Friend
-        )
+        pushMsg(record, elements, raw, msgHash, MsgType.Private, MsgSubType.Friend)
     }
 
     fun pushGroupMsg(
@@ -71,6 +69,13 @@ internal object HttpPusher {
                 else -> MemberRole.Member
             }
         )
+    }
+
+    fun pushNotice() {
+        if (!ShamrockConfig.allowWebHook()) {
+            return
+        }
+
     }
 
     fun pushMsg(
@@ -91,7 +96,8 @@ internal object HttpPusher {
             try {
                 val respond = GlobalClient.post(url) {
                     contentType(ContentType.Application.Json)
-                    setBody(PushMessage(
+                    setBody(
+                        PushMessage(
                         time = record.msgTime,
                         selfId = app.longAccountUin,
                         postType = "message",
@@ -111,7 +117,8 @@ internal object HttpPusher {
                             title = "",
                             level = "",
                         )
-                    ))
+                    )
+                    )
                 }.bodyAsText()
                 handleQuicklyReply(record, msgHash, respond)
             } catch (e: ConnectTimeoutException) {
