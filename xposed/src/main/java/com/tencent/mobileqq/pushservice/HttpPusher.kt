@@ -76,6 +76,10 @@ internal object HttpPusher: HttpPushServlet() {
         pushNotice(time, NoticeType.GroupBan, if (duration == 0) NoticeSubType.LiftBan else NoticeSubType.Ban, operation, userId, groupId, duration)
     }
 
+    fun pushGroupAdminChange(time: Long, target: Long, groupId: Long, setAdmin: Boolean) {
+        pushNotice(time, NoticeType.GroupAdminChange, if (setAdmin) NoticeSubType.Set else NoticeSubType.UnSet, 0, target, groupId)
+    }
+
     fun pushNotice(
         time: Long,
         type: NoticeType,

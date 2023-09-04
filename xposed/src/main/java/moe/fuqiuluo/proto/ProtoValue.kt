@@ -14,6 +14,10 @@ sealed interface ProtoValue {
         return 0
     }
 
+    fun has(vararg tags: Int): Boolean {
+        return false
+    }
+
     operator fun contains(tag: Int): Boolean {
         return false
     }

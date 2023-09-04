@@ -77,7 +77,11 @@ internal object MsgSvc: BaseSvc() {
             if (code != 0 && hashCode != 0) {
                 MessageHelper.removeMsgByHashCode(hashCode)
             }
-            LogCenter.log("消息发送: $peerId, code: $code $reason")
+            when (code) {
+                120 -> LogCenter.log("消息发送: $peerId, 禁言状态无法发送。")
+                5 -> LogCenter.log("消息发送: $peerId, 当前不支持该消息类型。")
+                else -> LogCenter.log("消息发送: $peerId, code: $code $reason")
+            }
         }
     }
 

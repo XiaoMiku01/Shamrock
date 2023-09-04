@@ -6,13 +6,16 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal enum class NoticeType {
     @SerialName("group_ban") GroupBan,
-
+    @SerialName("group_admin") GroupAdminChange
 }
 
 @Serializable
 internal enum class NoticeSubType {
     @SerialName("ban") Ban,
     @SerialName("lift_ban") LiftBan,
+
+    @SerialName("set") Set,
+    @SerialName("un_set") UnSet,
 }
 
 @Serializable

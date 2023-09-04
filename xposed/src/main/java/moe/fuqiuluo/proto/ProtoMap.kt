@@ -11,6 +11,17 @@ class ProtoMap(
 ): ProtoValue {
     constructor(): this(hashMapOf())
 
+    override fun has(vararg tags: Int): Boolean {
+        var curMap: ProtoMap = this
+        tags.forEach {
+            if (it !in curMap) {
+                return false
+            }
+            curMap = curMap[it].asMap
+        }
+        return true
+    }
+
     override fun contains(tag: Int): Boolean {
         return value.containsKey(tag)
     }

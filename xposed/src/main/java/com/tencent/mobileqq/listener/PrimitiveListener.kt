@@ -41,8 +41,26 @@ internal object PrimitiveListener {
         val msgType = pb[1, 2, 1].asInt
         val msgTime = pb[1, 2, 6].asLong
         when(msgType) {
+            44 -> onGroupAdminChange(msgTime, pb)
             732 -> onGroupBan(msgTime, pb)
         }
+    }
+
+    private suspend fun onGroupAdminChange(msgTime: Long, pb: ProtoMap) {
+        val groupCode = pb[1, 3, 2, 1].asLong
+        lateinit var targetUid: String
+        val isSetAdmin: Boolean
+        if (pb.has(1, 3, 2, 4, 1)) {
+            targetUid = pb[1, 3, 2, 4, 1, 1].asUtf8String
+            isSetAdmin = pb[1, 3, 2, 4, 1, 2].asInt == 1
+        } else {
+            targetUid = pb[1, 3, 2, 4, 2, 1].asUtf8String
+            isSetAdmin = pb[1, 3, 2, 4, 2, 2].asInt == 1
+        }
+        val target = ContactHelper.getUinByUidAsync(targetUid).toLong()
+        LogCenter.log("群管理员变动($groupCode): $target, isSetAdmin = $isSetAdmin")
+
+        HttpPusher.pushGroupAdminChange(msgTime, target, groupCode, isSetAdmin)
     }
 
     private suspend fun onGroupBan(msgTime: Long, pb: ProtoMap) {
