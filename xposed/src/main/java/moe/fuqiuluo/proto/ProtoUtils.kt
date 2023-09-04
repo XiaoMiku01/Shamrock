@@ -47,8 +47,31 @@ object ProtoUtils {
             is Map<*, *> -> ProtoMap(hashMapOf(*any.map { (k, v) ->
                 k as Int to any2proto(v!!)
             }.toTypedArray()))
+            is Pair<*, *> -> {
+                val (tag, v) = any
+                val value = any2proto(v!!)
+                when (tag) {
+                    is Pair<*, *> -> ProtoMap().apply {
+                        val tags = walkPairTags(tag)
+                        set(*tags.toIntArray(), v = value)
+                    }
+                    is Number -> ProtoMap(hashMapOf(tag.toInt() to value))
+                    else -> error("Not support type for tag: ${tag.toString()}")
+                }
+            }
             else -> error("Not support type: ${any::class.simpleName}")
         }
+    }
+
+    fun walkPairTags(pair: Pair<*, *>, tags: MutableList<Int> = mutableListOf()): List<Int> {
+        val (k, v) = pair
+        if (k is Number) {
+            tags.add(k.toInt())
+        } else {
+            walkPairTags(k as Pair<*, *>, tags)
+        }
+        tags.add(v as Int)
+        return tags
     }
 
     private fun printUnknownFieldSet(set: UnknownFieldSet, dest: ProtoMap) {

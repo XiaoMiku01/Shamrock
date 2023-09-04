@@ -1,8 +1,25 @@
 package moe.fuqiuluo.proto
 
 import com.google.protobuf.ByteString
+import moe.fuqiuluo.proto.ProtoUtils.walkPairTags
 
-fun protobufOf(struct: (ProtoMap) -> Unit): ProtoMap {
+fun <K, V> protobufOf(vararg pairs: Pair<K, V>): ProtoMap {
+    val map = ProtoMap()
+    pairs.forEach {
+        val (k, v) = it
+        when (k) {
+            is Number -> map[k.toInt()] = ProtoUtils.any2proto(v!!)
+            is Pair<*, *> -> {
+                val tags = walkPairTags(k)
+                map.set(*tags.toIntArray(), v = ProtoUtils.any2proto(v!!))
+            }
+            else -> error("Not support type for tag: ${k.toString()}")
+        }
+    }
+    return map
+}
+
+fun protobufMapOf(struct: (ProtoMap) -> Unit): ProtoMap {
     val map = ProtoMap()
     struct.invoke(map)
     return map

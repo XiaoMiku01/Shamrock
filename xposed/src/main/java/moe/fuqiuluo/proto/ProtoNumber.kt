@@ -2,6 +2,7 @@ package moe.fuqiuluo.proto
 
 import com.google.protobuf.CodedOutputStream
 import kotlinx.serialization.json.JsonElement
+import moe.fuqiuluo.proto.ProtoValue
 import moe.fuqiuluo.xposed.tools.json
 
 class ProtoNumber(

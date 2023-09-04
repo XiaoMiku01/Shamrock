@@ -5,7 +5,10 @@ import com.tencent.mobileqq.app.QQAppInterface
 import com.tencent.mobileqq.data.push.MemberRole
 import com.tencent.mobileqq.data.push.MsgSubType
 import com.tencent.mobileqq.data.push.MsgType
+import com.tencent.mobileqq.data.push.NoticeSubType
+import com.tencent.mobileqq.data.push.NoticeType
 import com.tencent.mobileqq.data.push.PushMessage
+import com.tencent.mobileqq.data.push.PushNotice
 import com.tencent.mobileqq.data.push.Sender
 import com.tencent.mobileqq.helper.ShamrockConfig
 import com.tencent.qqnt.helper.MessageHelper
@@ -14,13 +17,7 @@ import com.tencent.qqnt.kernel.nativeinterface.MsgRecord
 import com.tencent.qqnt.msg.toSegment
 import com.tencent.qqnt.protocol.GroupSvc
 import com.tencent.qqnt.protocol.MsgSvc
-import io.ktor.client.network.sockets.ConnectTimeoutException
-import io.ktor.client.plugins.HttpRequestTimeoutException
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -30,7 +27,6 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
-import moe.fuqiuluo.xposed.tools.GlobalClient
 import moe.fuqiuluo.xposed.tools.asBoolean
 import moe.fuqiuluo.xposed.tools.asBooleanOrNull
 import moe.fuqiuluo.xposed.tools.asIntOrNull
@@ -39,9 +35,8 @@ import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.json
 import moe.fuqiuluo.xposed.tools.jsonArray
 import mqq.app.MobileQQ
-import java.net.SocketException
 
-internal object HttpPusher {
+internal object HttpPusher: HttpPushServlet() {
     private val actionMsgTypes = arrayOf(
         "record", "voice", "video", "markdown"
     )
@@ -71,11 +66,38 @@ internal object HttpPusher {
         )
     }
 
-    fun pushNotice() {
-        if (!ShamrockConfig.allowWebHook()) {
-            return
-        }
+    fun pushGroupBan(
+        time: Long,
+        operation: Long,
+        userId: Long,
+        groupId: Long,
+        duration: Int
+    ) {
+        pushNotice(time, NoticeType.GroupBan, if (duration == 0) NoticeSubType.LiftBan else NoticeSubType.Ban, operation, userId, groupId, duration)
+    }
 
+    fun pushNotice(
+        time: Long,
+        type: NoticeType,
+        subType: NoticeSubType,
+        operation: Long,
+        userId: Long,
+        groupId: Long = 0,
+        duration: Int = 0
+    ) {
+        GlobalScope.launch {
+            pushTo(PushNotice(
+                time = time,
+                selfId = app.longAccountUin,
+                postType = "notice",
+                type = type,
+                subType = subType,
+                operatorId = operation,
+                userId = userId,
+                groupId = groupId,
+                duration = duration
+            ))
+        }
     }
 
     fun pushMsg(
@@ -87,53 +109,33 @@ internal object HttpPusher {
         subType: MsgSubType,
         role: MemberRole = MemberRole.Member
     ) {
-        if (!ShamrockConfig.allowWebHook()) {
-            return
-        }
         GlobalScope.launch {
-            val app = MobileQQ.getMobileQQ().waitAppRuntime() as QQAppInterface
-            val url = "http://" + ShamrockConfig.getWebHookAddress()
-            try {
-                val respond = GlobalClient.post(url) {
-                    contentType(ContentType.Application.Json)
-                    setBody(
-                        PushMessage(
-                        time = record.msgTime,
-                        selfId = app.longAccountUin,
-                        postType = "message",
-                        messageType = msgType,
-                        subType = subType,
-                        messageId = msgHash,
-                        groupId = record.peerUin,
-                        userId = record.senderUin,
-                        message = if(ShamrockConfig.useCQ()) raw.json else elements.toSegment(record.chatType).json,
-                        rawMessage = raw,
-                        font = 0,
-                        sender = Sender(
-                            userId = record.senderUin,
-                            nickname = record.sendNickName,
-                            card = record.sendMemberName,
-                            role = role,
-                            title = "",
-                            level = "",
-                        )
-                    )
-                    )
-                }.bodyAsText()
-                handleQuicklyReply(record, msgHash, respond)
-            } catch (e: ConnectTimeoutException) {
-                LogCenter.log("消息推送失败: 请检查你的推送服务器。", Level.ERROR)
-            } catch (e: SocketException) {
-                LogCenter.log("消息推送失败: 网络波动。", Level.ERROR)
-            } catch (e: HttpRequestTimeoutException) {
-                LogCenter.log("消息推送失败: 推送服务器无法连接。", Level.ERROR)
-            } catch (e: Throwable) {
-                LogCenter.log("消息推送失败: ${e.stackTraceToString()}", Level.ERROR)
-            }
+            val respond = pushTo(PushMessage(
+                time = record.msgTime,
+                selfId = app.longAccountUin,
+                postType = "message",
+                messageType = msgType,
+                subType = subType,
+                messageId = msgHash,
+                groupId = record.peerUin,
+                userId = record.senderUin,
+                message = if(ShamrockConfig.useCQ()) raw.json else elements.toSegment(record.chatType).json,
+                rawMessage = raw,
+                font = 0,
+                sender = Sender(
+                    userId = record.senderUin,
+                    nickname = record.sendNickName,
+                    card = record.sendMemberName,
+                    role = role,
+                    title = "",
+                    level = "",
+                )
+            )) ?: return@launch
+            handleQuicklyReply(record, respond.bodyAsText())
         }
     }
 
-    private suspend fun handleQuicklyReply(record: MsgRecord, msgHash: Int, jsonText: String) {
+    private suspend fun handleQuicklyReply(record: MsgRecord, jsonText: String) {
         try {
             val data = Json.parseToJsonElement(jsonText).asJsonObject
             if (data.containsKey("reply")) {
@@ -170,7 +172,7 @@ internal object HttpPusher {
                 GroupSvc.banMember(record.peerUin, record.senderUin, banTime)
             }
         } catch (e: Throwable) {
-            LogCenter.log("处理快速回复错: $e", Level.WARN)
+            LogCenter.log("处理快速操作错误: $e", Level.WARN)
         }
     }
 

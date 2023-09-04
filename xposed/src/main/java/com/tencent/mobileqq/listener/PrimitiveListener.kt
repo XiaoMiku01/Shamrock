@@ -1,17 +1,16 @@
 package com.tencent.mobileqq.listener
 
+import com.tencent.mobileqq.pushservice.HttpPusher
 import com.tencent.qqnt.helper.ContactHelper
-import com.tencent.qqnt.protocol.GroupSvc
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.proto.ProtoMap
-import moe.fuqiuluo.proto.ProtoUtils
 import moe.fuqiuluo.proto.asInt
 import moe.fuqiuluo.proto.asLong
 import moe.fuqiuluo.proto.asUtf8String
+import moe.fuqiuluo.proto.ProtoUtils
 import moe.fuqiuluo.utils.ServiceUtils
-import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.tools.slice
@@ -40,21 +39,23 @@ internal object PrimitiveListener {
 
     private suspend fun onMsgPush(pb: ProtoMap) {
         val msgType = pb[1, 2, 1].asInt
-        val msgTime = pb[1, 2, 6].asInt
+        val msgTime = pb[1, 2, 6].asLong
         when(msgType) {
             732 -> onGroupBan(msgTime, pb)
         }
     }
 
-    private suspend fun onGroupBan(msgTime: Int, pb: ProtoMap) {
+    private suspend fun onGroupBan(msgTime: Long, pb: ProtoMap) {
         val groupCode = pb[1, 3, 2, 1].asLong
         val operatorUid = pb[1, 3, 2, 4].asUtf8String
         val targetUid = pb[1, 3, 2, 5, 3, 1].asUtf8String
         val duration = pb[1, 3, 2, 5, 3, 2].asInt
 
-        val operation = ContactHelper.getUinByUidAsync(operatorUid)
-        val target = ContactHelper.getUinByUidAsync(targetUid)
+        val operation = ContactHelper.getUinByUidAsync(operatorUid).toLong()
+        val target = ContactHelper.getUinByUidAsync(targetUid).toLong()
 
+        LogCenter.log("群禁言($groupCode): $operation -> $target, 时长 = ${duration}s")
 
+        HttpPusher.pushGroupBan(msgTime, operation, target, groupCode, duration)
     }
 }

@@ -4,6 +4,7 @@ package moe.fuqiuluo.xposed.helper.internal
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.tencent.qqnt.utils.PlatformUtils
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -27,7 +28,7 @@ internal object DynamicReceiver: BroadcastReceiver() {
             if (cmd.isNotBlank()) {
                 cmdHandler[cmd].also {
                     if (it == null)
-                        LogCenter.log("无广播处理器: $cmd", Level.ERROR)
+                        LogCenter.log("无广播处理器: $cmd, main = ${PlatformUtils.isMainProcess()}", Level.ERROR)
                 }?.callback?.handle(intent)
             } else GlobalScope.launch { mutex.withLock {
                 if (hash == -1) return@withLock
