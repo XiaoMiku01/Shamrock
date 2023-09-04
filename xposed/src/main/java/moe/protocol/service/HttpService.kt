@@ -72,12 +72,17 @@ internal object HttpService: HttpPushServlet() {
         groupId: Long,
         duration: Int
     ) {
-
         pushNotice(time, NoticeType.GroupBan, if (duration == 0) NoticeSubType.LiftBan else NoticeSubType.Ban, operation, userId, groupId, duration)
     }
 
-    fun pushGroupMemberDecreased(time: Long, target: Long, groupId: Long) {
-        pushNotice(time, NoticeType.GroupBan, NoticeSubType.LiftBan, 0, target, groupId)
+    fun pushGroupMemberDecreased(
+        time: Long,
+        target: Long,
+        groupId: Long,
+        operation: Long = 0,
+        subType: NoticeSubType
+    ) {
+        pushNotice(time, NoticeType.GroupMemDecrease, subType, operation, target, groupId)
     }
 
     fun pushGroupAdminChange(time: Long, target: Long, groupId: Long, setAdmin: Boolean) {
