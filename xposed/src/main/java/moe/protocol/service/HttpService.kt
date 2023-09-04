@@ -65,6 +65,16 @@ internal object HttpService: HttpPushServlet() {
         )
     }
 
+    fun pushPrivateMsgRecall(time: Long, operation: Long, msgHash: Long) {
+        pushNotice(
+            time = time,
+            type = NoticeType.FriendRecall,
+            operation = operation,
+            userId = operation,
+            msgId = msgHash
+        )
+    }
+
     fun pushGroupMsgRecall(
         time: Long,
         operation: Long,

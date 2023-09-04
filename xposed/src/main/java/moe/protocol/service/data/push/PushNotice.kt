@@ -9,7 +9,9 @@ internal enum class NoticeType {
     @SerialName("group_admin") GroupAdminChange,
     @SerialName("group_decrease") GroupMemDecrease,
     @SerialName("group_increase") GroupMemIncrease,
-    @SerialName("group_recall") GroupRecall
+    @SerialName("group_recall") GroupRecall,
+    @SerialName("friend_recall") FriendRecall,
+
 }
 
 @Serializable
