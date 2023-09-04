@@ -1,6 +1,6 @@
 package moe.fuqiuluo.remote.action.handlers
 
-import com.tencent.qqnt.protocol.VisitorSvc
+import moe.protocol.servlet.protocol.VisitorSvc
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
 import moe.fuqiuluo.remote.entries.EmptyObject

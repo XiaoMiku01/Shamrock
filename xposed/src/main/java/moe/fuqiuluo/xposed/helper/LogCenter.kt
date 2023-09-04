@@ -2,7 +2,7 @@ package moe.fuqiuluo.xposed.helper
 
 import android.annotation.SuppressLint
 import android.icu.text.SimpleDateFormat
-import com.tencent.qqnt.utils.FileUtils
+import moe.protocol.servlet.utils.FileUtils
 import moe.fuqiuluo.xposed.actions.toast
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
 import mqq.app.MobileQQ

@@ -11,7 +11,7 @@ import de.robv.android.xposed.XposedBridge
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import com.tencent.qqnt.utils.PlatformUtils
+import moe.protocol.servlet.utils.PlatformUtils
 import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
 import mqq.app.MobileQQ
 

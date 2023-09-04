@@ -1,7 +1,7 @@
 package moe.fuqiuluo.remote.action.handlers
 
-import com.tencent.mobileqq.data.OutResource
-import com.tencent.qqnt.helper.LocalCacheHelper
+import moe.protocol.service.data.OutResource
+import moe.protocol.servlet.helper.LocalCacheHelper
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
 import moe.fuqiuluo.utils.AudioUtils
@@ -24,10 +24,12 @@ internal object GetRecord: IActionHandler() {
                 "amr" -> AudioUtils.audioToAmr(pttFile, isSilk)
                 else -> AudioUtils.audioToFormat(pttFile, isSilk, format)
             }
-            ok(OutResource(
+            ok(
+                OutResource(
                 audioFile.toString(),
                 url = "/res/${audioFile.nameWithoutExtension}"
-            ))
+            )
+            )
         } else {
             error("not found record file from cache")
         }

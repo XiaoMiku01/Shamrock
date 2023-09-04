@@ -2,7 +2,7 @@ package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
 import android.os.Bundle
-import com.tencent.qqnt.utils.PlatformUtils
+import moe.protocol.servlet.utils.PlatformUtils
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.xposed.helper.Level

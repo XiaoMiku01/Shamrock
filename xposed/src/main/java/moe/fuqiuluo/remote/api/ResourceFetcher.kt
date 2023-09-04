@@ -1,6 +1,6 @@
 package moe.fuqiuluo.remote.api
 
-import com.tencent.qqnt.utils.FileUtils
+import moe.protocol.servlet.utils.FileUtils
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.document

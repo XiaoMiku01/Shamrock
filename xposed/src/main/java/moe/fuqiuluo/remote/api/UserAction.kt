@@ -1,6 +1,6 @@
 package moe.fuqiuluo.remote.api
 
-import com.tencent.qqnt.helper.LogicException
+import moe.protocol.servlet.helper.LogicException
 import io.ktor.server.application.call
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing

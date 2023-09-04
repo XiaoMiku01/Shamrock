@@ -3,7 +3,7 @@ package moe.fuqiuluo.remote.api
 import com.tencent.mobileqq.data.Card
 import com.tencent.mobileqq.profilecard.api.IProfileCardBlacklistApi
 import com.tencent.mobileqq.qroute.QRoute
-import com.tencent.qqnt.protocol.CardSvc
+import moe.protocol.servlet.protocol.CardSvc
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText

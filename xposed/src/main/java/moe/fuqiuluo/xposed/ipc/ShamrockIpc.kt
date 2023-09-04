@@ -1,7 +1,7 @@
 package moe.fuqiuluo.xposed.ipc
 
 import android.os.IBinder
-import com.tencent.qqnt.utils.PlatformUtils
+import moe.protocol.servlet.utils.PlatformUtils
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull

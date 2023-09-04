@@ -1,11 +1,11 @@
 package moe.fuqiuluo.remote.action.handlers
 
 import com.tencent.mobileqq.data.Card
-import com.tencent.mobileqq.data.push.MemberRole
+import moe.protocol.service.data.push.MemberRole
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
-import com.tencent.mobileqq.data.SimpleTroopMemberInfo
-import com.tencent.qqnt.protocol.GroupSvc
+import moe.protocol.service.data.SimpleTroopMemberInfo
+import moe.protocol.servlet.protocol.GroupSvc
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
 
 internal object GetTroopMemberInfo: IActionHandler() {
@@ -21,7 +21,8 @@ internal object GetTroopMemberInfo: IActionHandler() {
         val info = GroupSvc.getTroopMemberInfoByUin(groupId, uin, refresh)
             ?: return logic("cannot get troop member info")
 
-        return ok(SimpleTroopMemberInfo(
+        return ok(
+            SimpleTroopMemberInfo(
             uin = info.memberuin,
             name = info.friendnick.ifNullOrEmpty(info.autoremark) ?: "",
             showName = info.troopnick.ifNullOrEmpty(info.troopColorNick),
@@ -49,7 +50,8 @@ internal object GetTroopMemberInfo: IActionHandler() {
             title = info.mUniqueTitle ?: "",
             titleExpireTime = info.mUniqueTitleExpire,
             cardChangeable = GroupSvc.isAdmin(groupId)
-        ))
+        )
+        )
     }
 
     override val requiredParams: Array<String> = arrayOf("user_id", "group_id")

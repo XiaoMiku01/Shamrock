@@ -1,6 +1,6 @@
 package moe.fuqiuluo.xposed.loader
 
-import com.tencent.mobileqq.service.PacketReceiver
+import moe.protocol.service.PacketReceiver
 import kotlin.reflect.jvm.jvmName
 
 /**

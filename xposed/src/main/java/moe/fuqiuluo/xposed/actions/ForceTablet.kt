@@ -2,11 +2,11 @@ package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
 import com.tencent.common.config.pad.DeviceType
-import com.tencent.mobileqq.helper.ShamrockConfig
+import moe.protocol.service.helper.ShamrockConfig
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import moe.fuqiuluo.xposed.helper.LogCenter
-import com.tencent.qqnt.utils.PlatformUtils
+import moe.protocol.servlet.utils.PlatformUtils
 import moe.fuqiuluo.xposed.loader.LuoClassloader
 import moe.fuqiuluo.xposed.tools.FuzzySearchClass
 

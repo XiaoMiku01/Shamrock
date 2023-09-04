@@ -1,11 +1,16 @@
 package moe.fuqiuluo.remote.action.handlers
 
-import com.tencent.mobileqq.data.GroupAllHonor
-import com.tencent.mobileqq.data.GroupMemberHonor
+import moe.protocol.service.data.GroupAllHonor
+import moe.protocol.service.data.GroupMemberHonor
 import com.tencent.mobileqq.data.*
-import com.tencent.qqnt.protocol.GroupSvc
+import moe.protocol.servlet.protocol.GroupSvc
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
+import moe.protocol.service.data.HONOR_GROUP_FIRE
+import moe.protocol.service.data.HONOR_GROUP_FLAME
+import moe.protocol.service.data.HONOR_HAPPY
+import moe.protocol.service.data.HONOR_NEWBIE
+import moe.protocol.service.data.HONOR_TALKATIVE
 
 internal object GetTroopHonor: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
@@ -28,7 +33,8 @@ internal object GetTroopHonor: IActionHandler() {
             }
         }
 
-        return ok(GroupAllHonor(
+        return ok(
+            GroupAllHonor(
             groupId = groupId,
             currentTalkActive = honorInfo.firstOrNull {
                 it.id == HONOR_TALKATIVE
@@ -39,7 +45,8 @@ internal object GetTroopHonor: IActionHandler() {
             strongNewbieList = honorInfo.filter { it.id == HONOR_NEWBIE },
             emotionList = honorInfo.filter { it.id == HONOR_HAPPY },
             all = honorInfo
-        ))
+        )
+        )
     }
 
     override val requiredParams: Array<String> = arrayOf("group_id", "refresh")

@@ -3,11 +3,11 @@ package moe.fuqiuluo.remote.action.handlers
 import com.tencent.mobileqq.data.Card
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
-import com.tencent.mobileqq.data.profile.Location
-import com.tencent.mobileqq.data.profile.ProfileCard
-import com.tencent.mobileqq.data.VipInfo
-import com.tencent.mobileqq.data.VipType
-import com.tencent.qqnt.protocol.CardSvc
+import moe.protocol.service.data.profile.Location
+import moe.protocol.service.data.profile.ProfileCard
+import moe.protocol.service.data.VipInfo
+import moe.protocol.service.data.VipType
+import moe.protocol.servlet.protocol.CardSvc
 import moe.fuqiuluo.remote.entries.Status
 import moe.fuqiuluo.remote.entries.resultToString
 

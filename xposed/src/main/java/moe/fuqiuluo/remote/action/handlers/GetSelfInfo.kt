@@ -3,7 +3,7 @@ package moe.fuqiuluo.remote.action.handlers
 import com.tencent.mobileqq.app.QQAppInterface
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
-import com.tencent.mobileqq.data.UserDetail
+import moe.protocol.service.data.UserDetail
 import moe.fuqiuluo.remote.entries.Status
 import moe.fuqiuluo.remote.entries.resultToString
 import mqq.app.MobileQQ

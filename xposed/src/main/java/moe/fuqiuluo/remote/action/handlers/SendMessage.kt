@@ -3,10 +3,10 @@ package moe.fuqiuluo.remote.action.handlers
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
-import com.tencent.mobileqq.data.MessageResult
-import com.tencent.qqnt.helper.MessageHelper
-import com.tencent.qqnt.helper.ParamsException
-import com.tencent.qqnt.protocol.MsgSvc
+import moe.protocol.service.data.MessageResult
+import moe.protocol.servlet.helper.MessageHelper
+import moe.protocol.servlet.helper.ParamsException
+import moe.protocol.servlet.protocol.MsgSvc
 import kotlinx.serialization.json.JsonArray
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
@@ -55,10 +55,12 @@ internal object SendMessage: IActionHandler() {
                 MsgSvc.sendToAIO(chatType, peerId, MessageHelper.decodeCQCode(message))
             }
         }
-        return ok(MessageResult(
+        return ok(
+            MessageResult(
             msgId = result.second,
             time = result.first * 0.001
-        ))
+        )
+        )
     }
 
     // 消息段格式消息
@@ -66,10 +68,12 @@ internal object SendMessage: IActionHandler() {
         chatType: Int, peerId: String, message: JsonArray
     ): String {
         val result = MsgSvc.sendToAIO(chatType, peerId, message)
-        return ok(MessageResult(
+        return ok(
+            MessageResult(
             msgId = result.second,
             time = result.first * 0.001
-        ))
+        )
+        )
     }
 
     override val requiredParams: Array<String> = arrayOf("detail_type", "message")

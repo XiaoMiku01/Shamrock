@@ -1,6 +1,6 @@
 package moe.fuqiuluo.remote.action.handlers
 
-import com.tencent.qqnt.utils.FileUtils
+import moe.protocol.servlet.utils.FileUtils
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
 import moe.fuqiuluo.utils.MMKVFetcher

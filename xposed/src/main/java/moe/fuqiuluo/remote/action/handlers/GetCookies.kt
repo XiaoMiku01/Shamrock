@@ -1,7 +1,7 @@
 package moe.fuqiuluo.remote.action.handlers
 
-import com.tencent.mobileqq.data.Credentials
-import com.tencent.qqnt.protocol.TicketSvc
+import moe.protocol.service.data.Credentials
+import moe.protocol.servlet.protocol.TicketSvc
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
 

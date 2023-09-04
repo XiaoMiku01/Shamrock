@@ -4,7 +4,7 @@ package moe.fuqiuluo.xposed.helper.internal
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.tencent.qqnt.utils.PlatformUtils
+import moe.protocol.servlet.utils.PlatformUtils
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

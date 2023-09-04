@@ -1,13 +1,13 @@
 package moe.fuqiuluo.xposed.helper
 
-import com.tencent.mobileqq.listener.AioListener
-import com.tencent.mobileqq.listener.GroupEventListener
-import com.tencent.mobileqq.listener.NetworkListener
-import com.tencent.mobileqq.listener.PrimitiveListener
+import moe.protocol.service.listener.AioListener
+import moe.protocol.service.listener.GroupEventListener
+import moe.protocol.service.listener.NetworkListener
+import moe.protocol.service.listener.PrimitiveListener
 import com.tencent.qqnt.kernel.api.IKernelService
 import com.tencent.qqnt.kernel.nativeinterface.IOperateCallback
 import com.tencent.qqnt.kernel.nativeinterface.IQQNTWrapperNetwork
-import com.tencent.qqnt.utils.PlatformUtils
+import moe.protocol.servlet.utils.PlatformUtils
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

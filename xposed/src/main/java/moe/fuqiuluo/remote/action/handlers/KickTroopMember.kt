@@ -1,6 +1,6 @@
 package moe.fuqiuluo.remote.action.handlers
 
-import com.tencent.qqnt.protocol.GroupSvc
+import moe.protocol.servlet.protocol.GroupSvc
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
 

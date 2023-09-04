@@ -7,9 +7,9 @@ import android.media.MediaMetadataRetriever
 import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFprobeKit
 import com.arthenica.ffmpegkit.ReturnCode
-import com.tencent.qqnt.helper.LocalCacheHelper
+import moe.protocol.servlet.helper.LocalCacheHelper
 import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
-import com.tencent.qqnt.utils.FileUtils
+import moe.protocol.servlet.utils.FileUtils
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import oicq.wlogin_sdk.tools.MD5

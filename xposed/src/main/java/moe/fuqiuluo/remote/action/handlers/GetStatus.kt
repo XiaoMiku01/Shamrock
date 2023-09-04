@@ -2,8 +2,8 @@ package moe.fuqiuluo.remote.action.handlers
 
 import moe.fuqiuluo.remote.action.IActionHandler
 import moe.fuqiuluo.remote.action.ActionSession
-import com.tencent.mobileqq.data.BotStatus
-import com.tencent.mobileqq.data.Self
+import moe.protocol.service.data.BotStatus
+import moe.protocol.service.data.Self
 import moe.fuqiuluo.remote.entries.Status
 import moe.fuqiuluo.remote.entries.resultToString
 import mqq.app.MobileQQ

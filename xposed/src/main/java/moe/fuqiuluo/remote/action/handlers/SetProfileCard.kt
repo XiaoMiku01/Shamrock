@@ -1,7 +1,7 @@
 package moe.fuqiuluo.remote.action.handlers
 
 import android.os.Bundle
-import com.tencent.mobileqq.data.profile.ProfileProtocolConst
+import moe.protocol.service.data.profile.ProfileProtocolConst
 import com.tencent.mobileqq.profilecard.api.IProfileProtocolService
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler

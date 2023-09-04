@@ -1,11 +1,11 @@
 package moe.fuqiuluo.remote.action.handlers
 
 import com.tencent.mobileqq.data.Card
-import com.tencent.mobileqq.data.push.MemberRole
+import moe.protocol.service.data.push.MemberRole
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
-import com.tencent.mobileqq.data.SimpleTroopMemberInfo
-import com.tencent.qqnt.protocol.GroupSvc
+import moe.protocol.service.data.SimpleTroopMemberInfo
+import moe.protocol.servlet.protocol.GroupSvc
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
 
 internal object GetTroopMemberList: IActionHandler() {
@@ -21,7 +21,8 @@ internal object GetTroopMemberList: IActionHandler() {
         return ok(arrayListOf<SimpleTroopMemberInfo>().apply {
             memberList.forEach {  info ->
                 if (info.memberuin != "0") {
-                    add(SimpleTroopMemberInfo(
+                    add(
+                        SimpleTroopMemberInfo(
                         uin = info.memberuin,
                         name = info.friendnick.ifNullOrEmpty(info.autoremark) ?: "",
                         showName = info.troopnick.ifNullOrEmpty(info.troopColorNick),
@@ -49,7 +50,8 @@ internal object GetTroopMemberList: IActionHandler() {
                         title = info.mUniqueTitle ?: "",
                         titleExpireTime = info.mUniqueTitleExpire,
                         cardChangeable = GroupSvc.isAdmin(groupId)
-                    ))
+                    )
+                    )
                 }
             }
         })

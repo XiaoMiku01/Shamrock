@@ -2,11 +2,11 @@ package moe.fuqiuluo.remote.action.handlers
 
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
-import com.tencent.mobileqq.data.MessageDetail
-import com.tencent.mobileqq.data.MessageSender
-import com.tencent.qqnt.helper.MessageHelper
-import com.tencent.qqnt.msg.MsgConvert
-import com.tencent.qqnt.protocol.MsgSvc
+import moe.protocol.service.data.MessageDetail
+import moe.protocol.service.data.MessageSender
+import moe.protocol.servlet.helper.MessageHelper
+import moe.protocol.servlet.msg.MsgConvert
+import moe.protocol.servlet.protocol.MsgSvc
 
 internal object GetMsg: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
@@ -19,7 +19,8 @@ internal object GetMsg: IActionHandler() {
         val msg = MsgSvc.getMsg(msgId)
             ?: return logic("Obtain msg failed, please check your msg_id.")
 
-        return ok(MessageDetail(
+        return ok(
+            MessageDetail(
             msg.msgTime.toInt(),
             MessageHelper.obtainDetailTypeByMsgType(msg.chatType),
             msgHash,
@@ -28,7 +29,8 @@ internal object GetMsg: IActionHandler() {
                 msg.senderUin, msg.sendNickName, "unknown", 0, msg.senderUid
             ),
             MsgConvert.convertMsgRecordToMsgSegment(msg)
-        ))
+        )
+        )
     }
 
     override val requiredParams: Array<String> = arrayOf("message_id")

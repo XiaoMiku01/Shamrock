@@ -2,9 +2,9 @@ package moe.fuqiuluo.remote.action.handlers
 
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
-import com.tencent.mobileqq.data.FriendEntry
-import com.tencent.mobileqq.data.PlatformType
-import com.tencent.qqnt.protocol.FriendSvc
+import moe.protocol.service.data.FriendEntry
+import moe.protocol.service.data.PlatformType
+import moe.protocol.servlet.protocol.FriendSvc
 
 internal object GetFriendList: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {

@@ -1,6 +1,6 @@
 package moe.fuqiuluo.remote
 
-import com.tencent.mobileqq.helper.ShamrockConfig
+import moe.protocol.service.helper.ShamrockConfig
 import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer

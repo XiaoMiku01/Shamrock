@@ -2,8 +2,8 @@ package moe.fuqiuluo.remote.action.handlers
 
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
-import com.tencent.qqnt.helper.MessageHelper
-import com.tencent.qqnt.protocol.MsgSvc
+import moe.protocol.servlet.helper.MessageHelper
+import moe.protocol.servlet.protocol.MsgSvc
 import moe.fuqiuluo.remote.entries.EmptyObject
 
 internal object DeleteMessage: IActionHandler() {

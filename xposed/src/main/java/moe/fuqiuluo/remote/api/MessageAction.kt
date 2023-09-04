@@ -1,6 +1,6 @@
 package moe.fuqiuluo.remote.api
 
-import com.tencent.qqnt.helper.MessageHelper
+import moe.protocol.servlet.helper.MessageHelper
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import io.ktor.server.application.call
 import io.ktor.server.response.respondText

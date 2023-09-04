@@ -2,8 +2,8 @@ package moe.fuqiuluo.remote.action.handlers
 
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
-import com.tencent.mobileqq.data.SimpleTroopInfo
-import com.tencent.qqnt.protocol.GroupSvc
+import moe.protocol.service.data.SimpleTroopInfo
+import moe.protocol.servlet.protocol.GroupSvc
 
 internal object GetTroopList: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
@@ -15,7 +15,8 @@ internal object GetTroopList: IActionHandler() {
         val troopList = GroupSvc.getGroupList(refresh) ?: return logic("unable to get group list")
         return ok(arrayListOf<SimpleTroopInfo>().apply {
             troopList.forEach { groupInfo ->
-                add(SimpleTroopInfo(
+                add(
+                    SimpleTroopInfo(
                     groupId = groupInfo.troopuin,
                     groupUin = groupInfo.troopcode,
                     groupName = groupInfo.troopname ?: groupInfo.newTroopName ?: groupInfo.oldTroopName,
@@ -27,7 +28,8 @@ internal object GetTroopList: IActionHandler() {
                     memNum = groupInfo.wMemberNum,
                     memCount = groupInfo.wMemberNum,
                     maxNum = groupInfo.wMemberMax,
-                ))
+                )
+                )
             }
         })
     }

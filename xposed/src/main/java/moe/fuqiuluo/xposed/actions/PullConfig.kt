@@ -1,11 +1,11 @@
 package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
-import com.tencent.mobileqq.helper.ShamrockConfig
+import moe.protocol.service.helper.ShamrockConfig
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
 
 import moe.fuqiuluo.remote.HTTPServer
-import com.tencent.qqnt.utils.PlatformUtils
+import moe.protocol.servlet.utils.PlatformUtils
 import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
 import moe.fuqiuluo.xposed.helper.internal.IPCRequest
 import moe.fuqiuluo.xposed.loader.ActionLoader
