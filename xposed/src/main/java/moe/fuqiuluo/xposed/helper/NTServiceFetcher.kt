@@ -2,44 +2,47 @@ package moe.fuqiuluo.xposed.helper
 
 import moe.protocol.service.listener.AioListener
 import moe.protocol.service.listener.GroupEventListener
-import moe.protocol.service.listener.NetworkListener
 import moe.protocol.service.listener.PrimitiveListener
 import com.tencent.qqnt.kernel.api.IKernelService
 import com.tencent.qqnt.kernel.nativeinterface.IOperateCallback
-import com.tencent.qqnt.kernel.nativeinterface.IQQNTWrapperNetwork
 import moe.protocol.servlet.utils.PlatformUtils
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import moe.fuqiuluo.xposed.tools.hookMethod
-import mqq.app.api.IRuntimeService
 
 internal object NTServiceFetcher {
     private lateinit var iKernelService: IKernelService
-    private var isInitedForNT = atomic(false)
+    private var isInitForNT = atomic(false)
     private var isForcedFore = atomic(false)
     private val lock = Mutex()
 
-    suspend fun onFetch(service: IRuntimeService) {
+    suspend fun onFetch(service: IKernelService) {
         lock.withLock {
-            if (service is IKernelService && !this::iKernelService.isInitialized) {
+            if (!this::iKernelService.isInitialized) {
                 this.iKernelService = service
                 LogCenter.log("Fetch kernel service successfully: $iKernelService")
             }
             if (::iKernelService.isInitialized) {
-                if (!isInitedForNT.value) {
+                if (!isInitForNT.value) {
                     initNTKernelListener()
                 }
                 if (!isForcedFore.value) {
                     antiBackgroundMode()
                 }
-                PrimitiveListener.listenTo()
             }
         }
     }
 
+    fun onNTStart() {
+        isInitForNT.lazySet(false)
+        //PacketHandler.isInit = false
+        LogCenter.log("NTKernel start successfully!", Level.DEBUG)
+    }
+
     private fun initNTKernelListener() {
         if (!PlatformUtils.isMainProcess()) return
+        if (!PacketHandler.isInit) return
 
         try {
             val kernelService = NTServiceFetcher.kernelService
@@ -58,7 +61,9 @@ internal object NTServiceFetcher {
             groupService.addKernelGroupListener(GroupEventListener)
             LogCenter.log("Register Group listener successfully.")
 
-            isInitedForNT.lazySet(true)
+            PrimitiveListener.registerListener()
+
+            isInitForNT.lazySet(true)
         } catch (e: Throwable) {
             LogCenter.log(e.stackTraceToString(), Level.WARN)
         }

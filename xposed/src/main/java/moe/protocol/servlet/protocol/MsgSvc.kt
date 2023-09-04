@@ -10,6 +10,7 @@ import com.tencent.qqnt.kernel.nativeinterface.MsgRecord
 import com.tencent.qqnt.msg.api.IMsgService
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonArray
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.utils.MMKVFetcher
@@ -30,6 +31,26 @@ internal object MsgSvc: BaseSvc() {
                     } else {
                         continuation.resume(null)
                     }
+                }
+                continuation.invokeOnCancellation {
+                    continuation.resume(null)
+                }
+            }
+        }
+    }
+
+    suspend fun getMsgBySeq(
+        chatType: Int,
+        peerId: String,
+        seq: Long
+    ): MsgRecord? {
+        val contact = MessageHelper.generateContact(chatType, peerId)
+        return withTimeoutOrNull(60 * 1000) {
+            val service = QRoute.api(IMsgService::class.java)
+            suspendCancellableCoroutine { continuation ->
+                service.getMsgsBySeqs(contact, arrayListOf(seq)) { code, _, msgRecords ->
+                    //LogCenter.log("getMsgBySeq: $code, ${msgRecords?.firstOrNull()?.msgId}")
+                    continuation.resume(msgRecords?.firstOrNull())
                 }
                 continuation.invokeOnCancellation {
                     continuation.resume(null)
@@ -87,9 +108,9 @@ internal object MsgSvc: BaseSvc() {
 
     private suspend fun internalGenerateContact(msgId: Long): Contact {
         val chatType = MessageHelper.getChatType(msgId)
-        val mmkv = MMKVFetcher.mmkvWithId("shamrock")
+        val mmkv = MMKVFetcher.mmkvWithId("hash2id")
         if (chatType == MsgConstant.KCHATTYPEGROUP) {
-            val key = "troop$msgId"
+            val key = "grp$msgId"
             val groupId = mmkv.getLong(key, 0)
             mmkv.remove(key)
             return MessageHelper.generateContact(chatType, groupId.toString())

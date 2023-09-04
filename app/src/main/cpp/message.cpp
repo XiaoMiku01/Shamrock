@@ -12,7 +12,7 @@ inline void replace_string(std::string& str, const std::string& from, const std:
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_tencent_qqnt_helper_MessageHelper_createMessageUniseq(JNIEnv *env, jobject thiz,
+Java_moe_protocol_servlet_helper_MessageHelper_createMessageUniseq(JNIEnv *env, jobject thiz,
                                                                jint chat_type,
                                                                jlong time) {
     static std::random_device rd;
@@ -27,14 +27,14 @@ Java_com_tencent_qqnt_helper_MessageHelper_createMessageUniseq(JNIEnv *env, jobj
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_tencent_qqnt_helper_MessageHelper_getChatType(JNIEnv *env, jobject thiz,
+Java_moe_protocol_servlet_helper_MessageHelper_getChatType(JNIEnv *env, jobject thiz,
                                                        jlong msg_id) {
     return (int32_t) ((int64_t) msg_id & 0xffL);
 }
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_tencent_qqnt_helper_MessageHelper_nativeDecodeCQCode(JNIEnv *env, jobject thiz,
+Java_moe_protocol_servlet_helper_MessageHelper_nativeDecodeCQCode(JNIEnv *env, jobject thiz,
                                                               jstring code) {
     jclass ArrayList = env->FindClass("java/util/ArrayList");
     jmethodID NewArrayList = env->GetMethodID(ArrayList, "<init>", "()V");
@@ -81,7 +81,7 @@ Java_com_tencent_qqnt_helper_MessageHelper_nativeDecodeCQCode(JNIEnv *env, jobje
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_tencent_qqnt_helper_MessageHelper_nativeEncodeCQCode(JNIEnv *env, jobject thiz,
+Java_moe_protocol_servlet_helper_MessageHelper_nativeEncodeCQCode(JNIEnv *env, jobject thiz,
                                                               jobject segment_list) {
     jclass List = env->FindClass("java/util/List");
     jmethodID ListSize = env->GetMethodID(List, "size", "()I");

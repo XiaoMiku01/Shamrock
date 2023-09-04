@@ -32,15 +32,15 @@ internal object AioListener: IKernelMsgListener {
             when (record.chatType) {
                 MsgConstant.KCHATTYPEGROUP -> {
                     LogCenter.log("群消息(group = ${record.peerName}(${record.peerUin}), uin = ${record.senderUin}, msg = $rawMsg)")
+                    MessageHelper.saveMsgSeqByMsgId(record.chatType, record.msgId, record.msgSeq)
                     HttpService.pushGroupMsg(record, record.elements, rawMsg, msgHash)
                 }
                 MsgConstant.KCHATTYPEC2C -> {
                     LogCenter.log("私聊消息(private = ${record.senderUin}, msg = $rawMsg)")
+                    MessageHelper.saveMsgSeqByMsgId(record.chatType, record.msgId, record.msgSeq)
                     HttpService.pushPrivateMsg(record, record.elements, rawMsg, msgHash)
                 }
-                else -> {
-                    LogCenter.log("不支持PUSH事件: ${record.chatType}")
-                }
+                else -> LogCenter.log("不支持PUSH事件: ${record.chatType}")
             }
         } catch (e: Throwable) {
             LogCenter.log(e.stackTraceToString(), Level.WARN)

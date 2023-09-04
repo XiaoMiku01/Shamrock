@@ -106,15 +106,15 @@ public interface IMsgService extends QRouteApi {
 
     void getMsgSetting(@Nullable IOperateCallback iOperateCallback);
 
-    void getMsgs(@NotNull Contact contact, long j2, int i2, boolean z, @NotNull IMsgOperateCallback iMsgOperateCallback);
+    void getMsgs(@NotNull Contact contact, long msgId, int cnt, boolean z, @NotNull IMsgOperateCallback iMsgOperateCallback);
 
     void getMsgsByMsgId(@Nullable Contact contact, @Nullable ArrayList<Long> msgIds, @Nullable IMsgOperateCallback callback);
 
-    void getMsgsBySeqAndCount(@Nullable Contact contact, long j2, int i2, boolean z, @Nullable IMsgOperateCallback iMsgOperateCallback);
+    void getMsgsBySeqAndCount(@Nullable Contact contact, long seq, int cnt, boolean z, @Nullable IMsgOperateCallback cb);
 
-    void getMsgsBySeqRange(@Nullable Contact contact, long j2, long j3, @Nullable IMsgOperateCallback iMsgOperateCallback);
+    void getMsgsBySeqRange(@Nullable Contact contact, long start, long end, @Nullable IMsgOperateCallback cb);
 
-    void getMsgsBySeqs(@Nullable Contact contact, @NotNull ArrayList<Long> arrayList, @Nullable IMsgOperateCallback iMsgOperateCallback);
+    void getMsgsBySeqs(@Nullable Contact contact, @NotNull ArrayList<Long> seqs, @Nullable IMsgOperateCallback cb);
 
     //@Nullable
     //Object getMsgsBySeqsSuspend(@NotNull Contact contact, long j2, boolean z, @NotNull Continuation<? super c<ArrayList<MsgRecord>>> continuation);

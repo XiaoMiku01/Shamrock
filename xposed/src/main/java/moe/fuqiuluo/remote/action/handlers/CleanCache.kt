@@ -12,7 +12,11 @@ internal object CleanCache: IActionHandler() {
 
     operator fun invoke(): String {
         FileUtils.clearCache()
-        MMKVFetcher.mmkvWithId("shamrock")
+        MMKVFetcher.mmkvWithId("hash2id")
+            .clear()
+        MMKVFetcher.mmkvWithId("seq2id")
+            .clear()
+        MMKVFetcher.mmkvWithId("audio2silk")
             .clear()
         return ok("成功")
     }

@@ -4,7 +4,6 @@ import com.tencent.qphone.base.remote.FromServiceMsg
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.xposed.helper.Level
-import moe.fuqiuluo.xposed.helper.internal.DataRequester
 import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
 import moe.fuqiuluo.xposed.helper.internal.IPCRequest
 import moe.fuqiuluo.xposed.helper.LogCenter
@@ -12,7 +11,10 @@ import moe.fuqiuluo.xposed.tools.broadcast
 import mqq.app.MobileQQ
 
 internal object PacketReceiver {
-    private val allowCommandList: MutableSet<String> by lazy { mutableSetOf() }
+    private val allowCommandList: MutableSet<String> by lazy { mutableSetOf(
+        "trpc.msg.olpush.OlPushService.MsgPush",
+
+    ) } // 非动态注册，永久常驻的包
     private val HandlerByIpcSet = hashSetOf<String>()
 
     init {
@@ -28,6 +30,7 @@ internal object PacketReceiver {
         })
         MobileQQ.getContext().broadcast("xqbot") {
             putExtra("__cmd", "msf_waiter")
+            LogCenter.log("MSF Packet Receiver running!")
         }
     }
 
@@ -36,10 +39,10 @@ internal object PacketReceiver {
     }
 
     private fun onReceive(from: FromServiceMsg) {
-        if (HandlerByIpcSet.contains(from.serviceCmd)) {
-            DataRequester.request("send_message", bodyBuilder = {
-                put("string", "ReceivePacket(cmd = ${from.serviceCmd})")
-            })
+        if (HandlerByIpcSet.contains(from.serviceCmd)
+            || allowCommandList.contains(from.serviceCmd)
+        ) {
+            LogCenter.log("ReceivePacket(cmd = ${from.serviceCmd})", Level.DEBUG)
             MobileQQ.getContext().broadcast("xqbot") {
                 putExtra("__cmd", from.serviceCmd)
                 putExtra("buffer", from.wupBuffer)

@@ -19,8 +19,7 @@ internal object GetMsg: IActionHandler() {
         val msg = MsgSvc.getMsg(msgId)
             ?: return logic("Obtain msg failed, please check your msg_id.")
 
-        return ok(
-            MessageDetail(
+        return ok(MessageDetail(
             msg.msgTime.toInt(),
             MessageHelper.obtainDetailTypeByMsgType(msg.chatType),
             msgHash,
@@ -29,8 +28,7 @@ internal object GetMsg: IActionHandler() {
                 msg.senderUin, msg.sendNickName, "unknown", 0, msg.senderUid
             ),
             MsgConvert.convertMsgRecordToMsgSegment(msg)
-        )
-        )
+        ))
     }
 
     override val requiredParams: Array<String> = arrayOf("message_id")
