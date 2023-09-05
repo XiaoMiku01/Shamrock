@@ -249,11 +249,11 @@ internal object MsgConvert {
                 when(val tipType = tip.subElementType) {
                     MsgConstant.GRAYTIPELEMENTSUBTYPEJSON -> {
                        val notify = tip.jsonGrayTipElement
-                        if (notify.busiId == 1014L) {
-                            return null
-                        } else {
-                            LogCenter.log("不支持的灰条类型: $tipType", Level.WARN)
+                        when(notify.busiId) {
+                            /* 群戳一戳 */1061L, /* 群撤回 */1014L -> {}
+                            else -> LogCenter.log("不支持的灰条类型: $tipType", Level.WARN)
                         }
+                        return null
                     }
                     else -> LogCenter.log("不支持的提示类型: $tip", Level.WARN)
                 }

@@ -20,6 +20,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
+import moe.fuqiuluo.proto.protobufOf
 import moe.fuqiuluo.remote.action.handlers.GetTroopMemberList
 import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import moe.fuqiuluo.xposed.helper.PacketHandler
@@ -52,6 +53,14 @@ internal object GroupSvc: BaseSvc() {
             val groupId = body.group_code.get()
             LruCacheTroop.put(groupId, text)
         }
+    }
+
+    fun poke(groupId: String, userId: String) {
+        sendOidb("OidbSvc.0xed3", 3795, 1, protobufOf(
+            1 to userId.toLong(),
+            2 to groupId.toLong(),
+            3 to 0
+        ).toByteArray())
     }
 
     suspend fun getGroupMemberList(groupId: String, refresh: Boolean): List<TroopMemberInfo>? {

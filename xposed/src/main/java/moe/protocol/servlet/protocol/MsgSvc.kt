@@ -18,6 +18,9 @@ import moe.fuqiuluo.xposed.helper.NTServiceFetcher
 import kotlin.coroutines.resume
 
 internal object MsgSvc: BaseSvc() {
+    /**
+     * 正常获取
+     */
     suspend fun getMsg(msgId: Long): MsgRecord? {
         val chatType = MessageHelper.getChatType(msgId)
         val peerId = MessageHelper.getPeerIdByMsgId(msgId)
@@ -39,6 +42,9 @@ internal object MsgSvc: BaseSvc() {
         }
     }
 
+    /**
+     * 什么鸟屎都获取不到
+     */
     suspend fun getMsgBySeq(
         chatType: Int,
         peerId: String,
@@ -59,17 +65,9 @@ internal object MsgSvc: BaseSvc() {
         }
     }
 
-    suspend fun deleteMsgASync(msgId: Long) {
-        val kernelService = NTServiceFetcher.kernelService
-        val sessionService = kernelService.wrapperSession
-        val msgService = sessionService.msgService
-
-        val contact = internalGenerateContact(msgId)
-        msgService.recallMsg(contact, arrayListOf(msgId)) { code, why ->
-            LogCenter.log("撤回消息(code = $code, reason = $why)")
-        }
-    }
-
+    /**
+     * 撤回消息 同步 HTTP API
+     */
     suspend fun recallMsg(msgId: Long): Pair<Int, String> {
         val kernelService = NTServiceFetcher.kernelService
         val sessionService = kernelService.wrapperSession
@@ -83,7 +81,12 @@ internal object MsgSvc: BaseSvc() {
         }
     }
 
-    suspend fun sendToAIO(chatType: Int, peedId: String, message: JsonArray): Pair<Long, Int> {
+    /**
+     * 发送消息
+     *
+     * Aio 腾讯内部命名 All In One
+     */
+    suspend fun sendToAio(chatType: Int, peedId: String, message: JsonArray): Pair<Long, Int> {
         val callback = MessageCallback(peedId, 0)
         val result = MessageHelper.sendMessageWithoutMsgId(chatType, peedId, message, callback)
         callback.hashCode = result.second
@@ -109,17 +112,20 @@ internal object MsgSvc: BaseSvc() {
     private suspend fun internalGenerateContact(msgId: Long): Contact {
         val chatType = MessageHelper.getChatType(msgId)
         val mmkv = MMKVFetcher.mmkvWithId("hash2id")
-        if (chatType == MsgConstant.KCHATTYPEGROUP) {
-            val key = "grp$msgId"
-            val groupId = mmkv.getLong(key, 0)
-            mmkv.remove(key)
-            return MessageHelper.generateContact(chatType, groupId.toString())
-        } else if (chatType == MsgConstant.KCHATTYPEC2C) {
-            val key = "c2c$msgId"
-            val friendId = mmkv.getLong(key, 0)
-            mmkv.remove(key)
-            return MessageHelper.generateContact(chatType, ContactHelper.getUidByUinAsync(friendId))
+        return when (chatType) {
+            MsgConstant.KCHATTYPEGROUP -> {
+                val key = "grp$msgId"
+                val groupId = mmkv.getLong(key, 0)
+                mmkv.remove(key)
+                MessageHelper.generateContact(chatType, groupId.toString())
+            }
+            MsgConstant.KCHATTYPEC2C -> {
+                val key = "c2c$msgId"
+                val friendId = mmkv.getLong(key, 0)
+                mmkv.remove(key)
+                MessageHelper.generateContact(chatType, ContactHelper.getUidByUinAsync(friendId))
+            }
+            else -> error("暂时不支持该类型消息: $chatType")
         }
-        error("暂时不支持该类型消息: $chatType")
     }
 }

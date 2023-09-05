@@ -13,11 +13,14 @@ class ProtoMap(
 
     override fun has(vararg tags: Int): Boolean {
         var curMap: ProtoMap = this
-        tags.forEach {
-            if (it !in curMap) {
+        tags.forEachIndexed { index, tag ->
+            if (tag !in curMap) {
                 return false
             }
-            curMap = curMap[it].asMap
+            if (index == tags.size - 1) {
+                return true
+            }
+            curMap = curMap[tag].asMap
         }
         return true
     }

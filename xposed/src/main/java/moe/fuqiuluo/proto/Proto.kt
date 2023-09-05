@@ -56,7 +56,11 @@ val ProtoValue.asList: ProtoList
     get() = (this as ProtoList)
 
 val ProtoValue.asByteArray: ByteArray
-    get() = (this as ProtoByteString).toByteArray()
+    get() = if (this is ProtoMap) {
+        toByteArray()
+    } else {
+        (this as ProtoByteString).toByteArray()
+    }
 
 val ProtoValue.asUtf8String: String
-    get() = (this as ProtoByteString).toUtfString()
+    get() = asByteArray.decodeToString()

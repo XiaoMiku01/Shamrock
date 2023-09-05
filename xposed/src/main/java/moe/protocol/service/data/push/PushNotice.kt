@@ -11,7 +11,7 @@ internal enum class NoticeType {
     @SerialName("group_increase") GroupMemIncrease,
     @SerialName("group_recall") GroupRecall,
     @SerialName("friend_recall") FriendRecall,
-
+    @SerialName("notify") Notify,
 }
 
 @Serializable
@@ -27,10 +27,12 @@ internal enum class NoticeSubType {
     @SerialName("leave") Leave,
     @SerialName("kick") Kick,
     @SerialName("kick_me") KickMe,
+
+    @SerialName("poke") Poke,
 }
 
 @Serializable
-internal data class PushNotice (
+internal data class PushNotice(
     @SerialName("time") val time: Long,
     @SerialName("self_id") val selfId: Long,
     @SerialName("post_type") val postType: String,
@@ -40,5 +42,7 @@ internal data class PushNotice (
     @SerialName("operator_id") val operatorId: Long,
     @SerialName("user_id") val userId: Long,
     @SerialName("duration") val duration: Int,
-    @SerialName("message_id") val msgId: Long
+    @SerialName("message_id") val msgId: Long,
+    @SerialName("tip_text") val tip: String,
+    @SerialName("target_id") val target: Long,
 )

@@ -65,13 +65,26 @@ internal object HttpService: HttpPushServlet() {
         )
     }
 
-    fun pushPrivateMsgRecall(time: Long, operation: Long, msgHash: Long) {
+    fun pushGroupPoke(time: Long, operation: Long, userId: Long, groupId: Long) {
+        pushNotice(
+            time = time,
+            type = NoticeType.Notify,
+            subType = NoticeSubType.Poke,
+            operation = operation,
+            userId = operation,
+            groupId = groupId,
+            target = userId
+        )
+    }
+
+    fun pushPrivateMsgRecall(time: Long, operation: Long, msgHash: Long, tip: String) {
         pushNotice(
             time = time,
             type = NoticeType.FriendRecall,
             operation = operation,
             userId = operation,
-            msgId = msgHash
+            msgId = msgHash,
+            tip = tip
         )
     }
 
@@ -80,7 +93,8 @@ internal object HttpService: HttpPushServlet() {
         operation: Long,
         userId: Long,
         groupId: Long,
-        msgHash: Long
+        msgHash: Long,
+        tip: String
     ) {
         pushNotice(
             time = time,
@@ -88,7 +102,8 @@ internal object HttpService: HttpPushServlet() {
             operation = operation,
             userId = userId,
             groupId =  groupId,
-            msgId = msgHash
+            msgId = msgHash,
+            tip = tip
         )
     }
 
@@ -125,7 +140,9 @@ internal object HttpService: HttpPushServlet() {
         userId: Long,
         groupId: Long = 0,
         duration: Int = 0,
-        msgId: Long = 0
+        msgId: Long = 0,
+        target: Long = 0,
+        tip: String = ""
     ) {
         GlobalScope.launch {
             pushTo(PushNotice(
@@ -138,7 +155,9 @@ internal object HttpService: HttpPushServlet() {
                 userId = userId,
                 groupId = groupId,
                 duration = duration,
-                msgId = msgId
+                target = target,
+                msgId = msgId,
+                tip = tip
             ))
         }
     }
@@ -232,7 +251,7 @@ internal object HttpService: HttpPushServlet() {
         }.let {
             if (it.isNotEmpty()) {
                 it.map { listOf(it) }.forEach {
-                    MsgSvc.sendToAIO(record.chatType, record.peerUin.toString(), it.jsonArray)
+                    MsgSvc.sendToAio(record.chatType, record.peerUin.toString(), it.jsonArray)
                 }
                 return
             }
@@ -253,7 +272,7 @@ internal object HttpService: HttpPushServlet() {
             ).json) // 添加@发送者
         }
         msgList.addAll(message)
-        MsgSvc.sendToAIO(record.chatType, record.peerUin.toString(), when {
+        MsgSvc.sendToAio(record.chatType, record.peerUin.toString(), when {
             else -> msgList
         }.jsonArray)
     }

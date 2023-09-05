@@ -16,12 +16,14 @@ internal class XCHook {
     var before = nullableOf<MethodHooker>()
     var after = nullableOf<MethodHooker>()
 
-    fun after(after: MethodHooker) {
+    fun after(after: MethodHooker): XCHook {
         this.after.set(after)
+        return this
     }
 
-    fun before(before: MethodHooker) {
+    fun before(before: MethodHooker): XCHook {
         this.before.set(before)
+        return this
     }
 }
 

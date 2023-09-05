@@ -45,14 +45,14 @@ internal object SendMessage: IActionHandler() {
         autoEscape: Boolean
     ): String {
         val result = if (autoEscape) {
-            MsgSvc.sendToAIO(chatType, peerId, arrayListOf(message).json)
+            MsgSvc.sendToAio(chatType, peerId, arrayListOf(message).json)
         } else {
             val msg = MessageHelper.decodeCQCode(message)
             if (msg.isEmpty()) {
                 LogCenter.log("CQ码解码失败，CQ码不合法", Level.WARN)
                 return logic("CQCdoe decode failed, CQCode is illegal")
             } else {
-                MsgSvc.sendToAIO(chatType, peerId, MessageHelper.decodeCQCode(message))
+                MsgSvc.sendToAio(chatType, peerId, MessageHelper.decodeCQCode(message))
             }
         }
         return ok(
@@ -67,7 +67,7 @@ internal object SendMessage: IActionHandler() {
     suspend operator fun invoke(
         chatType: Int, peerId: String, message: JsonArray
     ): String {
-        val result = MsgSvc.sendToAIO(chatType, peerId, message)
+        val result = MsgSvc.sendToAio(chatType, peerId, message)
         return ok(
             MessageResult(
             msgId = result.second,

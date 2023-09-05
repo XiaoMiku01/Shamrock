@@ -1,6 +1,8 @@
+@file:OptIn(DelicateCoroutinesApi::class)
 package moe.protocol.service.listener
 
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
+import kotlinx.coroutines.DelicateCoroutinesApi
 import moe.protocol.service.HttpService
 import moe.protocol.servlet.helper.ContactHelper
 import kotlinx.coroutines.GlobalScope
@@ -8,12 +10,15 @@ import kotlinx.coroutines.launch
 import kotlinx.io.core.ByteReadPacket
 import kotlinx.io.core.discardExact
 import kotlinx.io.core.readBytes
+import kotlinx.io.core.readUInt
 import moe.fuqiuluo.proto.ProtoMap
 import moe.fuqiuluo.proto.asInt
 import moe.fuqiuluo.proto.asLong
 import moe.fuqiuluo.proto.asUtf8String
 import moe.fuqiuluo.proto.ProtoUtils
 import moe.fuqiuluo.proto.asByteArray
+import moe.fuqiuluo.proto.asList
+import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.tools.slice
@@ -25,12 +30,22 @@ internal object PrimitiveListener {
     fun registerListener() {
         PacketHandler.register("trpc.msg.olpush.OlPushService.MsgPush") {
             GlobalScope.launch {
-                onMsgPush(ProtoUtils.decodeFromByteArray(it.slice(4)))
+                try {
+                    onMsgPush(ProtoUtils.decodeFromByteArray(it.slice(4)))
+                } catch (e: Exception) {
+                    LogCenter.log(e.stackTraceToString(), Level.WARN)
+                }
             }
         }
     }
 
     private suspend fun onMsgPush(pb: ProtoMap) {
+        if (
+            !pb.has(1, 3)
+            || !pb.has(1, 2)
+            || !pb.has(1, 2, 2)
+            || !pb.has(1, 2, 6)
+        ) return
         val msgType = pb[1, 2, 1].asInt
         val subType = pb[1, 2, 2].asInt
         val msgTime = pb[1, 2, 6].asLong
@@ -40,13 +55,34 @@ internal object PrimitiveListener {
             44 -> onGroupAdminChange(msgTime, pb)
             528 -> when(subType) {
                 138 -> onC2CRecall(msgTime, pb)
-
             }
             732 -> when(subType) {
                 12 -> onGroupBan(msgTime, pb)
                 17 -> onGroupRecall(msgTime, pb)
+                20 -> onGroupPoke(msgTime, pb)
             }
         }
+    }
+
+    private fun onGroupPoke(time: Long, pb: ProtoMap) {
+        val groupCode = pb[1, 1, 1].asLong
+        val readPacket = ByteReadPacket( pb[1, 3, 2].asByteArray )
+        val detail = if (readPacket.readUInt().toLong() == groupCode) {
+            readPacket.discardExact(1)
+            ProtoUtils.decodeFromByteArray(readPacket.readBytes(readPacket.readShort().toInt()))
+        } else pb[1, 3, 2]
+        lateinit var target: String
+        lateinit var operation: String
+        detail[26, 7].asList.value.forEach {
+            val value = it[2].asUtf8String
+            when(it[1].asUtf8String) {
+                "uin_str1" -> operation = value
+                "uin_str2" -> target = value
+            }
+        }
+        LogCenter.log("群戳一戳($groupCode): $operation -> $target")
+
+        HttpService.pushGroupPoke(time, operation.toLong(), target.toLong(), groupCode)
     }
 
     private suspend fun onC2CRecall(time: Long, pb: ProtoMap) {
@@ -59,7 +95,7 @@ internal object PrimitiveListener {
 
         LogCenter.log("私聊消息撤回: $operation, seq = $msgSeq, hash = $msgHash, tip = $tipText")
 
-        HttpService.pushPrivateMsgRecall(time, operation, msgHash.toLong())
+        HttpService.pushPrivateMsgRecall(time, operation, msgHash.toLong(), tipText)
     }
 
     private suspend fun onGroupMemIncreased(time: Long, pb: ProtoMap) {
@@ -124,24 +160,30 @@ internal object PrimitiveListener {
         HttpService.pushGroupBan(msgTime, operation, target, groupCode, duration)
     }
 
-    private suspend fun onGroupRecall(time: Long, tip: ProtoMap) {
-        val readPacket = ByteReadPacket( tip[1, 3, 2].asByteArray )
+    private suspend fun onGroupRecall(time: Long, pb: ProtoMap) {
+        val groupCode = pb[1, 1, 1].asLong
+        val readPacket = ByteReadPacket( pb[1, 3, 2].asByteArray )
         try {
-            readPacket.discardExact(4 + 1)
-            val pb = ProtoUtils.decodeFromByteArray(readPacket.readBytes(readPacket.readShort().toInt()))
-            val groupId = pb[4].asLong
-            val operatorUid = pb[11, 1].asUtf8String
-            val targetUid = pb[11, 3, 6].asUtf8String
-            val msgSeq = pb[11, 3, 1].asLong
-            val tipText = if (pb.has(11, 9)) pb[11, 9, 2].asUtf8String else ""
+            /**
+             * 真是不理解这个傻呗设计，有些群是正常的Protobuf，有些群要去掉7字节
+             */
+            val detail = if (readPacket.readUInt().toLong() == groupCode) {
+                readPacket.discardExact(1)
+                ProtoUtils.decodeFromByteArray(readPacket.readBytes(readPacket.readShort().toInt()))
+            } else pb[1, 3, 2]
+
+            val operatorUid = detail[11, 1].asUtf8String
+            val targetUid = detail[11, 3, 6].asUtf8String
+            val msgSeq = detail[11, 3, 1].asLong
+            val tipText = if (detail.has(11, 9)) detail[11, 9, 2].asUtf8String else ""
             val msgId = MessageHelper.getMsgIdByMsgSeq(MsgConstant.KCHATTYPEGROUP, msgSeq)
             val msgHash = if (msgId == 0L) msgSeq else MessageHelper.generateMsgIdHash(MsgConstant.KCHATTYPEGROUP, msgId)
             val operator = ContactHelper.getUinByUidAsync(operatorUid).toLong()
             val target = ContactHelper.getUinByUidAsync(targetUid).toLong()
 
-            LogCenter.log("群消息撤回($groupId): $operator -> $target, seq = $msgSeq, hash = $msgHash, tip = $tipText")
+            LogCenter.log("群消息撤回($groupCode): $operator -> $target, seq = $msgSeq, hash = $msgHash, tip = $tipText")
 
-            HttpService.pushGroupMsgRecall(time, operator, target, groupId, msgHash.toLong())
+            HttpService.pushGroupMsgRecall(time, operator, target, groupCode, msgHash.toLong(), tipText)
         } finally {
             readPacket.release()
         }
