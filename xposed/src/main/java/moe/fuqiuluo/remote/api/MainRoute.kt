@@ -21,6 +21,7 @@ import moe.fuqiuluo.remote.entries.IndexData
 import moe.fuqiuluo.remote.entries.Status
 import moe.fuqiuluo.xposed.tools.asJsonObject
 import moe.fuqiuluo.xposed.tools.asString
+import moe.fuqiuluo.xposed.tools.asStringOrNull
 import moe.fuqiuluo.xposed.tools.respond
 import mqq.app.MobileQQ
 
@@ -46,13 +47,14 @@ fun Routing.echoVersion() {
             val actionObject = Json.parseToJsonElement(jsonText).jsonObject
 
             val action = actionObject["action"].asString
+            val echo = actionObject["echo"].asStringOrNull ?: ""
             val params = actionObject["params"].asJsonObject
 
             val handler = ActionManager[action]
             if (handler == null) {
-                respond(false, Status.UnsupportedAction, EmptyObject, "不支持的Action")
+                respond(false, Status.UnsupportedAction, EmptyObject, "不支持的Action", echo = echo)
             } else {
-                call.respondText(handler.handle(ActionSession(params)), ContentType.Application.Json)
+                call.respondText(handler.handle(ActionSession(params, echo)), ContentType.Application.Json)
             }
         }
     }

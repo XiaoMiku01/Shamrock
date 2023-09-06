@@ -12,7 +12,7 @@ internal object GetForwardMsg: IActionHandler() {
         val sessionService = kernelService.wrapperSession
         val msgService = sessionService.msgService
 
-        return error("不支持实现，请提交ISSUE！")
+        return error("不支持实现，请提交ISSUE！", session.echo)
     }
 
     override val requiredParams: Array<String> = arrayOf("id")

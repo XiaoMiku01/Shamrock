@@ -3,7 +3,6 @@ package moe.protocol.service.listener
 
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import kotlinx.coroutines.DelicateCoroutinesApi
-import moe.protocol.service.HttpService
 import moe.protocol.servlet.helper.ContactHelper
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -22,6 +21,7 @@ import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.tools.slice
+import moe.protocol.service.api.GlobalPusher
 import moe.protocol.service.data.push.NoticeSubType
 import moe.protocol.service.data.push.NoticeType
 import moe.protocol.servlet.helper.MessageHelper
@@ -82,7 +82,7 @@ internal object PrimitiveListener {
         }
         LogCenter.log("群戳一戳($groupCode): $operation -> $target")
 
-        HttpService.pushGroupPoke(time, operation.toLong(), target.toLong(), groupCode)
+        GlobalPusher.forEach { it.pushGroupPoke(time, operation.toLong(), target.toLong(), groupCode) }
     }
 
     private suspend fun onC2CRecall(time: Long, pb: ProtoMap) {
@@ -95,7 +95,9 @@ internal object PrimitiveListener {
 
         LogCenter.log("私聊消息撤回: $operation, seq = $msgSeq, hash = $msgHash, tip = $tipText")
 
-        HttpService.pushPrivateMsgRecall(time, operation, msgHash.toLong(), tipText)
+        GlobalPusher.forEach {
+            it.pushPrivateMsgRecall(time, operation, msgHash.toLong(), tipText)
+        }
     }
 
     private suspend fun onGroupMemIncreased(time: Long, pb: ProtoMap) {
@@ -107,11 +109,13 @@ internal object PrimitiveListener {
 
         LogCenter.log("群成员增加($groupCode): $target, type = $type")
 
-        HttpService.pushGroupMemberDecreased(time, target, groupCode, operation, NoticeType.GroupMemIncrease, when(type) {
-            130 -> NoticeSubType.Approve
-            131 -> NoticeSubType.Invite
-            else -> NoticeSubType.Approve
-        })
+        GlobalPusher.forEach {
+            it.pushGroupMemberDecreased(time, target, groupCode, operation, NoticeType.GroupMemIncrease, when(type) {
+                130 -> NoticeSubType.Approve
+                131 -> NoticeSubType.Invite
+                else -> NoticeSubType.Approve
+            })
+        }
     }
 
     private suspend fun onGroupMemberDecreased(time: Long, pb: ProtoMap) {
@@ -124,12 +128,14 @@ internal object PrimitiveListener {
         val target = ContactHelper.getUinByUidAsync(targetUid).toLong()
         LogCenter.log("群成员减少($groupCode): $target, type = $type")
 
-        HttpService.pushGroupMemberDecreased(time, target, groupCode, operation, NoticeType.GroupMemDecrease, when(type) {
-            130 -> NoticeSubType.Kick
-            131 -> NoticeSubType.Leave
-            3 -> NoticeSubType.KickMe
-            else -> NoticeSubType.Kick
-        })
+        GlobalPusher.forEach {
+            it.pushGroupMemberDecreased(time, target, groupCode, operation, NoticeType.GroupMemDecrease, when(type) {
+                130 -> NoticeSubType.Kick
+                131 -> NoticeSubType.Leave
+                3 -> NoticeSubType.KickMe
+                else -> NoticeSubType.Kick
+            })
+        }
     }
 
     private suspend fun onGroupAdminChange(msgTime: Long, pb: ProtoMap) {
@@ -146,7 +152,9 @@ internal object PrimitiveListener {
         val target = ContactHelper.getUinByUidAsync(targetUid).toLong()
         LogCenter.log("群管理员变动($groupCode): $target, isSetAdmin = $isSetAdmin")
 
-        HttpService.pushGroupAdminChange(msgTime, target, groupCode, isSetAdmin)
+        GlobalPusher.forEach {
+            it.pushGroupAdminChange(msgTime, target, groupCode, isSetAdmin)
+        }
     }
 
     private suspend fun onGroupBan(msgTime: Long, pb: ProtoMap) {
@@ -157,7 +165,10 @@ internal object PrimitiveListener {
         val operation = ContactHelper.getUinByUidAsync(operatorUid).toLong()
         val target = ContactHelper.getUinByUidAsync(targetUid).toLong()
         LogCenter.log("群禁言($groupCode): $operation -> $target, 时长 = ${duration}s")
-        HttpService.pushGroupBan(msgTime, operation, target, groupCode, duration)
+
+        GlobalPusher.forEach {
+            it.pushGroupBan(msgTime, operation, target, groupCode, duration)
+        }
     }
 
     private suspend fun onGroupRecall(time: Long, pb: ProtoMap) {
@@ -183,7 +194,9 @@ internal object PrimitiveListener {
 
             LogCenter.log("群消息撤回($groupCode): $operator -> $target, seq = $msgSeq, hash = $msgHash, tip = $tipText")
 
-            HttpService.pushGroupMsgRecall(time, operator, target, groupCode, msgHash.toLong(), tipText)
+            GlobalPusher.forEach {
+                it.pushGroupMsgRecall(time, operator, target, groupCode, msgHash.toLong(), tipText)
+            }
         } finally {
             readPacket.release()
         }

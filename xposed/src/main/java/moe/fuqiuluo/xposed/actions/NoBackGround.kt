@@ -8,7 +8,7 @@ import moe.fuqiuluo.xposed.loader.LuoClassloader
 import moe.fuqiuluo.xposed.tools.hookMethod
 import mqq.app.MobileQQ
 
-internal class AntiBackgroundMsf: IAction {
+internal class NoBackGround: IAction {
     override fun invoke(ctx: Context) {
         kotlin.runCatching {
             XposedHelpers.findClass("com.tencent.mobileqq.activity.miniaio.MiniMsgUser", LuoClassloader)

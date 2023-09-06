@@ -5,7 +5,6 @@ import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.server.routing.Routing
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.isActive
@@ -20,9 +19,9 @@ import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
 import moe.fuqiuluo.xposed.loader.NativeLoader
 
-object HTTPServer {
+internal object HTTPServer {
     @JvmStatic
-    var isQueryServiceStarted = false
+    var isServiceStarted = false
     internal var startTime = 0L
 
     private val actionMutex = Mutex()
@@ -30,7 +29,7 @@ object HTTPServer {
     internal var currServerPort: Int = 0
 
     suspend fun start(port: Int) {
-        if (isQueryServiceStarted) return
+        if (isServiceStarted) return
         actionMutex.withLock {
             server = embeddedServer(Netty, port = port) {
                 install(Auth)
@@ -55,7 +54,7 @@ object HTTPServer {
             server.start(wait = false)
         }
         startTime = System.currentTimeMillis()
-        isQueryServiceStarted = true
+        isServiceStarted = true
         this.currServerPort = port
         LogCenter.log("Start HTTP Server: http://0.0.0.0:$currServerPort/")
         DataRequester.request("success", mapOf(
@@ -69,7 +68,7 @@ object HTTPServer {
     }
 
     fun changePort(port: Int) {
-        if (this.currServerPort == port && isQueryServiceStarted) return
+        if (this.currServerPort == port && isServiceStarted) return
         GlobalScope.launch {
             stop()
             start(port)
@@ -79,7 +78,7 @@ object HTTPServer {
     suspend fun stop() {
         actionMutex.withLock {
             server.stop()
-            isQueryServiceStarted = false
+            isServiceStarted = false
         }
     }
 }

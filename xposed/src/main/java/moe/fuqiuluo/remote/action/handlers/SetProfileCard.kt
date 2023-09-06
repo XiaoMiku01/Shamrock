@@ -35,7 +35,7 @@ internal object SetProfileCard: IActionHandler() {
         }
 
         service.setProfileDetail(bundle)
-        return ok("设置成功")
+        return ok("设置成功", session.echo)
     }
 
     override val requiredParams: Array<String> = arrayOf("nickname", "company", "email", "college", "personal_note")

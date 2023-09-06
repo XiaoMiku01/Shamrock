@@ -21,7 +21,7 @@ internal abstract class HttpPushServlet: BasePushServlet {
          return ShamrockConfig.allowWebHook()
      }
 
-    suspend inline fun <reified T> pushTo(body: T): HttpResponse? {
+    protected suspend inline fun <reified T> pushTo(body: T): HttpResponse? {
         if(!allowPush()) return null
         try {
             return GlobalClient.post(address) {

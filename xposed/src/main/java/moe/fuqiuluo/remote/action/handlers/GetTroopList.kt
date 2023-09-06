@@ -8,11 +8,11 @@ import moe.protocol.servlet.protocol.GroupSvc
 internal object GetTroopList: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
         val refresh = session.getBooleanOrDefault("refresh", false)
-        return invoke(refresh)
+        return invoke(refresh, session.echo)
     }
 
-    suspend operator fun invoke(refresh: Boolean): String {
-        val troopList = GroupSvc.getGroupList(refresh) ?: return logic("unable to get group list")
+    suspend operator fun invoke(refresh: Boolean, echo: String = ""): String {
+        val troopList = GroupSvc.getGroupList(refresh) ?: return logic("unable to get group list", echo)
         return ok(arrayListOf<SimpleTroopInfo>().apply {
             troopList.forEach { groupInfo ->
                 add(
@@ -31,7 +31,7 @@ internal object GetTroopList: IActionHandler() {
                 )
                 )
             }
-        })
+        }, echo)
     }
 
     override fun path(): String = "get_group_list"

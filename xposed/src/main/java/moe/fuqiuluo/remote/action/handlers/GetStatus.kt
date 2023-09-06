@@ -16,7 +16,7 @@ internal object GetStatus: IActionHandler() {
             BotStatus(
                 Self("qq", curUin), runtime.isLogin, "正常"
             )
-        ))
+        ), echo = session.echo)
     }
 
     override fun path(): String = "get_status"

@@ -21,7 +21,7 @@ internal object GetUinByUid: IActionHandler() {
                 continuation.resume(it)
             }
         }
-        return resultToString(true, Status.Ok, uinMap)
+        return resultToString(true, Status.Ok, uinMap, echo = session.echo)
     }
 
     override fun path(): String = "get_uin_by_uid"

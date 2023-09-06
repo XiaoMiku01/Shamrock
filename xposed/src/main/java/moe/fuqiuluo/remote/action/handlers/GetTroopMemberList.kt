@@ -12,12 +12,12 @@ internal object GetTroopMemberList: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
         val groupId = session.getString("group_id")
         val refresh = session.getBooleanOrDefault("refresh", false)
-        return invoke(groupId, refresh)
+        return invoke(groupId, refresh, session.echo)
     }
 
-    suspend operator fun invoke(groupId: String, refresh: Boolean): String {
+    suspend operator fun invoke(groupId: String, refresh: Boolean, echo: String = ""): String {
         val memberList = GroupSvc.getGroupMemberList(groupId, refresh)
-            ?: return error("unable to get group member list")
+            ?: return error("unable to get group member list", echo)
         return ok(arrayListOf<SimpleTroopMemberInfo>().apply {
             memberList.forEach {  info ->
                 if (info.memberuin != "0") {
@@ -54,7 +54,7 @@ internal object GetTroopMemberList: IActionHandler() {
                     )
                 }
             }
-        })
+        }, echo)
     }
 
     override val requiredParams: Array<String> = arrayOf("group_id")

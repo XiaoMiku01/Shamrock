@@ -14,15 +14,14 @@ internal object GetTroopMemberInfo: IActionHandler() {
         val groupId = session.getString("group_id")
         val refresh = session.getBooleanOrDefault("refresh", false)
 
-        return invoke(groupId, uin, refresh)
+        return invoke(groupId, uin, refresh, session.echo)
     }
 
-    suspend operator fun invoke(groupId: String, uin: String, refresh: Boolean): String {
+    suspend operator fun invoke(groupId: String, uin: String, refresh: Boolean, echo: String = ""): String {
         val info = GroupSvc.getTroopMemberInfoByUin(groupId, uin, refresh)
-            ?: return logic("cannot get troop member info")
+            ?: return logic("cannot get troop member info", echo)
 
-        return ok(
-            SimpleTroopMemberInfo(
+        return ok(SimpleTroopMemberInfo(
             uin = info.memberuin,
             name = info.friendnick.ifNullOrEmpty(info.autoremark) ?: "",
             showName = info.troopnick.ifNullOrEmpty(info.troopColorNick),
@@ -50,8 +49,7 @@ internal object GetTroopMemberInfo: IActionHandler() {
             title = info.mUniqueTitle ?: "",
             titleExpireTime = info.mUniqueTitleExpire,
             cardChangeable = GroupSvc.isAdmin(groupId)
-        )
-        )
+        ), echo)
     }
 
     override val requiredParams: Array<String> = arrayOf("user_id", "group_id")

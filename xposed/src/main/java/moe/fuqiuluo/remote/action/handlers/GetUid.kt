@@ -22,7 +22,7 @@ internal object GetUid: IActionHandler() {
                 continuation.resume(it)
             }
         }
-        return resultToString(true, Status.Ok, uidMap)
+        return resultToString(true, Status.Ok, uidMap, echo = session.echo)
     }
 
     override fun path(): String = "get_uid"

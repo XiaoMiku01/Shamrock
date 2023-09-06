@@ -10,15 +10,15 @@ internal object ModifyTroopName: IActionHandler() {
         val groupId = session.getString("group_id")
         val groupName = session.getString("group_name")
 
-        return invoke(groupId, groupName)
+        return invoke(groupId, groupName, session.echo)
     }
 
-    operator fun invoke(groupId: String, name: String): String {
+    operator fun invoke(groupId: String, name: String, echo: String = ""): String {
         return if (GroupSvc.isAdmin(groupId)) {
             GroupSvc.modifyTroopName(groupId, name)
-            ok(EmptyObject)
+            ok("成功", echo)
         } else {
-            logic("You are not the administrator of the group")
+            logic("You are not the administrator of the group", echo)
         }
     }
 

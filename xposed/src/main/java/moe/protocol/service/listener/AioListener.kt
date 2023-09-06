@@ -1,7 +1,6 @@
 @file:OptIn(DelicateCoroutinesApi::class)
 package moe.protocol.service.listener
 
-import moe.protocol.service.HttpService
 import moe.protocol.servlet.helper.MessageHelper
 import com.tencent.qqnt.kernel.nativeinterface.*
 import moe.protocol.servlet.msg.toCQCode
@@ -10,6 +9,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
+import moe.protocol.service.api.GlobalPusher
 import java.util.ArrayList
 import java.util.HashMap
 
@@ -33,12 +33,16 @@ internal object AioListener: IKernelMsgListener {
                 MsgConstant.KCHATTYPEGROUP -> {
                     LogCenter.log("群消息(group = ${record.peerName}(${record.peerUin}), uin = ${record.senderUin}, msg = $rawMsg)")
                     MessageHelper.saveMsgSeqByMsgId(record.chatType, record.msgId, record.msgSeq)
-                    HttpService.pushGroupMsg(record, record.elements, rawMsg, msgHash)
+                    GlobalPusher.forEach {
+                        it.pushGroupMsg(record, record.elements, rawMsg, msgHash)
+                    }
                 }
                 MsgConstant.KCHATTYPEC2C -> {
                     LogCenter.log("私聊消息(private = ${record.senderUin}, msg = $rawMsg)")
                     MessageHelper.saveMsgSeqByMsgId(record.chatType, record.msgId, record.msgSeq)
-                    HttpService.pushPrivateMsg(record, record.elements, rawMsg, msgHash)
+                    GlobalPusher.forEach {
+                        it.pushPrivateMsg(record, record.elements, rawMsg, msgHash)
+                    }
                 }
                 else -> LogCenter.log("不支持PUSH事件: ${record.chatType}")
             }

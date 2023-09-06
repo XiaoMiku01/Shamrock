@@ -9,7 +9,6 @@ import moe.protocol.servlet.utils.PlatformUtils
 import moe.fuqiuluo.xposed.helper.internal.DynamicReceiver
 import moe.fuqiuluo.xposed.helper.internal.IPCRequest
 import moe.fuqiuluo.xposed.loader.ActionLoader
-import moe.fuqiuluo.xposed.loader.LuoClassloader
 import moe.fuqiuluo.xposed.loader.NativeLoader
 import mqq.app.MobileQQ
 import kotlin.concurrent.thread
@@ -33,8 +32,8 @@ class PullConfig: IAction {
             ))
         })
         DynamicReceiver.register("checkAndStartService", IPCRequest {
-            if (HTTPServer.isQueryServiceStarted) {
-                HTTPServer.isQueryServiceStarted = false
+            if (HTTPServer.isServiceStarted) {
+                HTTPServer.isServiceStarted = false
             }
             initHttp(MobileQQ.getContext())
         })
@@ -50,7 +49,6 @@ class PullConfig: IAction {
                 }
                 "ws_port" -> {
                     ctx.toast("动态修改WS端口不支持。")
-                    //WsServer.changePort(it.getIntExtra("port", 5800))
                 }
             }
         })

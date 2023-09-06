@@ -18,22 +18,22 @@ internal object SendMessage: IActionHandler() {
         try {
             val chatType = MessageHelper.obtainMessageTypeByDetailType(detailType)
             val peerId = when(chatType) {
-                MsgConstant.KCHATTYPEGROUP -> session.getStringOrNull("group_id") ?: return noParam("group_id")
-                MsgConstant.KCHATTYPEC2C -> session.getStringOrNull("user_id") ?: return noParam("user_id")
+                MsgConstant.KCHATTYPEGROUP -> session.getStringOrNull("group_id") ?: return noParam("group_id", session.echo)
+                MsgConstant.KCHATTYPEC2C -> session.getStringOrNull("user_id") ?: return noParam("user_id", session.echo)
                 else -> error("unknown chat type: $chatType")
             }
             return if (session.isString("message")) {
                 val autoEscape = session.getBooleanOrDefault("auto_escape", false)
                 val message = session.getString("message")
-                invoke(chatType, peerId, message, autoEscape)
+                invoke(chatType, peerId, message, autoEscape, session.echo)
             } else {
                 val message = session.getArray("message")
-                invoke(chatType, peerId, message)
+                invoke(chatType, peerId, message, session.echo)
             }
         } catch (e: ParamsException) {
-            return noParam(e.message!!)
+            return noParam(e.message!!, session.echo)
         } catch (e: Throwable) {
-            return logic(e.message ?: e.toString())
+            return logic(e.message ?: e.toString(), session.echo)
         }
     }
 
@@ -42,7 +42,8 @@ internal object SendMessage: IActionHandler() {
         chatType: Int,
         peerId: String,
         message: String,
-        autoEscape: Boolean
+        autoEscape: Boolean,
+        echo: String = ""
     ): String {
         val result = if (autoEscape) {
             MsgSvc.sendToAio(chatType, peerId, arrayListOf(message).json)
@@ -50,30 +51,26 @@ internal object SendMessage: IActionHandler() {
             val msg = MessageHelper.decodeCQCode(message)
             if (msg.isEmpty()) {
                 LogCenter.log("CQ码解码失败，CQ码不合法", Level.WARN)
-                return logic("CQCdoe decode failed, CQCode is illegal")
+                return logic("CQCdoe decode failed, CQCode is illegal", echo)
             } else {
                 MsgSvc.sendToAio(chatType, peerId, MessageHelper.decodeCQCode(message))
             }
         }
-        return ok(
-            MessageResult(
+        return ok(MessageResult(
             msgId = result.second,
             time = result.first * 0.001
-        )
-        )
+        ), echo)
     }
 
     // 消息段格式消息
     suspend operator fun invoke(
-        chatType: Int, peerId: String, message: JsonArray
+        chatType: Int, peerId: String, message: JsonArray, echo: String = ""
     ): String {
         val result = MsgSvc.sendToAio(chatType, peerId, message)
-        return ok(
-            MessageResult(
+        return ok(MessageResult(
             msgId = result.second,
             time = result.first * 0.001
-        )
-        )
+        ), echo)
     }
 
     override val requiredParams: Array<String> = arrayOf("detail_type", "message")

@@ -12,7 +12,7 @@ internal object KickTroopMember: IActionHandler() {
 
         GroupSvc.kickMember(groupId, rejectAddRequest, userId)
 
-        return ok("成功")
+        return ok("成功", session.echo)
     }
 
     override val requiredParams: Array<String> = arrayOf("group_id", "user_id")

@@ -10,7 +10,7 @@ internal object SendLike: IActionHandler() {
         val times = session.getInt("times")
         val uin = session.getLong("user_id")
         VisitorSvc.vote(uin, times)
-        return ok(EmptyObject)
+        return ok("成功", session.echo)
     }
 
     override val requiredParams: Array<String> = arrayOf("times", "user_id")

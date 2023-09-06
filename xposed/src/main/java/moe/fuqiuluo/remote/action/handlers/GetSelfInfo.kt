@@ -17,8 +17,7 @@ internal object GetSelfInfo: IActionHandler() {
 
         return resultToString(true, Status.Ok, UserDetail(
             curUin, runtime.currentNickname, runtime.currentNickname
-        )
-        )
+        ), echo = session.echo)
     }
 
     override fun path(): String = "get_self_info"

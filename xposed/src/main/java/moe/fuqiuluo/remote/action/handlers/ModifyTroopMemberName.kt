@@ -9,15 +9,15 @@ internal object ModifyTroopMemberName: IActionHandler() {
         val groupId = session.getString("group_id")
         val userId = session.getString("user_id")
         val name = session.getStringOrNull("card") ?: ""
-        return invoke(groupId, userId, name)
+        return invoke(groupId, userId, name, session.echo)
     }
 
-    suspend operator fun invoke(groupId: String, userId: String, card: String): String {
+    operator fun invoke(groupId: String, userId: String, card: String, echo: String = ""): String {
         if (!GroupSvc.isAdmin(groupId)) {
-            return logic("you are not admin")
+            return logic("you are not admin", echo)
         }
         return if(GroupSvc.modifyGroupMemberCard(groupId.toLong(), userId.toLong(), card))
-            ok("成功")
+            ok("成功", echo)
         else error("check if member or group exist")
     }
 

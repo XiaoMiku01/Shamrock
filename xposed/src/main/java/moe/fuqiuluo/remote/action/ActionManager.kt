@@ -54,45 +54,52 @@ internal abstract class IActionHandler {
     suspend fun handle(session: ActionSession): String {
         requiredParams.forEach {
             if (!session.has(it)) {
-                return noParam(it)
+                return noParam(it, session.echo)
             }
         }
         return internalHandle(session)
     }
 
-    protected fun ok(msg: String = ""): String {
-        return resultToString(true, Status.Ok, EmptyObject, msg)
+    protected fun ok(
+        msg: String = "",
+        echo: String
+    ): String {
+        return resultToString(true, Status.Ok, EmptyObject, msg, echo = echo)
     }
 
-    protected inline fun <reified T> ok(data: T, msg: String = ""): String {
-        return resultToString(true, Status.Ok, data!!, msg)
+    protected inline fun <reified T> ok(data: T, echo: String, msg: String = ""): String {
+        return resultToString(true, Status.Ok, data!!, msg, echo = echo)
     }
 
-    protected fun noParam(paramName: String): String {
-        return failed(Status.BadParam, "lack of [$paramName]")
+    protected fun noParam(paramName: String, echo: String): String {
+        return failed(Status.BadParam, "lack of [$paramName]", echo)
     }
 
-    protected fun badParam(why: String): String {
-        return failed(Status.BadParam, why)
+    protected fun badParam(why: String, echo: String): String {
+        return failed(Status.BadParam, why, echo)
     }
 
-    protected fun error(why: String): String {
-        return failed(Status.InternalHandlerError, why)
+    protected fun error(why: String, echo: String): String {
+        return failed(Status.InternalHandlerError, why, echo)
     }
 
-    protected fun logic(why: String): String {
-        return failed(Status.LogicError, why)
+    protected fun logic(why: String, echo: String): String {
+        return failed(Status.LogicError, why, echo)
     }
 
-    protected fun failed(status: Status, msg: String): String {
-        return resultToString(false, status, EmptyObject, msg)
+    protected fun failed(status: Status, msg: String, echo: String): String {
+        return resultToString(false, status, EmptyObject, msg, echo = echo)
     }
 }
 
 internal class ActionSession {
     private val params: JsonObject
+    internal val echo: String
 
-    constructor(values: Map<String, Any?>) {
+    constructor(
+        values: Map<String, Any?>,
+        echo: String = ""
+    ) {
         val map = hashMapOf<String, JsonElement>()
         values.forEach { (key, value) ->
             if (value != null) {
@@ -107,10 +114,15 @@ internal class ActionSession {
                 }
             }
         }
+        this.echo = echo
         this.params = JsonObject(map)
     }
 
-    constructor(params: JsonObject) {
+    constructor(
+        params: JsonObject,
+        echo: String = ""
+    ) {
+        this.echo = echo
         this.params = params
     }
 

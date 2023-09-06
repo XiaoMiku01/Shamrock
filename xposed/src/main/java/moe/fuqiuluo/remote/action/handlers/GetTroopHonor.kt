@@ -16,12 +16,12 @@ internal object GetTroopHonor: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
         val groupId = session.getString("group_id")
         val refresh = session.getBooleanOrDefault("refresh", false)
-        return invoke(groupId, refresh)
+        return invoke(groupId, refresh, session.echo)
     }
 
-    suspend operator fun invoke(groupId: String, refresh: Boolean): String {
+    suspend operator fun invoke(groupId: String, refresh: Boolean, echo: String = ""): String {
         val memberList = GroupSvc.getGroupMemberList(groupId, refresh)
-            ?: return error("unable to fetch group member list")
+            ?: return error("unable to fetch group member list", echo)
         val honorInfo = ArrayList<GroupMemberHonor>()
         memberList.forEach { member ->
             GroupSvc.parseHonor(member.honorList).forEach {
@@ -33,8 +33,7 @@ internal object GetTroopHonor: IActionHandler() {
             }
         }
 
-        return ok(
-            GroupAllHonor(
+        return ok(GroupAllHonor(
             groupId = groupId,
             currentTalkActive = honorInfo.firstOrNull {
                 it.id == HONOR_TALKATIVE
@@ -45,8 +44,7 @@ internal object GetTroopHonor: IActionHandler() {
             strongNewbieList = honorInfo.filter { it.id == HONOR_NEWBIE },
             emotionList = honorInfo.filter { it.id == HONOR_HAPPY },
             all = honorInfo
-        )
-        )
+        ), echo)
     }
 
     override val requiredParams: Array<String> = arrayOf("group_id", "refresh")

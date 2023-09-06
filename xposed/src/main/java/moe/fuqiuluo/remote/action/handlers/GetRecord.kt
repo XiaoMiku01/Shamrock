@@ -13,10 +13,10 @@ internal object GetRecord: IActionHandler() {
             .replace(" ", "")
             .split(".")[0].lowercase()
         val format = session.getString("out_format")
-        return invoke(file, format)
+        return invoke(file, format, session.echo)
     }
 
-    operator fun invoke(file: String, format: String): String {
+    operator fun invoke(file: String, format: String, echo: String = ""): String {
         val pttFile = LocalCacheHelper.getCachePttFile(file)
         return if(pttFile.exists()) {
             val isSilk = AudioUtils.isSilk(pttFile)
@@ -24,12 +24,10 @@ internal object GetRecord: IActionHandler() {
                 "amr" -> AudioUtils.audioToAmr(pttFile, isSilk)
                 else -> AudioUtils.audioToFormat(pttFile, isSilk, format)
             }
-            ok(
-                OutResource(
+            ok(OutResource(
                 audioFile.toString(),
                 url = "/res/${audioFile.nameWithoutExtension}"
-            )
-            )
+            ), echo)
         } else {
             error("not found record file from cache")
         }

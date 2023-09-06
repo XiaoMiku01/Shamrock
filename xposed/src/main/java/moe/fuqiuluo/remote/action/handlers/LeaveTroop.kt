@@ -7,15 +7,15 @@ import moe.fuqiuluo.remote.action.IActionHandler
 internal object LeaveTroop: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
         val groupId = session.getString("group_id")
-        return invoke(groupId)
+        return invoke(groupId, session.echo)
     }
 
-    operator fun invoke(groupId: String): String {
+    operator fun invoke(groupId: String, echo: String = ""): String {
         if (GroupSvc.isOwner(groupId)) {
-            return error("you are the owner of this group")
+            return error("you are the owner of this group", echo)
         }
         GroupSvc.resignTroop(groupId.toLong())
-        return ok("成功")
+        return ok("成功", echo)
     }
 
     override val requiredParams: Array<String> = arrayOf("group_id")

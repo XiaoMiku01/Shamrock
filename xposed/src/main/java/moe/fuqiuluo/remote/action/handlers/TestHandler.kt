@@ -11,13 +11,12 @@ internal object TestHandler: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
         kotlin.runCatching {
             val msg = StringBuffer()
-
-
             return resultToString(
                 isOk = true,
                 code = Status.Ok,
                 data = Test(System.currentTimeMillis()),
-                msg = msg.toString()
+                msg = msg.toString(),
+                echo = session.echo
             )
         }.onFailure {
             log(it)

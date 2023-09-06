@@ -21,7 +21,7 @@ internal object GetProfileCard: IActionHandler() {
             card = CardSvc.refreshAndGetProfileCard(uin)
         }
         if (!card.ok()) {
-            return logic("get profilecard error, please check your user_id or network")
+            return logic("get profilecard error, please check your user_id or network", session.echo)
         }
         requireNotNull(card)
 
@@ -65,8 +65,7 @@ internal object GetProfileCard: IActionHandler() {
                 card.strCity, card.strCompany, card.strCountry, card.strProvince, card.strHometownDesc, card.strSchool
             ),
             cookie = card.vCookies
-        )
-        )
+        ), echo = session.echo)
     }
 
     override val requiredParams: Array<String> = arrayOf("user_id")

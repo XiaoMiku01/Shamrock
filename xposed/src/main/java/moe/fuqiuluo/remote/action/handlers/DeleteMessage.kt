@@ -9,13 +9,13 @@ import moe.fuqiuluo.remote.entries.EmptyObject
 internal object DeleteMessage: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
         val hashCode = session.getString("message_id").toInt()
-        return invoke(hashCode)
+        return invoke(hashCode, session.echo)
     }
 
-    suspend operator fun invoke(msgHash: Int): String {
+    suspend operator fun invoke(msgHash: Int, echo: String = ""): String {
         val msgId = MessageHelper.getMsgIdByHashCode(msgHash)
         MsgSvc.recallMsg(msgId)
-        return ok(EmptyObject)
+        return ok("成功", echo)
     }
 
     override fun path(): String = "delete_message"

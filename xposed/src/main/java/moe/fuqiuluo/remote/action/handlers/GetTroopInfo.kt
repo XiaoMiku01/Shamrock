@@ -9,16 +9,15 @@ internal object GetTroopInfo: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
         val groupId = session.getString("group_id")
         val refresh = session.getBooleanOrDefault("refresh", false)
-        return invoke(groupId, refresh)
+        return invoke(groupId, refresh, session.echo)
     }
 
-    suspend operator fun invoke(groupId: String, refresh: Boolean): String {
+    suspend operator fun invoke(groupId: String, refresh: Boolean, echo: String = ""): String {
         val groupInfo = GroupSvc.getGroupInfo(groupId, refresh)
         return if ( groupInfo == null || groupInfo.troopuin.isNullOrBlank()) {
-            logic("Unable to obtain group information")
+            logic("Unable to obtain group information", echo)
         } else {
-            ok(
-                SimpleTroopInfo(
+            ok(SimpleTroopInfo(
                 groupId = groupInfo.troopuin,
                 groupUin = groupInfo.troopcode,
                 groupName = groupInfo.troopname ?: groupInfo.newTroopName ?: groupInfo.oldTroopName,
@@ -30,8 +29,7 @@ internal object GetTroopInfo: IActionHandler() {
                 memNum = groupInfo.wMemberNum,
                 memCount = groupInfo.wMemberNum,
                 maxNum = groupInfo.wMemberMax,
-            )
-            )
+            ), echo)
         }
     }
 

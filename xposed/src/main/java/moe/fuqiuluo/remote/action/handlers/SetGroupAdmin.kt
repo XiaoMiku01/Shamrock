@@ -9,15 +9,15 @@ internal object SetGroupAdmin: IActionHandler() {
         val groupId = session.getLong("group_id")
         val userId = session.getLong("user_id")
         val enable = session.getBoolean("enable")
-        return invoke(groupId, userId, enable)
+        return invoke(groupId, userId, enable, session.echo)
     }
 
-    operator fun invoke(groupId: Long, userId: Long, enable: Boolean): String {
+    operator fun invoke(groupId: Long, userId: Long, enable: Boolean, echo: String = ""): String {
         if (!GroupSvc.isOwner(groupId.toString())) {
-            return logic("you are not owner")
+            return logic("you are not owner", echo)
         }
         GroupSvc.setGroupAdmin(groupId, userId, enable)
-        return ok("设置成功")
+        return ok("成功", echo)
     }
 
     override fun path(): String = "set_group_admin"

@@ -7,10 +7,10 @@ import moe.fuqiuluo.utils.MMKVFetcher
 
 internal object CleanCache: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {
-        return invoke()
+        return invoke(session.echo)
     }
 
-    operator fun invoke(): String {
+    operator fun invoke(echo: String = ""): String {
         FileUtils.clearCache()
         MMKVFetcher.mmkvWithId("hash2id")
             .clear()
@@ -18,7 +18,7 @@ internal object CleanCache: IActionHandler() {
             .clear()
         MMKVFetcher.mmkvWithId("audio2silk")
             .clear()
-        return ok("成功")
+        return ok("成功", echo)
     }
 
     override fun path(): String = "clean_cache"
