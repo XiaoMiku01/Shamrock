@@ -11,11 +11,9 @@ private val json = Json {
     ignoreUnknownKeys = true // 忽略未知key
     isLenient = true // 宽松模式
     allowSpecialFloatingPointValues = true // 允许特殊浮点数值（如NaN）
-    useArrayPolymorphism = true // 使用数组多态性
     encodeDefaults = false // 不编码默认值
     prettyPrint = true // 格式化输出
     coerceInputValues = true // 强制输入值
-    classDiscriminator = "#class" // 类别鉴别器
 }
 
 internal abstract class WebSocketPushServlet : BasePushServlet {

@@ -16,7 +16,7 @@ internal object ShamrockConfig {
             putBoolean(  "tablet",     intent.getBooleanExtra("tablet", false))                 // 强制平板模式
             putInt(      "port",       intent.getIntExtra("port", 5700))                         // 主动HTTP端口
             putBoolean(  "ws",         intent.getBooleanExtra("ws", false))                     // 主动WS开关
-            putInt(      "ws_port",    intent.getIntExtra("port", 5800))                         // 主动WS端口
+            putInt(      "ws_port",    intent.getIntExtra("ws_port", 5800))                         // 主动WS端口
             putBoolean(  "http",       intent.getBooleanExtra("http", false))                   // HTTP回调开关
             putString(   "http_addr",  intent.getStringExtra("http_addr"))                                  // WebHook回调地址
             putBoolean(  "ws_client",  intent.getBooleanExtra("ws_client", false))              // 被动WS开关

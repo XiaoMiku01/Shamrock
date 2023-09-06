@@ -27,7 +27,7 @@ import java.util.Collections
 internal var InternalWebSocketServer: moe.fuqiuluo.remote.WebSocketServer? = null
 
 internal class WebSocketServer(
-    val port: Int
+    port: Int
 ) : WebSocketServer(InetSocketAddress(port)) {
     private val eventReceivers = Collections.synchronizedList(mutableListOf<WebSocket>())
 
