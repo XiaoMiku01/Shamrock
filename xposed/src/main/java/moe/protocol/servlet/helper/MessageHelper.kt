@@ -20,7 +20,6 @@ import moe.fuqiuluo.xposed.tools.asJsonObjectOrNull
 import moe.fuqiuluo.xposed.tools.asString
 import moe.fuqiuluo.xposed.tools.json
 import moe.fuqiuluo.xposed.tools.jsonArray
-import oicq.wlogin_sdk.tools.MD5
 import kotlin.math.abs
 
 internal object MessageHelper {
@@ -98,7 +97,7 @@ internal object MessageHelper {
             MsgConstant.KCHATTYPEC2C -> "c2c$msgId"
             else -> error("不支持的消息来源类型 | generateMsgIdHash: $chatType")
         }
-        return abs(MD5.getMD5String(key.toByteArray()).hashCode())
+        return abs(key.hashCode())
     }
 
     fun generateMsgId(chatType: Int, peerId: Long): Pair<Int, Long> {

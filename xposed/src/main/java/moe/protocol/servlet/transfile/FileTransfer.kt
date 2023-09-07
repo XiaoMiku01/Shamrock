@@ -9,9 +9,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import moe.fuqiuluo.utils.MD5
 import mqq.app.AppRuntime
 import mqq.app.MobileQQ
-import oicq.wlogin_sdk.tools.MD5
 import java.io.File
 import kotlin.coroutines.resume
 import kotlin.math.abs
@@ -37,7 +37,7 @@ internal abstract class FileTransfer {
         transferRequest.mIsUp = true
         builder(transferRequest)
         transferRequest.mBusiType = busiType
-        transferRequest.mMd5 = MD5.getFileMD5(file)
+        transferRequest.mMd5 = MD5.genFileMd5Hex(file.absolutePath)
         transferRequest.mLocalPath = file.absolutePath
         return transAndWait(runtime, transferRequest, wait)
     }
@@ -61,12 +61,12 @@ internal abstract class FileTransfer {
         transferRequest.mIsUp = true
         builder(transferRequest)
         transferRequest.mBusiType = busiType
-        transferRequest.mMd5 = MD5.getFileMD5(file)
+        transferRequest.mMd5 = MD5.genFileMd5Hex(file.absolutePath)
         transferRequest.mLocalPath = file.absolutePath
         return transAndWait(runtime, transferRequest, wait)
     }
 
-    protected suspend fun transAndWait(
+    private suspend fun transAndWait(
         runtime: AppRuntime,
         transferRequest: TransferRequest,
         wait: Boolean

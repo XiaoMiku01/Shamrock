@@ -3,10 +3,10 @@ package moe.protocol.servlet.transfile
 import com.tencent.mobileqq.data.MessageForShortVideo
 import com.tencent.mobileqq.transfile.FileMsg
 import com.tencent.mobileqq.transfile.TransferRequest
+import moe.fuqiuluo.utils.MD5
 import moe.protocol.servlet.transfile.ContactType.*
 import java.io.File
 import moe.protocol.servlet.transfile.ResourceType.*
-import oicq.wlogin_sdk.tools.MD5
 
 internal object Transfer: FileTransfer() {
     private val ROUTE = mapOf<ContactType, Map<ResourceType, suspend TransTarget.(Resource) -> Boolean>>(
@@ -36,7 +36,7 @@ internal object Transfer: FileTransfer() {
                 it.busiType = BUSI_TYPE_SHORT_VIDEO
             }
             it.mThumbPath = thumb.absolutePath
-            it.mThumbMd5 = MD5.getFileMD5(thumb)
+            it.mThumbMd5 = MD5.genFileMd5Hex(thumb.absolutePath)
         }
     }
 
@@ -52,7 +52,7 @@ internal object Transfer: FileTransfer() {
                 it.busiType = BUSI_TYPE_SHORT_VIDEO
             }
             it.mThumbPath = thumb.absolutePath
-            it.mThumbMd5 = MD5.getFileMD5(thumb)
+            it.mThumbMd5 = MD5.genFileMd5Hex(thumb.absolutePath)
         }
     }
 

@@ -12,7 +12,6 @@ import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
 import moe.protocol.servlet.utils.FileUtils
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
-import oicq.wlogin_sdk.tools.MD5
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.roundToInt
@@ -80,7 +79,7 @@ object AudioUtils {
     }
 
     internal fun audioToSilk(audio: File): Pair<Int, File> {
-        val md5 = MD5.getFileMD5(audio)
+        val md5 = MD5.genFileMd5Hex(audio.absolutePath)
 
         val mmkv = MMKVFetcher.mmkvWithId("audio2silk")
         mmkv.getString(md5, null)?.let {
@@ -95,7 +94,7 @@ object AudioUtils {
         val pcmFile = audioToPcm(audio)
         var duration: Int
         pcmToSilk(pcmFile).let {
-            val silkMd5 = MD5.getFileMD5(it.first)
+            val silkMd5 = MD5.genFileMd5Hex(it.first.absolutePath)
             silkFile = LocalCacheHelper.getCachePttFile(silkMd5)
             mmkv.putString(md5, silkMd5)
             it.first.renameTo(silkFile)
@@ -114,7 +113,7 @@ object AudioUtils {
         val tmpFile = FileUtils.getTmpFile("silk", false)
         val time = pcmToSilk(sampleRate, 2, file.absolutePath, tmpFile.absolutePath)
 
-        val silkMd5 = MD5.getFileMD5(tmpFile)
+        val silkMd5 = MD5.genFileMd5Hex(tmpFile.absolutePath)
         val silk = LocalCacheHelper.getCachePttFile(silkMd5)
         tmpFile.renameTo(silk)
         tmpFile.delete()

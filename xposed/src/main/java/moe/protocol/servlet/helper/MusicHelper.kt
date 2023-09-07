@@ -5,6 +5,7 @@ import moe.protocol.servlet.protocol.ArkMsgSvc
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json
+import moe.fuqiuluo.utils.MD5
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.tools.GlobalClient
@@ -12,7 +13,6 @@ import moe.fuqiuluo.xposed.tools.asInt
 import moe.fuqiuluo.xposed.tools.asJsonArray
 import moe.fuqiuluo.xposed.tools.asJsonObject
 import moe.fuqiuluo.xposed.tools.asString
-import oicq.wlogin_sdk.tools.MD5
 
 internal object MusicHelper {
     suspend fun tryShare163MusicById(chatType: Int, peerId: Long, msgId: Long, id: String): Boolean {
@@ -58,7 +58,7 @@ internal object MusicHelper {
                 val name = trackInfo["name"].asString
                 val title = trackInfo["title"].asString
                 val singerName = trackInfo["singer"].asJsonArray.first().asJsonObject["name"].asString
-                val code = MD5.getMD5String("${mid}q;z(&l~sdf2!nK".toByteArray()).substring(0 .. 4).uppercase()
+                val code = MD5.getMd5Hex("${mid}q;z(&l~sdf2!nK".toByteArray()).substring(0 .. 4).uppercase()
                 val playUrl = "http://c6.y.qq.com/rsc/fcgi-bin/fcg_pyq_play.fcg?songid=&songmid=$mid&songtype=1&fromtag=50&uin=&code=$code"
                 val previewUrl = "http://y.gtimg.cn/music/photo_new/T002R180x180M000$previewMid.jpg"
                 val jumpUrl = "https://i.y.qq.com/v8/playsong.html?platform=11&appshare=android_qq&appversion=10030010&hosteuin=oKnlNenz7i-s7c**&songmid=${mid}&type=0&appsongtype=1&_wv=1&source=qq&ADTAG=qfshare"

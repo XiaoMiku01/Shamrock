@@ -6,10 +6,10 @@ import com.tencent.mobileqq.transfile.api.ITransFileController
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.post
 import moe.fuqiuluo.remote.entries.Status
+import moe.fuqiuluo.utils.MD5
 import moe.fuqiuluo.xposed.tools.fetchPost
 import moe.fuqiuluo.xposed.tools.respond
 import mqq.app.MobileQQ
-import oicq.wlogin_sdk.tools.MD5
 import kotlin.random.Random
 import kotlin.random.nextLong
 
@@ -17,7 +17,7 @@ fun Routing.registerBDH() {
     post("/upload_group_image") {
         val troop = fetchPost("troop")
         val picBytes = Base64.decode(fetchPost("pic"), Base64.DEFAULT)
-        val md5Str = MD5.getMD5String(picBytes)
+        val md5Str = MD5.getMd5Hex(picBytes)
         val file = MobileQQ.getContext().cacheDir.resolve("vas_ad").also {
             if (!it.exists()) it.mkdir()
         }.resolve("$md5Str.jpg")

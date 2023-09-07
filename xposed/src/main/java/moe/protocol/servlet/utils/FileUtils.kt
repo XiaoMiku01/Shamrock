@@ -3,20 +3,18 @@ package moe.protocol.servlet.utils
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.util.Base64
-import com.tencent.qqnt.kernel.nativeinterface.QQNTWrapperUtil
 import io.ktor.util.cio.writeChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.copyTo
 import moe.fuqiuluo.utils.DownloadUtils
+import moe.fuqiuluo.utils.MD5.genFileMd5Hex
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import mqq.app.MobileQQ
-import oicq.wlogin_sdk.tools.MD5
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 import java.util.UUID
-import kotlin.experimental.and
 
 internal object FileUtils {
     private val CacheDir = MobileQQ.getContext().getExternalFilesDir(null)!!
@@ -58,7 +56,7 @@ internal object FileUtils {
     }
 
     fun renameByMd5(file: File): File {
-        val md5 = MD5.getFileMD5(file)
+        val md5 = genFileMd5Hex(file.absolutePath)
         val newFile = file.parentFile!!.resolve(md5)
         file.renameTo(newFile)
         file.delete()
@@ -131,7 +129,7 @@ internal object FileUtils {
     suspend fun saveFileToCache(channel: ByteReadChannel): File {
         val tmpFile = getTmpFile()
         channel.copyTo(tmpFile.writeChannel())
-        val md5Hex = QQNTWrapperUtil.CppProxy.genFileMd5Hex(tmpFile.absolutePath)
+        val md5Hex = genFileMd5Hex(tmpFile.absolutePath)
         val sourceFile = CacheDir.resolve(md5Hex)
         tmpFile.renameTo(sourceFile)
         return sourceFile
@@ -142,7 +140,7 @@ internal object FileUtils {
         tmpFile.outputStream().use {
             input.copyTo(it)
         }
-        val md5Hex = QQNTWrapperUtil.CppProxy.genFileMd5Hex(tmpFile.absolutePath)
+        val md5Hex = genFileMd5Hex(tmpFile.absolutePath)
         val sourceFile = CacheDir.resolve(md5Hex)
         if (sourceFile.exists()) {
             sourceFile.delete()
@@ -155,4 +153,5 @@ internal object FileUtils {
         CacheDir.delete()
         CacheDir.mkdirs()
     }
+
 }
