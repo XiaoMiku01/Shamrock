@@ -8,8 +8,12 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.remote.HTTPServer
+import moe.fuqiuluo.remote.InternalWebSocketClient
 import moe.fuqiuluo.remote.InternalWebSocketServer
+import moe.fuqiuluo.remote.WebSocketClient
 import moe.fuqiuluo.remote.WebSocketServer
+import moe.fuqiuluo.xposed.helper.Level
+import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.protocol.servlet.utils.PlatformUtils
 
 internal class InitRemoteService: IAction {
@@ -20,7 +24,7 @@ internal class InitRemoteService: IAction {
             try {
                 HTTPServer.start(ShamrockConfig.getPort())
             } catch (e: Throwable) {
-                XposedBridge.log(e)
+                LogCenter.log(e.stackTraceToString(), Level.ERROR)
             }
         }
 
@@ -33,7 +37,21 @@ internal class InitRemoteService: IAction {
                     InternalWebSocketServer = WebSocketServer(ShamrockConfig.getWebSocketPort())
                     InternalWebSocketServer?.start()
                 } catch (e: Throwable) {
-                    XposedBridge.log(e)
+                    LogCenter.log(e.stackTraceToString(), Level.ERROR)
+                }
+            }
+        }
+
+        if (ShamrockConfig.openWebSocketClient()) {
+            GlobalScope.launch {
+                try {
+                    if (InternalWebSocketClient != null) {
+                        InternalWebSocketClient?.close()
+                    }
+                    InternalWebSocketClient = WebSocketClient(ShamrockConfig.getWebSocketClientAddress())
+                    InternalWebSocketClient?.connect()
+                } catch (e: Throwable) {
+                    LogCenter.log(e.stackTraceToString(), Level.ERROR)
                 }
             }
         }

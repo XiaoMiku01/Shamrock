@@ -14,6 +14,14 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
 
 val EmptyJsonObject = JsonObject(mapOf())
+val GlobalJson = Json {
+    ignoreUnknownKeys = true // 忽略未知key
+    isLenient = true // 宽松模式
+    allowSpecialFloatingPointValues = true // 允许特殊浮点数值（如NaN）
+    encodeDefaults = false // 不编码默认值
+    prettyPrint = true // 格式化输出
+    coerceInputValues = true // 强制输入值
+}
 
 val String.asJson: JsonElement
     get() = Json.parseToJsonElement(this)

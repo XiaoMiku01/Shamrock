@@ -29,6 +29,16 @@ internal object ShamrockConfig {
         }
     }
 
+    fun openWebSocketClient(): Boolean {
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
+        return mmkv.getBoolean("ws_client", false)
+    }
+
+    fun getWebSocketClientAddress(): String {
+        val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
+        return mmkv.getString("ws_addr", "") ?: ""
+    }
+
     fun openWebSocket(): Boolean {
         val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
         return mmkv.getBoolean("ws", false)

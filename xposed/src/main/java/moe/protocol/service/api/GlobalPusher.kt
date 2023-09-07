@@ -1,10 +1,11 @@
 package moe.protocol.service.api
 
 import moe.protocol.service.HttpService
+import moe.protocol.service.WebSocketClientService
 import moe.protocol.service.WebSocketService
 
 internal val GlobalPusher = arrayOf(
-    WebSocketService, HttpService
+    WebSocketService, HttpService, WebSocketClientService
 )
 
 
