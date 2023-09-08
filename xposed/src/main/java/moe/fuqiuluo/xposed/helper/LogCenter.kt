@@ -6,6 +6,7 @@ import moe.protocol.servlet.utils.FileUtils
 import moe.fuqiuluo.xposed.actions.toast
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
 import mqq.app.MobileQQ
+import java.io.File
 import java.util.Date
 
 internal enum class Level(
@@ -47,4 +48,7 @@ internal object LogCenter {
         LogFile.appendText(format)
     }
 
+    fun getAllLog(): File {
+        return LogFile
+    }
 }

@@ -45,6 +45,7 @@ internal object HTTPServer {
                     friendAction()
                     ticketActions()
                     fetchRes()
+                    showLog()
                     if (ShamrockConfig.isPro()) {
                         qsign()
                         obtainProtocolData()
