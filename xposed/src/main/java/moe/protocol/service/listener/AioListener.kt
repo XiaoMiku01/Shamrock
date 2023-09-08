@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.protocol.service.api.GlobalPusher
+import moe.protocol.service.config.ShamrockConfig
 import java.util.ArrayList
 import java.util.HashMap
 
@@ -33,6 +34,12 @@ internal object AioListener: IKernelMsgListener {
                 MsgConstant.KCHATTYPEGROUP -> {
                     LogCenter.log("群消息(group = ${record.peerName}(${record.peerUin}), uin = ${record.senderUin}, msg = $rawMsg)")
                     MessageHelper.saveMsgSeqByMsgId(record.chatType, record.msgId, record.msgSeq)
+
+                    ShamrockConfig.getGroupMsgRule()?.let { rule ->
+                        if (rule.black?.contains(record.peerUin) == true) return
+                        if (rule.white?.contains(record.peerUin) == false) return
+                    }
+
                     GlobalPusher.forEach {
                         it.pushGroupMsg(record, record.elements, rawMsg, msgHash)
                     }
@@ -40,6 +47,12 @@ internal object AioListener: IKernelMsgListener {
                 MsgConstant.KCHATTYPEC2C -> {
                     LogCenter.log("私聊消息(private = ${record.senderUin}, msg = $rawMsg)")
                     MessageHelper.saveMsgSeqByMsgId(record.chatType, record.msgId, record.msgSeq)
+
+                    ShamrockConfig.getPrivateRule()?.let { rule ->
+                        if (rule.black?.contains(record.peerUin) == true) return
+                        if (rule.white?.contains(record.peerUin) == false) return
+                    }
+
                     GlobalPusher.forEach {
                         it.pushPrivateMsg(record, record.elements, rawMsg, msgHash)
                     }

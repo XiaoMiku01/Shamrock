@@ -17,7 +17,7 @@ import moe.protocol.service.data.push.NoticeType
 import moe.protocol.service.data.push.PushMessage
 import moe.protocol.service.data.push.PushNotice
 import moe.protocol.service.data.push.Sender
-import moe.protocol.service.helper.ShamrockConfig
+import moe.protocol.service.config.ShamrockConfig
 import moe.protocol.servlet.msg.toSegment
 import moe.protocol.servlet.protocol.GroupSvc
 

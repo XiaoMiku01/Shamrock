@@ -1,6 +1,6 @@
 package moe.fuqiuluo.remote
 
-import moe.protocol.service.helper.ShamrockConfig
+import moe.protocol.service.config.ShamrockConfig
 import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer

@@ -9,7 +9,7 @@ import moe.protocol.service.data.push.NoticeType
 import moe.protocol.service.data.push.PushMessage
 import moe.protocol.service.data.push.PushNotice
 import moe.protocol.service.data.push.Sender
-import moe.protocol.service.helper.ShamrockConfig
+import moe.protocol.service.config.ShamrockConfig
 import moe.protocol.servlet.helper.MessageHelper
 import com.tencent.qqnt.kernel.nativeinterface.MsgElement
 import com.tencent.qqnt.kernel.nativeinterface.MsgRecord

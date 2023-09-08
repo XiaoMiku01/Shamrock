@@ -1,16 +1,28 @@
-package moe.protocol.service.helper
+package moe.protocol.service.config
 
-import android.content.Context
 import android.content.Intent
 import moe.fuqiuluo.utils.MMKVFetcher
+import moe.fuqiuluo.xposed.tools.GlobalJson
+import mqq.app.MobileQQ
 
 internal object ShamrockConfig {
-    fun isInit(context: Context): Boolean {
+    private val ConfigDir = MobileQQ.getContext().getExternalFilesDir(null)!!
+        .parentFile!!.resolve("Tencent/Shamrock").also {
+            if (it.exists()) it.delete()
+            it.mkdirs()
+        }
+    private val Config by lazy {
+        GlobalJson.decodeFromString<ServiceConfig>(ConfigDir.resolve("config.json").also {
+            if (!it.exists()) it.writeText("{}")
+        }.readText())
+    }
+
+    fun isInit(): Boolean {
         val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
         return mmkv.getBoolean("isInit", false)
     }
 
-    fun updateConfig(context: Context, intent: Intent) {
+    fun updateConfig(intent: Intent) {
         val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
         mmkv.apply {
             putBoolean(  "tablet",     intent.getBooleanExtra("tablet", false))                 // 强制平板模式
@@ -27,6 +39,21 @@ internal object ShamrockConfig {
             putString(   "token",      intent.getStringExtra("token"))                                      // 鉴权
             putBoolean("isInit", true)
         }
+    }
+
+    /**
+     * 忽略所有推送事件
+     */
+    fun isIgnoreAllEvent(): Boolean {
+        return false
+    }
+
+    fun getGroupMsgRule(): GroupRule? {
+        return Config.groupRule
+    }
+
+    fun getPrivateRule(): PrivateRule? {
+        return Config.privateRule
     }
 
     fun openWebSocketClient(): Boolean {
@@ -88,4 +115,8 @@ internal object ShamrockConfig {
         val mmkv = MMKVFetcher.mmkvWithId("shamrock_config")
         return mmkv.getBoolean("inject_packet", false)
     }
+
+
+
+
 }

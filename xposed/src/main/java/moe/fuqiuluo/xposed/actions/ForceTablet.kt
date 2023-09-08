@@ -2,7 +2,7 @@ package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
 import com.tencent.common.config.pad.DeviceType
-import moe.protocol.service.helper.ShamrockConfig
+import moe.protocol.service.config.ShamrockConfig
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import moe.fuqiuluo.xposed.helper.LogCenter

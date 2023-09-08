@@ -1,12 +1,11 @@
 package moe.protocol.service.api
 
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import moe.fuqiuluo.remote.InternalWebSocketServer
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter
 import moe.fuqiuluo.xposed.tools.GlobalJson
-import moe.protocol.service.helper.ShamrockConfig
+import moe.protocol.service.config.ShamrockConfig
 
 internal abstract class WebSocketPushServlet : BasePushServlet {
     override val address: String

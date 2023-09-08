@@ -1,6 +1,6 @@
 package moe.fuqiuluo.remote.plugin
 
-import moe.protocol.service.helper.ShamrockConfig
+import moe.protocol.service.config.ShamrockConfig
 import moe.protocol.servlet.helper.ErrorTokenException
 import io.ktor.server.application.createApplicationPlugin
 

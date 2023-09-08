@@ -2,7 +2,7 @@
 package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
-import moe.protocol.service.helper.ShamrockConfig
+import moe.protocol.service.config.ShamrockConfig
 import moe.protocol.service.PacketReceiver
 import com.tencent.msf.service.protocol.pb.SSOLoginMerge
 import com.tencent.qphone.base.remote.FromServiceMsg

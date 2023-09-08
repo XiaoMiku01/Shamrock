@@ -127,6 +127,22 @@ object AudioUtils {
         return silk to time
     }
 
+    fun getAudioMediaMime(file: File): String? {
+        val extractor = MediaExtractor()
+        extractor.setDataSource(file.absolutePath)
+        var audioFormat: String? = null
+        for (i in 0 until extractor.trackCount) {
+            val format = extractor.getTrackFormat(i)
+            val mime = format.getString(MediaFormat.KEY_MIME)
+            if (mime?.startsWith("audio/") == true) {
+                audioFormat = mime
+                break
+            }
+        }
+        extractor.release()
+        return audioFormat
+    }
+
     fun audioToPcm(audio: File): File {
         try {
             val tmp = FileUtils.getTmpFile("pcm", false)

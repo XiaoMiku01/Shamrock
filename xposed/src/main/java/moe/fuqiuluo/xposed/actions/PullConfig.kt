@@ -1,7 +1,7 @@
 package moe.fuqiuluo.xposed.actions
 
 import android.content.Context
-import moe.protocol.service.helper.ShamrockConfig
+import moe.protocol.service.config.ShamrockConfig
 import moe.fuqiuluo.xposed.helper.internal.DataRequester
 
 import moe.fuqiuluo.remote.HTTPServer
@@ -39,7 +39,7 @@ class PullConfig: IAction {
         })
         DynamicReceiver.register("push_config", IPCRequest {
             ctx.toast("动态推送配置文件成功。")
-            ShamrockConfig.updateConfig(ctx, it)
+            ShamrockConfig.updateConfig(it)
         })
         DynamicReceiver.register("change_port", IPCRequest {
             when (it.getStringExtra("type")) {
@@ -54,7 +54,7 @@ class PullConfig: IAction {
         })
 
         DataRequester.request("init", onFailure = {
-            if (!ShamrockConfig.isInit(ctx)) {
+            if (!ShamrockConfig.isInit()) {
                 ctx.toast("请启动Shamrock主进程以初始化服务，进程将退出。")
                 thread {
                     Thread.sleep(3000)
@@ -66,7 +66,7 @@ class PullConfig: IAction {
             }
         }, bodyBuilder = null) {
             isConfigOk = true
-            ShamrockConfig.updateConfig(ctx, it)
+            ShamrockConfig.updateConfig(it)
             initHttp(ctx)
         }
     }

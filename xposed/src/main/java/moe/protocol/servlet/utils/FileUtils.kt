@@ -1,7 +1,5 @@
 package moe.protocol.servlet.utils
 
-import android.media.MediaExtractor
-import android.media.MediaFormat
 import android.util.Base64
 import io.ktor.util.cio.writeChannel
 import io.ktor.utils.io.ByteReadChannel
@@ -86,22 +84,6 @@ internal object FileUtils {
     }
 
     fun getFile(name: String) = CacheDir.resolve(name)
-
-    fun getAudioMediaMime(file: File): String? {
-        val extractor = MediaExtractor()
-        extractor.setDataSource(file.absolutePath)
-        var audioFormat: String? = null
-        for (i in 0 until extractor.trackCount) {
-            val format = extractor.getTrackFormat(i)
-            val mime = format.getString(MediaFormat.KEY_MIME)
-            if (mime?.startsWith("audio/") == true) {
-                audioFormat = mime
-                break
-            }
-        }
-        extractor.release()
-        return audioFormat
-    }
 
     fun getFileType(file: File): String {
         val bytes = ByteArray(2)
