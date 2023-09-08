@@ -22,7 +22,7 @@ import java.net.URI
 
 internal var InternalWebSocketClient: moe.fuqiuluo.remote.WebSocketClient? = null
 
-class WebSocketClient(url: String): WebSocketClient(URI("ws://$url")) {
+class WebSocketClient(url: String, wsHeaders: Map<String, String>): WebSocketClient(URI("ws://$url"), wsHeaders) {
     override fun onOpen(handshakedata: ServerHandshake?) {
         LogCenter.log("WebSocketClient onOpen: ${handshakedata?.httpStatus}, ${handshakedata?.httpStatusMessage}")
     }
