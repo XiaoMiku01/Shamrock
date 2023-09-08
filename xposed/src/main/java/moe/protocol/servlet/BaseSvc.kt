@@ -1,4 +1,4 @@
-package moe.protocol.servlet.protocol
+package moe.protocol.servlet
 
 import android.os.Bundle
 import com.tencent.mobileqq.app.QQAppInterface

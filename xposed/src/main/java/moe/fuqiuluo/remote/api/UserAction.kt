@@ -7,12 +7,18 @@ import io.ktor.server.routing.Routing
 import moe.fuqiuluo.remote.action.ActionManager
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.handlers.CleanCache
+import moe.fuqiuluo.remote.action.handlers.GetModelShow
 import moe.fuqiuluo.remote.action.handlers.RestartMe
 import moe.fuqiuluo.xposed.tools.fetchOrNull
 import moe.fuqiuluo.xposed.tools.fetchOrThrow
 import moe.fuqiuluo.xposed.tools.getOrPost
 
 fun Routing.userAction() {
+    getOrPost("/get_model_show") {
+        val uin = fetchOrNull("user_id")
+        call.respondText(GetModelShow.invoke(uin?.toLong() ?: 0))
+    }
+
     getOrPost("/clean_cache") {
         call.respondText(CleanCache())
     }

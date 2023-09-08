@@ -1,6 +1,6 @@
 package moe.protocol.servlet.helper
 
-import moe.protocol.servlet.protocol.BaseSvc
+import moe.protocol.servlet.BaseSvc
 import mqq.app.MobileQQ
 import java.io.File
 

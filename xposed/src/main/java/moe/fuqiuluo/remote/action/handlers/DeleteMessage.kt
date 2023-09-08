@@ -3,8 +3,7 @@ package moe.fuqiuluo.remote.action.handlers
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
 import moe.protocol.servlet.helper.MessageHelper
-import moe.protocol.servlet.protocol.MsgSvc
-import moe.fuqiuluo.remote.entries.EmptyObject
+import moe.protocol.servlet.MsgSvc
 
 internal object DeleteMessage: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {

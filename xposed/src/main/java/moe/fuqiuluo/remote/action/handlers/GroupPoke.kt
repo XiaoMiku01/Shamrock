@@ -2,7 +2,7 @@ package moe.fuqiuluo.remote.action.handlers
 
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
-import moe.protocol.servlet.protocol.GroupSvc
+import moe.protocol.servlet.GroupSvc
 
 internal object GroupPoke: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {

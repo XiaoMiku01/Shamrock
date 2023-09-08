@@ -1,4 +1,4 @@
-package moe.protocol.servlet.protocol
+package moe.protocol.servlet
 
 import com.tencent.mobileqq.qroute.QRoute
 import moe.protocol.servlet.helper.ContactHelper

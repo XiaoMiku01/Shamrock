@@ -1,7 +1,7 @@
 package moe.protocol.servlet.helper
 
-import moe.protocol.servlet.protocol.ArkAppInfo
-import moe.protocol.servlet.protocol.ArkMsgSvc
+import moe.protocol.servlet.ArkAppInfo
+import moe.protocol.servlet.ArkMsgSvc
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json

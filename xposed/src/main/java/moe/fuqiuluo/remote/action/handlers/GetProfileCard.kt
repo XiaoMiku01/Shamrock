@@ -7,7 +7,7 @@ import moe.protocol.service.data.profile.Location
 import moe.protocol.service.data.profile.ProfileCard
 import moe.protocol.service.data.VipInfo
 import moe.protocol.service.data.VipType
-import moe.protocol.servlet.protocol.CardSvc
+import moe.protocol.servlet.CardSvc
 import moe.fuqiuluo.remote.entries.Status
 import moe.fuqiuluo.remote.entries.resultToString
 

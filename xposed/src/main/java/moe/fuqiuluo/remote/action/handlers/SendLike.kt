@@ -1,9 +1,8 @@
 package moe.fuqiuluo.remote.action.handlers
 
-import moe.protocol.servlet.protocol.VisitorSvc
+import moe.protocol.servlet.VisitorSvc
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
-import moe.fuqiuluo.remote.entries.EmptyObject
 
 internal object SendLike: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {

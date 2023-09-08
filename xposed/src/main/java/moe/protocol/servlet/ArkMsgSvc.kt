@@ -1,4 +1,4 @@
-package moe.protocol.servlet.protocol
+package moe.protocol.servlet
 
 import com.tencent.qqnt.kernel.nativeinterface.MsgConstant
 import tencent.im.oidb.cmd0xb77.oidb_cmd0xb77

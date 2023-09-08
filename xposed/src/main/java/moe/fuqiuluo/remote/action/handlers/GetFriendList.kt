@@ -4,7 +4,7 @@ import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
 import moe.protocol.service.data.FriendEntry
 import moe.protocol.service.data.PlatformType
-import moe.protocol.servlet.protocol.FriendSvc
+import moe.protocol.servlet.FriendSvc
 
 internal object GetFriendList: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {

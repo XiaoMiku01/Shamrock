@@ -1,13 +1,11 @@
 package moe.protocol.servlet.transfile
 
 import com.tencent.mobileqq.transfile.FileMsg
-import com.tencent.mobileqq.transfile.TransferRequest
 import com.tencent.mobileqq.transfile.api.IProtoReqManager
 import com.tencent.mobileqq.transfile.protohandler.RichProto
 import com.tencent.mobileqq.transfile.protohandler.RichProto.RichProtoReq
-import com.tencent.mobileqq.transfile.protohandler.RichProto.RichProtoReq.MultiMsgUpReq
 import com.tencent.mobileqq.transfile.protohandler.RichProtoProc
-import moe.protocol.servlet.protocol.BaseSvc
+import moe.protocol.servlet.BaseSvc
 import moe.protocol.servlet.utils.PlatformUtils
 import kotlinx.coroutines.suspendCancellableCoroutine
 import moe.fuqiuluo.xposed.helper.Level

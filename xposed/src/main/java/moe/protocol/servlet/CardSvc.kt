@@ -1,12 +1,21 @@
-package moe.protocol.servlet.protocol
+@file:OptIn(DelicateCoroutinesApi::class)
 
+package moe.protocol.servlet
+
+import VIP.GetCustomOnlineStatusRsp
 import android.util.LruCache
+import com.qq.jce.wup.UniPacket
 import com.tencent.common.app.AppInterface
 import com.tencent.mobileqq.data.Card
 import com.tencent.mobileqq.profilecard.api.IProfileDataService
 import com.tencent.mobileqq.profilecard.api.IProfileProtocolService
 import com.tencent.mobileqq.profilecard.observer.ProfileCardObserver
+import com.tencent.qphone.base.remote.ToServiceMsg
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -14,12 +23,16 @@ import kotlinx.coroutines.withTimeoutOrNull
 import moe.fuqiuluo.xposed.helper.PacketHandler
 import moe.fuqiuluo.xposed.tools.slice
 import mqq.app.MobileQQ
+import mqq.app.Packet
 import tencent.im.oidb.cmd0x11b2.oidb_0x11b2
 import tencent.im.oidb.oidb_sso
 import kotlin.coroutines.resume
 
+
 internal object CardSvc: BaseSvc() {
     private val LruCachePrivate = LruCache<Long, String>(5)
+    private val CacheModelShowChannel = Channel<String>()
+    private val GetModelShowLock = Mutex()
     private val refreshCardLock = Mutex()
 
     init {
@@ -33,6 +46,23 @@ internal object CardSvc: BaseSvc() {
             val matcher = privatePattern.findAll(text)
             val id = matcher.first().groups[1]!!.value
             LruCachePrivate.put(id.toLong(), text)
+        }
+        PacketHandler.register("VipCustom.GetCustomOnlineStatus") {
+            val rsp = Packet.decodePacket(it, "rsp",  GetCustomOnlineStatusRsp())
+            GlobalScope.launch {
+                CacheModelShowChannel.send(rsp.sBuffer)
+            }
+        }
+    }
+
+    suspend fun getModelShow(uin: Long = app.longAccountUin): String {
+        return GetModelShowLock.withLock {
+            val toServiceMsg = createToServiceMsg("VipCustom.GetCustomOnlineStatus")
+            toServiceMsg.extraData.putLong("uin", uin)
+            send(toServiceMsg)
+            withTimeoutOrNull(5000) {
+                CacheModelShowChannel.receive()
+            } ?: error("unable to fetch contact model_show")
         }
     }
 

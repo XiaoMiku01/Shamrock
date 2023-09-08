@@ -1,4 +1,4 @@
-package moe.protocol.servlet.protocol
+package moe.protocol.servlet
 
 import moe.protocol.service.data.profile.ProfileProtocolConst
 

@@ -1,4 +1,4 @@
-package moe.protocol.servlet.protocol
+package moe.protocol.servlet
 
 import android.util.LruCache
 import com.tencent.biz.map.trpcprotocol.LbsSendInfo

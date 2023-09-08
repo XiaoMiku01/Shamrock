@@ -19,7 +19,7 @@ import moe.protocol.service.data.push.PushNotice
 import moe.protocol.service.data.push.Sender
 import moe.protocol.service.config.ShamrockConfig
 import moe.protocol.servlet.msg.toSegment
-import moe.protocol.servlet.protocol.GroupSvc
+import moe.protocol.servlet.GroupSvc
 
 internal object WebSocketService: WebSocketPushServlet() {
     override fun pushPrivateMsg(

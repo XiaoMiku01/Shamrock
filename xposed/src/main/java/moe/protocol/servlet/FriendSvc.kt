@@ -1,4 +1,4 @@
-package moe.protocol.servlet.protocol
+package moe.protocol.servlet
 
 import com.tencent.mobileqq.data.Friends
 import com.tencent.mobileqq.friend.api.IFriendDataService
@@ -7,7 +7,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import moe.fuqiuluo.remote.action.handlers.GetFriendList
 import mqq.app.AppRuntime
 import mqq.app.MobileQQ
 import kotlin.coroutines.resume

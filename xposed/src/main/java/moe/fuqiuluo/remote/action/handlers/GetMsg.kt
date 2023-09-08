@@ -6,7 +6,7 @@ import moe.protocol.service.data.MessageDetail
 import moe.protocol.service.data.MessageSender
 import moe.protocol.servlet.helper.MessageHelper
 import moe.protocol.servlet.msg.MsgConvert
-import moe.protocol.servlet.protocol.MsgSvc
+import moe.protocol.servlet.MsgSvc
 
 internal object GetMsg: IActionHandler() {
     override suspend fun internalHandle(session: ActionSession): String {

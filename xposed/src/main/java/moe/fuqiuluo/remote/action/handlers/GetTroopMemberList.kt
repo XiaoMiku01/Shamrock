@@ -5,7 +5,7 @@ import moe.protocol.service.data.push.MemberRole
 import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.IActionHandler
 import moe.protocol.service.data.SimpleTroopMemberInfo
-import moe.protocol.servlet.protocol.GroupSvc
+import moe.protocol.servlet.GroupSvc
 import moe.fuqiuluo.xposed.tools.ifNullOrEmpty
 
 internal object GetTroopMemberList: IActionHandler() {

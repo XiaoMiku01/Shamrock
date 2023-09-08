@@ -6,7 +6,7 @@ import moe.fuqiuluo.remote.action.IActionHandler
 import moe.protocol.service.data.MessageResult
 import moe.protocol.servlet.helper.MessageHelper
 import moe.protocol.servlet.helper.ParamsException
-import moe.protocol.servlet.protocol.MsgSvc
+import moe.protocol.servlet.MsgSvc
 import kotlinx.serialization.json.JsonArray
 import moe.fuqiuluo.xposed.helper.Level
 import moe.fuqiuluo.xposed.helper.LogCenter

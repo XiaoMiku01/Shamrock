@@ -16,11 +16,11 @@ import moe.protocol.servlet.helper.LogicException
 import moe.protocol.servlet.helper.MusicHelper
 import moe.protocol.servlet.helper.ParamsException
 import moe.protocol.servlet.helper.IllegalParamsException
-import moe.protocol.servlet.protocol.ArkAppInfo
-import moe.protocol.servlet.protocol.ArkMsgSvc
-import moe.protocol.servlet.protocol.CardSvc
-import moe.protocol.servlet.protocol.GroupSvc
-import moe.protocol.servlet.protocol.LbsSvc
+import moe.protocol.servlet.ArkAppInfo
+import moe.protocol.servlet.ArkMsgSvc
+import moe.protocol.servlet.CardSvc
+import moe.protocol.servlet.GroupSvc
+import moe.protocol.servlet.LbsSvc
 import moe.protocol.servlet.transfile.FileTransfer
 import moe.protocol.servlet.transfile.Transfer
 import moe.protocol.servlet.utils.FileUtils

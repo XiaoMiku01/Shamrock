@@ -14,8 +14,8 @@ import moe.protocol.servlet.helper.MessageHelper
 import com.tencent.qqnt.kernel.nativeinterface.MsgElement
 import com.tencent.qqnt.kernel.nativeinterface.MsgRecord
 import moe.protocol.servlet.msg.toSegment
-import moe.protocol.servlet.protocol.GroupSvc
-import moe.protocol.servlet.protocol.MsgSvc
+import moe.protocol.servlet.GroupSvc
+import moe.protocol.servlet.MsgSvc
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope

@@ -1,4 +1,4 @@
-package moe.protocol.servlet.protocol
+package moe.protocol.servlet
 
 import com.tencent.mobileqq.app.QQAppInterface
 import mqq.manager.TicketManager
