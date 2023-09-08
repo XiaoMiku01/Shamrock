@@ -9,14 +9,20 @@ import moe.fuqiuluo.remote.action.ActionSession
 import moe.fuqiuluo.remote.action.handlers.CleanCache
 import moe.fuqiuluo.remote.action.handlers.GetModelShow
 import moe.fuqiuluo.remote.action.handlers.RestartMe
+import moe.fuqiuluo.remote.action.handlers.SetModelShow
 import moe.fuqiuluo.xposed.tools.fetchOrNull
 import moe.fuqiuluo.xposed.tools.fetchOrThrow
 import moe.fuqiuluo.xposed.tools.getOrPost
 
 fun Routing.userAction() {
+    getOrPost("/_set_model_show") {
+        val modelShow = fetchOrThrow("model")
+        call.respondText(SetModelShow(modelShow))
+    }
+
     getOrPost("/get_model_show") {
         val uin = fetchOrNull("user_id")
-        call.respondText(GetModelShow.invoke(uin?.toLong() ?: 0))
+        call.respondText(GetModelShow(uin?.toLong() ?: 0))
     }
 
     getOrPost("/clean_cache") {

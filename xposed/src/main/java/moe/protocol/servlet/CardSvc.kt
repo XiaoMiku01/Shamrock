@@ -4,13 +4,16 @@ package moe.protocol.servlet
 
 import VIP.GetCustomOnlineStatusRsp
 import android.util.LruCache
-import com.qq.jce.wup.UniPacket
 import com.tencent.common.app.AppInterface
 import com.tencent.mobileqq.data.Card
 import com.tencent.mobileqq.profilecard.api.IProfileDataService
 import com.tencent.mobileqq.profilecard.api.IProfileProtocolService
 import com.tencent.mobileqq.profilecard.observer.ProfileCardObserver
-import com.tencent.qphone.base.remote.ToServiceMsg
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType.Application.Json
+import io.ktor.http.contentType
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
@@ -21,6 +24,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import moe.fuqiuluo.xposed.helper.PacketHandler
+import moe.fuqiuluo.xposed.tools.GlobalClient
 import moe.fuqiuluo.xposed.tools.slice
 import mqq.app.MobileQQ
 import mqq.app.Packet
@@ -63,6 +67,33 @@ internal object CardSvc: BaseSvc() {
             withTimeoutOrNull(5000) {
                 CacheModelShowChannel.receive()
             } ?: error("unable to fetch contact model_show")
+        }
+    }
+
+    suspend fun setModelShow(model: String) {
+        val pSKey = TicketSvc.getPSKey(app.currentUin)
+        val url = "https://club.vip.qq.com/srf-cgi-node?srfname=VIP.CustomOnlineStatusServer.CustomOnlineStatusObj.SetCustomOnlineStatus&ts=${System.currentTimeMillis()}&daid=18&g_tk=${TicketSvc.getCSRF(pSKey)}&pt4_token=${TicketSvc.getPt4Token(pSKey, "club.vip.qq.com") ?: ""}"
+        val cookie = TicketSvc.getCookie("club.vip.qq.com")
+        GlobalClient.post(url) {
+            contentType(Json)
+            header("Cookie", cookie)
+            setBody("""{
+  "servicesName": "VIP.CustomOnlineStatusServer.CustomOnlineStatusObj",
+  "cmd": "SetCustomOnlineStatus",
+  "args": [
+    {
+      "sModel": "$model",
+      "iAppType": 3,
+      "sIMei": "",
+      "sVer": "",
+      "sManu": "undefined",
+      "lUin": ${app.currentUin},
+      "bShowInfo": ${model.isNotEmpty()},
+      "sModelShow": "$model",
+      "bRecoverDefault": ${model.isEmpty()}
+    }
+  ]
+}""")
         }
     }
 

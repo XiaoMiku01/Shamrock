@@ -32,6 +32,21 @@ internal object TicketSvc: BaseSvc() {
         return app.currentUin
     }
 
+    fun getCookie(): String {
+        val uin = getUin()
+        val skey = getSKey(uin)
+        val pskey = getPSKey(uin)
+        return "o_cookie=$uin; ied_qq=o$uin; pac_uid=1_$uin; uin=o$uin; skey=$skey; p_uin=o$uin; p_skey=$pskey;"
+    }
+
+    fun getCookie(domain: String): String {
+        val uin = getUin()
+        val skey = getSKey(uin)
+        val pskey = getPSKey(uin, domain) ?: ""
+        val pt4token = getPt4Token(uin, domain) ?: ""
+        return "o_cookie=$uin; ied_qq=o$uin; pac_uid=1_$uin; uin=o$uin; skey=$skey; p_uin=o$uin; p_skey=$pskey; pt4_token=$pt4token;"
+    }
+
     fun getCSRF(pskey: String): String {
         var v: Long = 5381
         for (element in pskey) {

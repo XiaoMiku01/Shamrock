@@ -13,18 +13,11 @@ internal object GetCookies: IActionHandler() {
     }
 
     operator fun invoke(echo: String = ""): String {
-        val uin = TicketSvc.getUin()
-        val skey = TicketSvc.getSKey(uin)
-        val pskey = TicketSvc.getPSKey(uin)
-        return ok(Credentials(cookie = "o_cookie=$uin; ied_qq=o$uin; pac_uid=1_$uin; uin=o$uin; skey=$skey; p_uin=o$uin; p_skey=$pskey;"), echo)
+        return ok(Credentials(cookie = TicketSvc.getCookie()), echo)
     }
 
     operator fun invoke(domain: String, echo: String = ""): String {
-        val uin = TicketSvc.getUin()
-        val skey = TicketSvc.getSKey(uin)
-        val pskey = TicketSvc.getPSKey(uin, domain) ?: ""
-        val pt4token = TicketSvc.getPt4Token(uin, domain) ?: ""
-        return ok(Credentials(cookie = "o_cookie=$uin; ied_qq=o$uin; pac_uid=1_$uin; uin=o$uin; skey=$skey; p_uin=o$uin; p_skey=$pskey; pt4_token=$pt4token;"), echo)
+        return ok(Credentials(cookie = TicketSvc.getCookie(domain)), echo)
     }
 
     override fun path(): String = "get_cookies"
